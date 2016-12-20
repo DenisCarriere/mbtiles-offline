@@ -1,0 +1,38 @@
+{
+  "name": "mbtiles-offline",
+  "version": "3.1.8",
+  "description": "MBTiles for offline",
+  "main": "index.js",
+  "jsnext:main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DenisCarriere/mbtiles-offline.git"
+  },
+  "author": "Denis Carriere <carriere.denis@gmail.com>",
+  "contributors": [
+    "Denis Carriere <carriere.denis@gmail.com>"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DenisCarriere/mbtiles-offline/issues"
+  },
+  "homepage": "https://github.com/DenisCarriere/mbtiles-offline#readme",
+  "keywords": [],
+  "testEnvironment": "node",
+  "dependencies": {
+    "@types/d3-queue": "^3.0.4",
+    "@types/node": "^6.0.52",
+    "d3-queue": "^3.0.3",
+    "global-mercator": "^1.4.0",
+    "sqlite3-offline": "^3.1.8",
+    "tiletype": "^0.3.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^16.0.1",
+    "documentation": "^4.0.0-beta10",
+    "jest-cli": "^17.0.3",
+    "tslint": "^3.15.1",
+    "typescript": "^2.0.10"
+  }
+}
