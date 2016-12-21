@@ -12,7 +12,8 @@
     "exclude": [
         "node_modules"
     ],
-    "filesGlob": [
-        "**/*.ts"
+    "files": [
+        "index.ts",
+        "test.ts"
     ]
 }

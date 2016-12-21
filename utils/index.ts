@@ -55,6 +55,7 @@ export interface Metadata {
   uri?: string
   [key: string]: any
 }
+
 /**
  * MBTiles
  */

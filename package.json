@@ -4,7 +4,11 @@
   "description": "MBTiles for offline",
   "main": "index.js",
   "jsnext:main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "test": "npm run lint && jest --coverage",
+    "docs": "tsc && cat HEADER.md > README.md && documentation build index.js -c documentation.yml -f md --shallow >> README.md && cat CHANGELOG.md >> README.md",
+    "lint": "tsc && tslint index.ts index.test.ts && documentation lint index.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/DenisCarriere/mbtiles-offline.git"
@@ -21,14 +25,14 @@
   "keywords": [],
   "testEnvironment": "node",
   "dependencies": {
-    "@types/d3-queue": "^3.0.4",
-    "@types/node": "^6.0.52",
     "d3-queue": "^3.0.3",
     "global-mercator": "^1.4.0",
-    "sqlite3-offline": "^3.1.8",
+    "sequelize-offline": "^4.0.0-2",
     "tiletype": "^0.3.0"
   },
   "devDependencies": {
+    "@types/d3-queue": "^3.0.4",
+    "@types/node": "^6.0.52",
     "@types/jest": "^16.0.1",
     "documentation": "^4.0.0-beta10",
     "jest-cli": "^17.0.3",
