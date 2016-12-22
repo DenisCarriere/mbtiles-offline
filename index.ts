@@ -15,14 +15,10 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import * as Sequelize from 'sequelize-offline'
-import Tiles, {
-  TilesAttribute,
-  TilesInstance,
-  TilesModel } from './models/Tiles'
-import Metadata, {
-  MetadataAttribute,
-  MetadataInstance,
-  MetadataModel } from './models/Metadata'
+import * as Tiles from './models/Tiles'
+import * as Metadata from './models/Metadata'
+import * as Images from './models/Images'
+import * as Map from './models/Map'
 
 /**
  * Tile - z,x,y
@@ -59,7 +55,8 @@ export interface Metadata {
  * hash(4, 312, 480)
  * //=5728
  */
-export function hash(z: number, x: number, y: number): number {
+export function hash(tile: Tile): number {
+  const [z, x, y] = tile
   return (1 << z) * ((1 << z) + x) + y
 }
 
@@ -85,7 +82,7 @@ export function getFiles(path: string, regex = /\.mbtiles$/): Array<string> {
  * @param {TileInstance} data
  * @returns {Buffer} Tile Data
  */
-function readTileData(data: TilesInstance): Buffer {
+function readTileData(data: Tiles.Instance): Buffer {
   if (!data) { throw new Error('Tile has no data') }
   return data.tile_data
 }
@@ -106,7 +103,7 @@ export function connect(uri: string): Sequelize.Sequelize {
   return new Sequelize(`sqlite://${ uri }`, options)
 }
 
-export function parseMetadata(data: Array<MetadataInstance>): Metadata {
+export function parseMetadata(data: Array<Metadata.Instance>): Metadata {
   const metadata: Metadata = {}
   data.map(item => {
     const name = item.name.toLowerCase()
@@ -175,14 +172,20 @@ export function parseMetadata(data: Array<MetadataInstance>): Metadata {
 export class MBTiles {
   public uri: string
   private sequelize: Sequelize.Sequelize
-  private tilesSQL: TilesModel
-  private metadataSQL: MetadataModel
+  private tilesSQL: Tiles.Model
+  private metadataSQL: Metadata.Model
+  private imagesSQL: Images.Model
+  private mapSQL: Map.Model
 
-  constructor(uri: string) {
+  constructor(uri: string, metadata?: Metadata) {
     this.uri = uri
     this.sequelize = connect(uri)
-    this.tilesSQL = this.sequelize.define<TilesInstance, TilesAttribute>('tiles', Tiles)
-    this.metadataSQL = this.sequelize.define<MetadataInstance, MetadataAttribute>('metadata', Metadata)
+    this.tilesSQL = this.sequelize.define<Tiles.Instance, Tiles.Attributes>('tiles', Tiles.scheme)
+    this.metadataSQL = this.sequelize.define<Metadata.Instance, Metadata.Attributes>('metadata', Metadata.scheme)
+    this.imagesSQL = this.sequelize.define<Images.Instance, Images.Attributes>('images', Images.scheme)
+    this.mapSQL = this.sequelize.define<Map.Instance, Map.Attributes>('map', Map.scheme)
+
+    if (metadata !== undefined) { this.update(metadata) }
   }
 
   /**
@@ -205,12 +208,36 @@ export class MBTiles {
   }
 
   /**
+   * Update Metadata
+   */
+  public async update(metadata: Metadata): Promise<Metadata> {
+    await this.mapSQL.sync()
+    await this.imagesSQL.sync()
+    await this.tilesSQL.sync()
+    await this.metadataSQL.sync({ force: true })
+    for (const name of Object.keys(metadata)) {
+      const value = metadata[name]
+      await this.metadataSQL.create({name, value})
+    }
+    return metadata
+  }
+
+  /**
    * Retrieves Metadata from MBTiles
    */
-  public async metadata() {
-    const metadata = parseMetadata(await this.metadataSQL.findAll())
+  public async metadata(): Promise<Metadata> {
+    const data = await this.metadataSQL.findAll()
+    const metadata = parseMetadata(data)
     metadata.uri = this.uri
     metadata.basename = path.basename(this.uri)
     return metadata
+  }
+
+  /**
+   * Save tile MBTile
+   */
+  public async save(tile: Tile, tile_data: Buffer): Promise<any> {
+    const tile_id = hash(tile)
+    return this.imagesSQL.create({ tile_data, tile_id })
   }
 }

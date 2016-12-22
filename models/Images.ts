@@ -2,31 +2,27 @@ import * as Sequelize from 'sequelize-offline'
 import { BLOB, INTEGER, DefineAttributes } from 'sequelize-offline'
 
 /**
- * Tiles Interface for MBTiles SQL Model
+ * Images  for MBTiles SQL Model
  */
 export interface Attributes {
-  tile_column: number,
-  tile_row: number,
-  tile_data?: Buffer,
-  zoom_level: number,
+  tile_data: Buffer
+  tile_id: number
 }
 
 /**
- * Tiles Instance for MBTiles SQL Model
+ * Images Instance for MBTiles SQL Model
  */
 export interface Instance extends Sequelize.Instance<Attributes>, Attributes { }
 
 /**
- * Tiles Model for MBTiles SQL Model
+ * Images Model for MBTiles SQL Model
  */
 export interface Model extends Sequelize.Model<Instance, Attributes> { }
 
 /**
- * Tiles Scheme for MBTiles SQL Model
+ * Images Scheme for MBTiles SQL Model
  */
 export const scheme: DefineAttributes = {
-  tile_column: { type: INTEGER },
   tile_data: { type: BLOB },
-  tile_row: { type: INTEGER },
-  zoom_level: { type: INTEGER },
+  tile_id: { primaryKey: true, type: INTEGER, unique: true },
 }

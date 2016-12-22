@@ -4,7 +4,7 @@ import { TEXT, DefineAttributes } from 'sequelize-offline'
 /**
  * Metadata Interface for MBTiles SQL Model
  */
-export interface MetadataAttribute {
+export interface Attributes {
   name: string
   value: string
 }
@@ -12,19 +12,17 @@ export interface MetadataAttribute {
 /**
  * Metadata Instance for MBTiles SQL Model
  */
-export interface MetadataInstance extends Sequelize.Instance<MetadataAttribute>, MetadataAttribute { }
+export interface Instance extends Sequelize.Instance<Attributes>, Attributes { }
 
 /**
  * Metadata Model for MBTiles SQL Model
  */
-export interface MetadataModel extends Sequelize.Model<MetadataInstance, MetadataAttribute> { }
+export interface Model extends Sequelize.Model<Instance, Attributes> { }
 
 /**
  * Metadata Scheme for MBTiles SQL Model
  */
-const scheme: DefineAttributes = {
+export const scheme: DefineAttributes = {
   name: { primaryKey: true, type: TEXT, unique: true },
   value: { allowNull: false, type: TEXT },
 }
-
-export default scheme
