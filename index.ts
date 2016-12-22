@@ -1,21 +1,37 @@
 // NodeJS packages
-import * as fs from 'fs'
-import * as crypto from 'crypto'
-import * as zlib from 'zlib'
-import * as path from 'path'
-import * as url from 'url'
-import * as qs from 'querystring'
-import {Buffer} from 'buffer'
+// import * as fs from 'fs'
+// import * as crypto from 'crypto'
+// import * as zlib from 'zlib'
+// import * as path from 'path'
+// import * as url from 'url'
+// import * as qs from 'querystring'
 
 // External packages
-import * as queue from 'd3-queue'
-import * as mercator from 'global-mercator'
-import * as sqlite3 from 'sqlite3-offline'
-const tiletype = require('tiletype')
+// import * as queue from 'd3-queue'
+// import * as mercator from 'global-mercator'
+// import * as sqlite3 from 'sqlite3-offline'
+// import * as tiletype from 'tiletype'
 
-// Tile - z,x,y
+import * as fs from 'fs'
+import * as path from 'path'
+import * as Sequelize from 'sequelize-offline'
+import Tiles, {
+  TilesAttribute,
+  TilesInstance,
+  TilesModel } from './models/Tiles'
+import Metadata, {
+  MetadataAttribute,
+  MetadataInstance,
+  MetadataModel } from './models/Metadata'
+
+/**
+ * Tile - z,x,y
+ */
 type Tile = [number, number, number]
 
+/**
+ * Metadata
+ */
 export interface Metadata {
   name?: string
   type?: 'baselayer' | 'overlay'
@@ -48,29 +64,109 @@ export function hash(z: number, x: number, y: number): number {
 }
 
 /**
- * Connect to SQLite3 Database
+ * Get all files that match regex
  *
- * @param {string} uri
- * @returns {sqlite3.Database} database
+ * @param {string} path
+ * @param {string} regex
+ * @returns {Array<string>} matching files
+ * getFiles('/home/myfiles')
+ * //=['map', 'test']
  */
-export function connect(uri: string): sqlite3.Database {
-  return new sqlite3.Database(uri)
+export function getFiles(path: string, regex = /\.mbtiles$/): Array<string> {
+  let mbtiles = fs.readdirSync(path).filter(value => value.match(regex))
+  mbtiles = mbtiles.map(data => data.replace(regex, ''))
+  mbtiles = mbtiles.filter(name => !name.match(/^_.*/))
+  return mbtiles
 }
 
 /**
- * Retrieve Buffer from Tile [x, y, z]
+ * Read Tile Data
+ *
+ * @param {TileInstance} data
+ * @returns {Buffer} Tile Data
  */
-function getTile(tile: Tile, area?: number): Promise<Buffer> {
-  const [x, y, z] = tile
-  const data = await this.tilesSQL.find({
-    attributes: ['tile_data'],
-    where: {
-      tile_column: x,
-      tile_row: y,
-      zoom_level: z,
-    },
+function readTileData(data: TilesInstance): Buffer {
+  if (!data) { throw new Error('Tile has no data') }
+  return data.tile_data
+}
+
+/**
+ * Connect to SQL MBTiles DB
+ *
+ * @param {string} uri
+ * @returns {Sequelize} Sequelize connection
+ */
+export function connect(uri: string): Sequelize.Sequelize {
+  const options = {
+    define: { freezeTableName: true, timestamps: false },
+    logging: false,
+    pool: { idle: 10000, max: 5, min: 0 },
+    storage: uri,
+  }
+  return new Sequelize(`sqlite://${ uri }`, options)
+}
+
+export function parseMetadata(data: Array<MetadataInstance>): Metadata {
+  const metadata: Metadata = {}
+  data.map(item => {
+    const name = item.name.toLowerCase()
+    const value = item.value
+    switch (name) {
+      case 'minzoom':
+      case 'maxzoom':
+        metadata[name] = Number(value)
+        break
+      case 'name':
+      case 'attribution':
+      case 'description':
+        metadata[name] = value
+        break
+      case 'bounds':
+        const bounds = value.split(',').map(i => Number(i))
+        metadata.bounds = [bounds[0], bounds[1], bounds[2], bounds[3]]
+        break
+      case 'center':
+        const center = value.split(',').map(i => Number(i))
+        switch (center.length) {
+          case 2:
+            metadata.center = [center[0], center[1]]
+            break
+          case 3:
+            metadata.center = [center[0], center[1], center[2]]
+            break
+          default:
+        }
+        break
+      case 'type':
+        switch (value) {
+          case 'overlay':
+          case 'baselayer':
+            metadata[name] = value
+            break
+          default:
+        }
+      case 'format':
+        switch (value) {
+          case 'png':
+          case 'jpg':
+            metadata[name] = value
+            break
+          default:
+        }
+      case 'version':
+        switch (value) {
+          case '1.0.0':
+          case '1.1.0':
+          case '1.2.0':
+            metadata[name] = value
+            break
+          default:
+        }
+      default:
+        metadata[name] = value
+    }
   })
-  return readTileData(data)
+  return metadata
 }
 
 /**
@@ -78,13 +174,43 @@ function getTile(tile: Tile, area?: number): Promise<Buffer> {
  */
 export class MBTiles {
   public uri: string
-  private db: sqlite3.Database
+  private sequelize: Sequelize.Sequelize
+  private tilesSQL: TilesModel
+  private metadataSQL: MetadataModel
 
   constructor(uri: string) {
     this.uri = uri
-    this.db = connect(uri)
+    this.sequelize = connect(uri)
+    this.tilesSQL = this.sequelize.define<TilesInstance, TilesAttribute>('tiles', Tiles)
+    this.metadataSQL = this.sequelize.define<MetadataInstance, MetadataAttribute>('metadata', Metadata)
+  }
+
+  /**
+   * Retrieve Buffer from Tile [x, y, z]
+   *
+   * @param {Tile} tile
+   * @return {Promise<Buffer>} Tile Data
+   */
+  public async getTile(tile: Tile): Promise<Buffer> {
+    const [x, y, z] = tile
+    const data = await this.tilesSQL.find({
+      attributes: ['tile_data'],
+      where: {
+        tile_column: x,
+        tile_row: y,
+        zoom_level: z,
+      },
+    })
+    return readTileData(data)
+  }
+
+  /**
+   * Retrieves Metadata from MBTiles
+   */
+  public async metadata() {
+    const metadata = parseMetadata(await this.metadataSQL.findAll())
+    metadata.uri = this.uri
+    metadata.basename = path.basename(this.uri)
+    return metadata
   }
 }
-
-const db = new MBTiles('test.mbtiles')
-console.log(db)
