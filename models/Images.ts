@@ -19,9 +19,6 @@ export interface Instance extends Sequelize.Instance<Attributes>, Attributes { }
  */
 export interface Model extends Sequelize.Model<Instance, Attributes> { }
 
-/**
- * Images Scheme for MBTiles SQL Model
- */
 export const scheme: DefineAttributes = {
   tile_data: { type: BLOB },
   tile_id: { primaryKey: true, type: INTEGER, unique: true },

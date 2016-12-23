@@ -19,9 +19,6 @@ export interface Instance extends Sequelize.Instance<Attributes>, Attributes { }
  */
 export interface Model extends Sequelize.Model<Instance, Attributes> { }
 
-/**
- * Metadata Scheme for MBTiles SQL Model
- */
 export const scheme: DefineAttributes = {
   name: { primaryKey: true, type: TEXT, unique: true },
   value: { allowNull: false, type: TEXT },

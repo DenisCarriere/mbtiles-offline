@@ -21,9 +21,6 @@ export interface Instance extends Sequelize.Instance<Attributes>, Attributes { }
  */
 export interface Model extends Sequelize.Model<Instance, Attributes> { }
 
-/**
- * Map Scheme for MBTiles SQL Model
- */
 export const scheme: DefineAttributes = {
   tile_column: { type: INTEGER, validate: { isInt: true }},
   tile_id: { primaryKey: true, type: TEXT, unique: true },
