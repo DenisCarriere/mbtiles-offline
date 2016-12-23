@@ -21,9 +21,24 @@ import * as Images from './models/Images'
 import * as Map from './models/Map'
 
 /**
- * Tile - z,x,y
+ * Tile - [x, y, zoom]
  */
 type Tile = [number, number, number]
+
+/**
+ * BBox - [west, south, east, north]
+ */
+type BBox = [number, number, number, number]
+
+/**
+ * LngLat - [longitude, latitude]
+ */
+type LngLat = [number, number]
+
+/**
+ * LngLatZoom - [longitude, latitude, zoom]
+ */
+type LngLatZoom = [number, number, number]
 
 /**
  * Metadata
@@ -34,8 +49,8 @@ export interface Metadata {
   version?: '1.0.0' | '1.1.0' | '1.2.0'
   attribution?: string
   description?: string
-  bounds?: [number, number, number, number]
-  center?: [number, number] | [number, number, number]
+  bounds?: BBox
+  center?: LngLat | LngLatZoom
   minzoom?: number
   maxzoom?: number
   format?: 'png' | 'jpg'
@@ -47,17 +62,31 @@ export interface Metadata {
 /**
  * Hash for Map ID
  *
- * @param {number} z Z tile
- * @param {number} x X tile
- * @param {number} y Y tile
+ * @param {Tile} tile [x, y, z]
  * @returns {number} hash
  * @example
- * hash(4, 312, 480)
+ * hash([312, 480, 4])
  * //=5728
  */
 export function hash(tile: Tile): number {
-  const [z, x, y] = tile
+  const [x, y, z] = tile
   return (1 << z) * ((1 << z) + x) + y
+}
+
+/**
+ * Converts BBox to Center
+ *
+ * @param {BBox} bbox - [west, south, east, north] coordinates
+ * @return {LngLat} center
+ * @example
+ * const center = bboxToCenter([90, -45, 85, -50])
+ * //= [ 87.5, -47.5 ]
+ */
+export function bboxToCenter(bbox: BBox): LngLat {
+  const [west, south, east, north] = bbox
+  const lng = (west - east) / 2 + east
+  const lat = (south - north) / 2 + north
+  return [lng, lat]
 }
 
 /**
@@ -208,12 +237,34 @@ export class MBTiles {
   }
 
   /**
+   * Builds Index
+   *
+   * @returns {boolean}
+   */
+  public async index(): Promise<boolean> {
+    await this.mapSQL.sync()
+    await this.imagesSQL.sync()
+    await this.metadataSQL.sync()
+    await this.sequelize.query('CREATE UNIQUE INDEX IF NOT EXISTS metadata_name on metadata (name)')
+    await this.sequelize.query('CREATE UNIQUE INDEX IF NOT EXISTS map_tile_id on map (tile_id)')
+    await this.sequelize.query('CREATE UNIQUE INDEX IF NOT EXISTS map_tile on map (tile_row, tile_column, zoom_level)')
+    await this.sequelize.query('CREATE UNIQUE INDEX IF NOT EXISTS images_tile_id on images (tile_id)')
+    await this.sequelize.query(`CREATE VIEW IF NOT EXISTS tiles AS
+  SELECT
+    map.zoom_level AS zoom_level,
+    map.tile_column AS tile_column,
+    map.tile_row AS tile_row,
+    images.tile_data AS tile_data
+  FROM map
+  JOIN images ON images.tile_id = map.tile_id`)
+    return true
+  }
+
+  /**
    * Update Metadata
    */
   public async update(metadata: Metadata): Promise<Metadata> {
-    await this.mapSQL.sync()
-    await this.imagesSQL.sync()
-    await this.tilesSQL.sync()
+    await this.index()
     await this.metadataSQL.sync({ force: true })
     for (const name of Object.keys(metadata)) {
       const value = metadata[name]
@@ -236,8 +287,10 @@ export class MBTiles {
   /**
    * Save tile MBTile
    */
-  public async save(tile: Tile, tile_data: Buffer): Promise<any> {
+  public async save(tile: Tile, tile_data: Buffer): Promise<Images.Attributes> {
+    await this.imagesSQL.sync()
     const tile_id = hash(tile)
-    return this.imagesSQL.create({ tile_data, tile_id })
+    await this.imagesSQL.create({ tile_data, tile_id })
+    return { tile_data, tile_id }
   }
 }
