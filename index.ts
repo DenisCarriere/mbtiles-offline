@@ -206,15 +206,14 @@ export class MBTiles {
   private imagesSQL: Images.Model
   private mapSQL: Map.Model
 
-  constructor(uri: string, metadata?: Metadata) {
+  constructor(uri: string) {
     this.uri = uri
     this.sequelize = connect(uri)
     this.tilesSQL = this.sequelize.define<Tiles.Instance, Tiles.Attributes>('tiles', Tiles.scheme)
     this.metadataSQL = this.sequelize.define<Metadata.Instance, Metadata.Attributes>('metadata', Metadata.scheme)
     this.imagesSQL = this.sequelize.define<Images.Instance, Images.Attributes>('images', Images.scheme)
     this.mapSQL = this.sequelize.define<Map.Instance, Map.Attributes>('map', Map.scheme)
-
-    if (metadata !== undefined) { this.update(metadata) }
+    // this.index()
   }
 
   /**
@@ -261,10 +260,9 @@ export class MBTiles {
   }
 
   /**
-   * Update Metadata
+   * Set Metadata
    */
-  public async update(metadata: Metadata): Promise<Metadata> {
-    await this.index()
+  public async setMetadata(metadata: Metadata): Promise<Metadata> {
     await this.metadataSQL.sync({ force: true })
     for (const name of Object.keys(metadata)) {
       const value = metadata[name]
@@ -276,11 +274,9 @@ export class MBTiles {
   /**
    * Retrieves Metadata from MBTiles
    */
-  public async metadata(): Promise<Metadata> {
+  public async getMetadata(): Promise<Metadata> {
     const data = await this.metadataSQL.findAll()
     const metadata = parseMetadata(data)
-    metadata.uri = this.uri
-    metadata.basename = path.basename(this.uri)
     return metadata
   }
 
