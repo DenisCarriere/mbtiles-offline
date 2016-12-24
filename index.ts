@@ -13,12 +13,9 @@
 // import * as tiletype from 'tiletype'
 
 import * as fs from 'fs'
-import * as path from 'path'
+// import * as path from 'path'
 import * as Sequelize from 'sequelize-offline'
-import * as Tiles from './models/Tiles'
-import * as Metadata from './models/Metadata'
-import * as Images from './models/Images'
-import * as Map from './models/Map'
+import { Tiles, Metadata, Images, Map } from './models'
 
 /**
  * Tile - [x, y, zoom]
