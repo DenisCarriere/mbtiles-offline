@@ -13,7 +13,7 @@
 // import * as tiletype from 'tiletype'
 
 import * as fs from 'fs'
-// import * as path from 'path'
+import * as mercator from 'global-mercator'
 import * as Sequelize from 'sequelize-offline'
 import { Tiles, Metadata, Images, Map } from './models'
 
@@ -53,37 +53,6 @@ export interface Metadata {
   format?: 'png' | 'jpg'
   basename?: string
   uri?: string
-  [key: string]: any
-}
-
-/**
- * Hash for Map ID
- *
- * @param {Tile} tile [x, y, z]
- * @returns {number} hash
- * @example
- * hash([312, 480, 4])
- * //=5728
- */
-export function hash(tile: Tile): number {
-  const [x, y, z] = tile
-  return (1 << z) * ((1 << z) + x) + y
-}
-
-/**
- * Converts BBox to Center
- *
- * @param {BBox} bbox - [west, south, east, north] coordinates
- * @return {LngLat} center
- * @example
- * const center = bboxToCenter([90, -45, 85, -50])
- * //= [ 87.5, -47.5 ]
- */
-export function bboxToCenter(bbox: BBox): LngLat {
-  const [west, south, east, north] = bbox
-  const lng = (west - east) / 2 + east
-  const lat = (south - north) / 2 + north
-  return [lng, lat]
 }
 
 /**
@@ -129,6 +98,11 @@ export function connect(uri: string): Sequelize.Sequelize {
   return new Sequelize(`sqlite://${ uri }`, options)
 }
 
+/**
+ * Parse Metadata
+ * @param {Array<Metadata.Instance>} data
+ * @returns Metadata
+ */
 export function parseMetadata(data: Array<Metadata.Instance>): Metadata {
   const metadata: Metadata = {}
   data.map(item => {
@@ -186,7 +160,6 @@ export function parseMetadata(data: Array<Metadata.Instance>): Metadata {
           default:
         }
       default:
-        metadata[name] = value
     }
   })
   return metadata
@@ -202,6 +175,9 @@ export class MBTiles {
   private metadataSQL: Metadata.Model
   private imagesSQL: Images.Model
   private mapSQL: Map.Model
+  private _init: boolean = false
+  private _index: boolean = false
+  private _tables: boolean = false
 
   constructor(uri: string) {
     this.uri = uri
@@ -210,26 +186,27 @@ export class MBTiles {
     this.metadataSQL = this.sequelize.define<Metadata.Instance, Metadata.Attributes>('metadata', Metadata.scheme)
     this.imagesSQL = this.sequelize.define<Images.Instance, Images.Attributes>('images', Images.scheme)
     this.mapSQL = this.sequelize.define<Map.Instance, Map.Attributes>('map', Map.scheme)
-    // this.index()
   }
 
   /**
-   * Retrieve Buffer from Tile [x, y, z]
-   *
-   * @param {Tile} tile
-   * @return {Promise<Buffer>} Tile Data
+   * Initialize
    */
-  public async getTile(tile: Tile): Promise<Buffer> {
-    const [x, y, z] = tile
-    const data = await this.tilesSQL.find({
-      attributes: ['tile_data'],
-      where: {
-        tile_column: x,
-        tile_row: y,
-        zoom_level: z,
-      },
-    })
-    return readTileData(data)
+  public async init(): Promise<boolean> {
+    await this.tables()
+    await this.index()
+    this._init = true
+    return true
+  }
+
+  /**
+   * Build Tables
+   */
+  public async tables(): Promise<boolean> {
+    await this.metadataSQL.sync()
+    await this.imagesSQL.sync()
+    await this.mapSQL.sync()
+    this._tables = true
+    return true
   }
 
   /**
@@ -253,7 +230,27 @@ export class MBTiles {
     images.tile_data AS tile_data
   FROM map
   JOIN images ON images.tile_id = map.tile_id`)
+    this._index = true
     return true
+  }
+
+  /**
+   * Retrieve Buffer from Tile [x, y, z]
+   *
+   * @param {Tile} tile
+   * @return {Promise<Buffer>} Tile Data
+   */
+  public async getTile(tile: Tile): Promise<Buffer> {
+    const [x, y, z] = tile
+    const data = await this.tilesSQL.find({
+      attributes: ['tile_data'],
+      where: {
+        tile_column: x,
+        tile_row: y,
+        zoom_level: z,
+      },
+    })
+    return readTileData(data)
   }
 
   /**
@@ -281,9 +278,17 @@ export class MBTiles {
    * Save tile MBTile
    */
   public async save(tile: Tile, tile_data: Buffer): Promise<Images.Attributes> {
-    await this.imagesSQL.sync()
-    const tile_id = hash(tile)
+    if (!this._init) { await this.init() }
+
+    const tile_id = mercator.hash(tile)
+    const [x, y, z] = tile
     await this.imagesSQL.create({ tile_data, tile_id })
+    await this.mapSQL.create({
+      tile_column: x,
+      tile_row: y,
+      zoom_level: z,
+      tile_id,
+    })
     return { tile_data, tile_id }
   }
 }
