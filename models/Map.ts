@@ -7,7 +7,7 @@ import { TEXT, INTEGER, DefineAttributes } from 'sequelize-offline'
 export interface Attributes {
   tile_row: number
   tile_column: number
-  tile_id?: string
+  tile_id?: number
   zoom_level: number
 }
 
@@ -23,7 +23,7 @@ export interface Model extends Sequelize.Model<Instance, Attributes> { }
 
 export const scheme: DefineAttributes = {
   tile_column: { type: INTEGER, validate: { isInt: true }},
-  tile_id: { primaryKey: true, type: TEXT, unique: true },
-  tile_row: { type: INTEGER, validate: { isInt: true }},
-  zoom_level: { type: INTEGER, validate: { isInt: true }},
+  tile_id:     { type: INTEGER, validate: { isInt: true }, primaryKey: true, unique: true },
+  tile_row:    { type: INTEGER, validate: { isInt: true }},
+  zoom_level:  { type: INTEGER, validate: { isInt: true }},
 }

@@ -20,6 +20,6 @@ export interface Instance extends Sequelize.Instance<Attributes>, Attributes { }
 export interface Model extends Sequelize.Model<Instance, Attributes> { }
 
 export const scheme: DefineAttributes = {
-  name: { primaryKey: true, type: TEXT, unique: true },
-  value: { allowNull: false, type: TEXT },
+  name:  { type: TEXT, primaryKey: true, unique: true },
+  value: { type: TEXT, allowNull: false },
 }
