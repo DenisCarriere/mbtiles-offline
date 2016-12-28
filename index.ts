@@ -53,6 +53,7 @@ export interface Metadata {
   format?: 'png' | 'jpg'
   basename?: string
   uri?: string
+  [key: string]: any
 }
 
 /**
@@ -69,17 +70,6 @@ export function getFiles(path: string, regex = /\.mbtiles$/): Array<string> {
   mbtiles = mbtiles.map(data => data.replace(regex, ''))
   mbtiles = mbtiles.filter(name => !name.match(/^_.*/))
   return mbtiles
-}
-
-/**
- * Read Tile Data
- *
- * @param {TileInstance} data
- * @returns {Buffer} Tile Data
- */
-function readTileData(data: Tiles.Instance): Buffer {
-  if (!data) { throw new Error('Tile has no data') }
-  return data.tile_data
 }
 
 /**
@@ -250,7 +240,8 @@ export class MBTiles {
         zoom_level: z,
       },
     })
-    return readTileData(data)
+    if (!data) { throw new Error('Tile has no data') }
+    return data.tile_data
   }
 
   /**
@@ -259,7 +250,7 @@ export class MBTiles {
   public async setMetadata(metadata: Metadata): Promise<Metadata> {
     await this.metadataSQL.sync({ force: true })
     for (const name of Object.keys(metadata)) {
-      const value = metadata[name]
+      const value = String(metadata[name])
       await this.metadataSQL.create({name, value})
     }
     return metadata

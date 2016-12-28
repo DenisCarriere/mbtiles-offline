@@ -11,7 +11,7 @@
         "**/node_modules": true,
         "**/uploads": true,
         "**/coverage": true,
-        "**/*.js": { "when": "$(basename).ts"},
+        // "**/*.js": { "when": "$(basename).ts"},
         "**/*.js.map": true
     }
 }
