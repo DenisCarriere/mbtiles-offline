@@ -3,7 +3,7 @@ import * as path from 'path'
 import { MBTiles, Metadata } from './'
 
 describe('Metadata', () => {
-  test('getMetadata', async () => {
+  test('setMetadata', async () => {
     const mbtiles = new MBTiles('setMetadata.mbtiles')
     const metadata: Metadata = {
       name: 'Foo',
@@ -12,23 +12,19 @@ describe('Metadata', () => {
       minzoom: 8,
       maxzoom: 13,
       center: [10, 30, 10],
-      bounds: [-110, -20, 130, 50],
+      bounds: [-110, -20, 130, 30],
       type: 'baselayer',
       format: 'png'
     }
-    await mbtiles.setMetadata(metadata)
+    expect(await mbtiles.setMetadata(metadata)).toBeTruthy()
     expect(await mbtiles.getMetadata()).toEqual(metadata)
     fs.unlinkSync('setMetadata.mbtiles')
   })
 
-  test('getMetadata - Alternates', async () => {
-    const mbtiles = new MBTiles('setMetadata-alts.mbtiles')
-    const metadata: Metadata = {
-      center: [10, 30]
-    }
-    await mbtiles.setMetadata(metadata)
-    expect(await mbtiles.getMetadata()).toEqual(metadata)
-    fs.unlinkSync('setMetadata-alts.mbtiles')
+  test('index', async () => {
+    const mbtiles = new MBTiles('index.mbtiles')
+    expect(await mbtiles.index()).toBeTruthy()
+    fs.unlinkSync('index.mbtiles')
   })
 })
 
@@ -36,8 +32,7 @@ describe('Save', () => {
   test('[0, 0, 0]', async () => {
     const mbtiles = new MBTiles('save.mbtiles')
     const tileData = fs.readFileSync(path.join(__dirname, 'fixtures', 'images', '0', '0', '0.png'))
-    const data = await mbtiles.save([0, 0, 0], tileData)
-    expect(data.tile_data).toEqual(tileData)
+    expect(await mbtiles.save([0, 0, 0], tileData)).toBeTruthy()
     fs.unlinkSync('save.mbtiles')
   })
 })

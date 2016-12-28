@@ -18,6 +18,43 @@ import * as models from './models'
 import { connect, parseMetadata } from './utils'
 
 /**
+ * Tile - [x, y, zoom]
+ */
+type Tile = [number, number, number]
+
+/**
+ * BBox - [west, south, east, north]
+ */
+type BBox = [number, number, number, number]
+
+/**
+ * LngLat - [longitude, latitude]
+ */
+type LngLat = [number, number]
+
+/**
+ * LngLatZoom - [longitude, latitude, zoom]
+ */
+type LngLatZoom = [number, number, number]
+
+/**
+ * Metadata
+ */
+export interface Metadata {
+  name?: string
+  type?: 'baselayer' | 'overlay'
+  version?: '1.0.0' | '1.1.0' | '1.2.0'
+  attribution?: string
+  description?: string
+  bounds?: BBox
+  center?: LngLat | LngLatZoom
+  format?: 'png' | 'jpg'
+  minzoom?: number
+  maxzoom?: number
+  [key: string]: any
+}
+
+/**
  * MBTiles
  */
 export class MBTiles {
@@ -46,7 +83,7 @@ export class MBTiles {
   public async init(): Promise<boolean> {
     await this.tables()
     await this.index()
-    this._init = true
+    this._index = true
     return true
   }
 
@@ -70,18 +107,23 @@ export class MBTiles {
     await this.mapSQL.sync()
     await this.imagesSQL.sync()
     await this.metadataSQL.sync()
-    await this.sequelize.query('CREATE UNIQUE INDEX IF NOT EXISTS metadata_name on metadata (name)')
-    await this.sequelize.query('CREATE UNIQUE INDEX IF NOT EXISTS map_tile_id on map (tile_id)')
-    await this.sequelize.query('CREATE UNIQUE INDEX IF NOT EXISTS map_tile on map (tile_row, tile_column, zoom_level)')
-    await this.sequelize.query('CREATE UNIQUE INDEX IF NOT EXISTS images_tile_id on images (tile_id)')
-    await this.sequelize.query(`CREATE VIEW IF NOT EXISTS tiles AS
-  SELECT
-    map.zoom_level AS zoom_level,
-    map.tile_column AS tile_column,
-    map.tile_row AS tile_row,
-    images.tile_data AS tile_data
-  FROM map
-  JOIN images ON images.tile_id = map.tile_id`)
+    const queries = [
+      'CREATE UNIQUE INDEX IF NOT EXISTS metadata_name on metadata (name)',
+      'CREATE UNIQUE INDEX IF NOT EXISTS map_tile_id on map (tile_id)',
+      'CREATE UNIQUE INDEX IF NOT EXISTS map_tile on map (tile_row, tile_column, zoom_level)',
+      'CREATE UNIQUE INDEX IF NOT EXISTS images_tile_id on images (tile_id)',
+      `CREATE VIEW IF NOT EXISTS tiles AS
+      SELECT
+        map.zoom_level AS zoom_level,
+        map.tile_column AS tile_column,
+        map.tile_row AS tile_row,
+        images.tile_data AS tile_data
+      FROM map
+      JOIN images ON images.tile_id = map.tile_id`
+    ]
+    for (const query of queries) {
+      await this.sequelize.query(query)
+    }
     this._index = true
     return true
   }
@@ -108,18 +150,27 @@ export class MBTiles {
 
   /**
    * Set Metadata
+   *
+   * @param {Metadata} metadata
+   * @returns {Promise<boolean>}
    */
-  public async setMetadata(metadata: Metadata): Promise<Metadata> {
+  public async setMetadata(metadata: Metadata): Promise<boolean> {
     await this.metadataSQL.sync({ force: true })
     for (const name of Object.keys(metadata)) {
-      const value = String(metadata[name])
+      let value = metadata[name]
+
+      if (Array.isArray(value)) value = value.join(',')
+      else value = String(value)
+
       await this.metadataSQL.create({name, value})
     }
-    return metadata
+    return true
   }
 
   /**
    * Retrieves Metadata from MBTiles
+   *
+   * @returns {Promise<Metadata}
    */
   public async getMetadata(): Promise<Metadata> {
     const data = await this.metadataSQL.findAll()
@@ -129,8 +180,12 @@ export class MBTiles {
 
   /**
    * Save tile MBTile
+   *
+   * @param {Tile} tile
+   * @param {Buffer} tile_data
+   * @returns {Promise<boolean>}
    */
-  public async save(tile: Tile, tile_data: Buffer): Promise<models.Images.Attributes> {
+  public async save(tile: Tile, tile_data: Buffer): Promise<boolean> {
     if (!this._init) { await this.init() }
 
     const tile_id = mercator.hash(tile)
@@ -142,6 +197,6 @@ export class MBTiles {
       zoom_level: z,
       tile_id,
     })
-    return { tile_data, tile_id }
+    return true
   }
 }

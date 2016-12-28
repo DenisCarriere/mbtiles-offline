@@ -4,6 +4,14 @@ import { Metadata } from '../'
 import * as models from '../models'
 
 /**
+ * ParseMetadata
+ */
+export interface ParseMetadata {
+  name: string
+  value: string
+}
+
+/**
  * Get all files that match regex
  *
  * @param {string} path
@@ -37,10 +45,10 @@ export function connect(uri: string): Sequelize.Sequelize {
 
 /**
  * Parse Metadata
- * @param {Array<Metadata.Instance>} data
+ * @param {Array<ParseMetadata>} data
  * @returns Metadata
  */
-export function parseMetadata(data: Array<models.Metadata.Instance>): Metadata {
+export function parseMetadata(data: Array<ParseMetadata>): Metadata {
   const metadata: Metadata = {}
   data.map(item => {
     const name = item.name.toLowerCase()
