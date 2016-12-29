@@ -6,15 +6,8 @@ describe('Metadata', () => {
   test('setMetadata', async () => {
     const mbtiles = new MBTiles('setMetadata.mbtiles')
     const metadata: Metadata = {
-      name: 'Foo',
-      description: 'bar',
-      version: '1.1.0',
-      minzoom: 8,
-      maxzoom: 13,
-      center: [10, 30, 10],
-      bounds: [-110, -20, 130, 30],
-      type: 'baselayer',
-      format: 'png'
+      name: 'foo',
+      bounds: [-110, -20, 130, 30]
     }
     expect(await mbtiles.setMetadata(metadata)).toBeTruthy()
     expect(await mbtiles.getMetadata()).toEqual(metadata)
