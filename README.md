@@ -21,7 +21,11 @@ This library is intented to be used in an offline environment with no dependenci
 $ npm install --save mbtiles-offline
 ```
 
-# constructor
+# MBTiles
+
+MBTiles
+
+## constructor
 
 MBTiles
 
@@ -37,9 +41,9 @@ const mbtiles = MBTiles('example.mbtiles')
 //=mbtiles
 ```
 
-Returns **MBTiles** MBTiles
+Returns **[MBTiles](#mbtiles)** MBTiles
 
-# save
+## save
 
 Save tile MBTile
 
@@ -56,7 +60,7 @@ await mbtiles.save([x, y, z], buffer)
 
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** true/false
 
-# metadata
+## metadata
 
 Retrieves Metadata from MBTiles
 
@@ -69,7 +73,7 @@ const metadata = await mbtiles.metadata()
 
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;Metadata>** Metadata as an Object
 
-# update
+## update
 
 Update Metadata
 
@@ -85,7 +89,7 @@ await mbtiles.update({name: 'foo', description: 'bar'})
 
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** true/false
 
-# tile
+## tile
 
 Retrieve Buffer from Tile
 
@@ -102,7 +106,7 @@ const tile = await mbtiles.tile([x, y, z])
 
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Buffer](https://nodejs.org/api/buffer.html)>** Tile Data
 
-# init
+## init
 
 Initialize
 
@@ -114,7 +118,7 @@ await mbtiles.init()
 
 Returns **[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** true/false
 
-# tables
+## tables
 
 Build Tables
 
@@ -126,7 +130,7 @@ await mbtiles.tables()
 
 Returns **[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** true/false
 
-# index
+## index
 
 Builds Index
 

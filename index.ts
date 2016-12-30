@@ -54,6 +54,9 @@ export interface Metadata {
   [key: string]: any
 }
 
+/**
+ * MBTiles
+ */
 export class MBTiles {
   public uri: string
   private sequelize: Sequelize.Sequelize
