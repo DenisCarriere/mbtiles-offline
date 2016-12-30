@@ -1,0 +1,3 @@
+paths:
+  Sequelize: "https://github.com/sequelize/sequelize"
+BBox: "http://geojson.org/geojson-spec.html#bounding-boxes"

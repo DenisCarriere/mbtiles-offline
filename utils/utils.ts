@@ -1,7 +1,6 @@
 import * as fs from 'fs'
 import * as Sequelize from 'sequelize-offline'
 import { Metadata } from '../'
-import * as models from '../models'
 
 /**
  * ParseMetadata

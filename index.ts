@@ -117,7 +117,7 @@ export class MBTiles {
         map.tile_row AS tile_row,
         images.tile_data AS tile_data
       FROM map
-      JOIN images ON images.tile_id = map.tile_id`
+      JOIN images ON images.tile_id = map.tile_id`,
     ]
     return new Promise((resolve, reject) => {
       const q = queue()
@@ -139,7 +139,7 @@ export class MBTiles {
   public getTile(tile: Tile): Promise<Buffer> {
     return new Promise((resolve, reject) => {
       const [x, y, z] = tile
-      const data = this.tilesSQL.find({
+      this.tilesSQL.find({
         attributes: ['tile_data'],
         where: {
           tile_column: x,
@@ -181,7 +181,7 @@ export class MBTiles {
   /**
    * Retrieves Metadata from MBTiles
    *
-   * @returns {Promise<Metadata}
+   * @returns {Promise<Metadata>}
    */
   public getMetadata(): Promise<Metadata> {
     return new Promise((resolve, reject) => {
