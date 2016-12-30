@@ -5,10 +5,6 @@
 // import * as path from 'path'
 // import * as url from 'url'
 // import * as qs from 'querystring'
-
-// External packages
-import { queue } from 'd3-queue'
-// import * as mercator from 'global-mercator'
 // import * as sqlite3 from 'sqlite3-offline'
 // import * as tiletype from 'tiletype'
 
@@ -93,7 +89,7 @@ export class MBTiles {
    * @example
    * await mbtiles.save([x, y, z], buffer)
    */
-  public save(tile: Tile, tile_data: Buffer): Promise<boolean> {
+  public async save(tile: Tile, tile_data: Buffer): Promise<boolean> {
     const tile_id = mercator.hash(tile)
     const [x, y, z] = tile
     const entity = {
@@ -102,14 +98,9 @@ export class MBTiles {
       zoom_level: z,
       tile_id,
     }
-    return new Promise((resolve, reject) => {
-      this.init().then(() => {
-        queue(1)
-          .defer(callback => this.imagesSQL.create({ tile_data, tile_id }).then(() => callback(null)))
-          .defer(callback => this.mapSQL.create(entity).then(() => callback(null)))
-          .await(() => resolve(true))
-      })
-    })
+    await this.imagesSQL.create({ tile_data, tile_id })
+    await this.mapSQL.create(entity)
+    return true
   }
 
   /**
@@ -120,10 +111,31 @@ export class MBTiles {
    * const metadata = await mbtiles.metadata()
    * //=metadata
    */
-  public metadata(): Promise<Metadata> {
-    return new Promise((resolve, reject) => {
-      this.metadataSQL.findAll().then(data => resolve(parseMetadata(data)))
-    })
+  public async metadata(): Promise<Metadata> {
+    const data = await this.metadataSQL.findAll()
+    return parseMetadata(data)
+  }
+
+  /**
+   * Delete Tile
+   *
+   * @param {Tile} tile Tile [x, y, z]
+   * @returns {Promise<boolean>} true/false
+   * @example
+   * await mbtiles.delete([x, y, z])
+   */
+  public async delete(tile: Tile): Promise<boolean> {
+    const tile_id = mercator.hash(tile)
+    const [x, y, z] = tile
+    const entity = {
+      tile_column: x,
+      tile_row: y,
+      zoom_level: z,
+      tile_id,
+    }
+    const found = await this.imagesSQL.findOne(entity)
+    await found.destroy()
+    return true
   }
 
   /**
@@ -134,21 +146,17 @@ export class MBTiles {
    * @example
    * await mbtiles.update({name: 'foo', description: 'bar'})
    */
-  public update(metadata: Metadata): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      this.metadataSQL.sync({ force: true }).then(() => {
-        const q = queue()
-        for (const name of Object.keys(metadata)) {
-          let value = metadata[name]
+  public async update(metadata: Metadata): Promise<boolean> {
+    await this.metadataSQL.sync({ force: true })
+    for (const name of Object.keys(metadata)) {
+      let value = metadata[name]
 
-          if (Array.isArray(value)) { value = value.join(',')
-          } else { value = String(value) }
+      if (Array.isArray(value)) { value = value.join(',')
+      } else { value = String(value) }
 
-          q.defer(callback => this.metadataSQL.create({name, value}).then(() => callback(null)))
-        }
-        q.await(() => resolve(true))
-      })
-    })
+      await this.metadataSQL.create({name, value})
+    }
+    return true
   }
 
   /**
@@ -160,23 +168,18 @@ export class MBTiles {
    * const tile = await mbtiles.tile([x, y, z])
    * //=tile
    */
-  public tile(tile: Tile): Promise<Buffer> {
-    return new Promise((resolve, reject) => {
-      const [x, y, z] = tile
-      this.tilesSQL.find({
-        attributes: ['tile_data'],
-        where: {
-          tile_column: x,
-          tile_row: y,
-          zoom_level: z,
-        },
-      }).then(
-        data => {
-          if (!data) { return reject('Tile has no data') }
-          return resolve(data.tile_data)
-        }
-      )
+  public async tile(tile: Tile): Promise<Buffer> {
+    const [x, y, z] = tile
+    const data = await this.tilesSQL.find({
+      attributes: ['tile_data'],
+      where: {
+        tile_column: x,
+        tile_row: y,
+        zoom_level: z,
+      },
     })
+    if (!data) { throw new Error('Tile has no data') }
+    return data.tile_data
   }
 
   /**
@@ -186,13 +189,10 @@ export class MBTiles {
    * @example
    * await mbtiles.init()
    */
-  public init(): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      queue()
-        .defer(callback => this.tables().then(() => callback(null)))
-        .defer(callback => this.index().then(() => callback(null)))
-        .await(() => resolve(true))
-    })
+  public async initAsync(): Promise<boolean> {
+    await this.tables()
+    await this.index()
+    return true
   }
 
   /**
@@ -202,14 +202,11 @@ export class MBTiles {
    * @example
    * await mbtiles.tables()
    */
-  public tables(): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      queue()
-        .defer(callback => this.metadataSQL.sync().then(() => callback(null)))
-        .defer(callback => this.imagesSQL.sync().then(() => callback(null)))
-        .defer(callback => this.mapSQL.sync().then(() => callback(null)))
-        .await(() => resolve(true))
-    })
+  public async tables(): Promise<boolean> {
+    await this.metadataSQL.sync()
+    await this.imagesSQL.sync()
+    await this.mapSQL.sync()
+    return true
   }
 
   /**
@@ -219,7 +216,7 @@ export class MBTiles {
    * @example
    * await mbtiles.index()
    */
-  public index(): Promise<boolean> {
+  public async index(): Promise<boolean> {
     const queries = [
       'CREATE UNIQUE INDEX IF NOT EXISTS metadata_name on metadata (name)',
       'CREATE UNIQUE INDEX IF NOT EXISTS map_tile_id on map (tile_id)',
@@ -234,14 +231,10 @@ export class MBTiles {
       FROM map
       JOIN images ON images.tile_id = map.tile_id`,
     ]
-    return new Promise((resolve, reject) => {
-      const q = queue()
-      this.tables().then(() => {
-        for (const query of queries) {
-          q.defer(callback => this.sequelize.query(query).then(() => callback(null)))
-        }
-        q.await(() => resolve(true))
-      })
-    })
+    await this.tables()
+    for (const query of queries) {
+      await this.sequelize.query(query)
+    }
+    return true
   }
 }

@@ -21,13 +21,14 @@ describe('Metadata', () => {
   })
 })
 
-describe('Save', () => {
-  test('[0, 0, 0]', async () => {
-    const mbtiles = new MBTiles('save.mbtiles')
-    const tileData = fs.readFileSync(path.join(__dirname, 'fixtures', 'images', '0', '0', '0.png'))
-    expect(await mbtiles.save([0, 0, 0], tileData)).toBeTruthy()
-    fs.unlinkSync('save.mbtiles')
-  })
+describe('Save', async () => {
+  const mbtiles = new MBTiles('save.mbtiles')
+  const tileData = fs.readFileSync(path.join(__dirname, 'fixtures', 'images', '0', '0', '0.png'))
+  const save = await mbtiles.save([0, 0, 0], tileData)
+  const deleted = await mbtiles.delete([0, 0, 0])
+  test('[0, 0, 0]', () => expect(save).toBeTruthy())
+  test('[0, 0, 0]', () => expect(deleted).toBeTruthy())
+  fs.unlinkSync('save.mbtiles')
 })
 
 describe('Read', () => {
