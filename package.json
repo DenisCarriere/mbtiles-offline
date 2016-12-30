@@ -43,6 +43,7 @@
     "@types/lodash": "^4.14.44",
     "@types/node": "^6.0.52",
     "@types/validator": "^5.7.35",
+    "coveralls": "^2.11.15",
     "documentation": "^4.0.0-beta10",
     "jest-cli": "^17.0.3",
     "tslint": "^3.15.1",
