@@ -21,60 +21,122 @@ This library is intented to be used in an offline environment with no dependenci
 $ npm install --save mbtiles-offline
 ```
 
-# MBTiles
+# constructor
 
 MBTiles
 
-## init
-
-Initialize
-
-## tables
-
-Build Tables
-
-## index
-
-Builds Index
-
-Returns **[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** 
-
-## getTile
-
-Retrieve Buffer from Tile [x, y, z]
-
 **Parameters**
 
--   `tile` **Tile** 
+-   `uri` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** Path to MBTiles
 
-Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Buffer](https://nodejs.org/api/buffer.html)>** Tile Data
+**Examples**
 
-## setMetadata
+```javascript
+import {MBTiles} from 'mbtiles-offline'
+const mbtiles = MBTiles('example.mbtiles')
+//=mbtiles
+```
 
-Set Metadata
+Returns **MBTiles** MBTiles
 
-**Parameters**
-
--   `metadata` **Metadata** 
-
-Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** 
-
-## getMetadata
-
-Retrieves Metadata from MBTiles
-
-Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;Metadata>** 
-
-## save
+# save
 
 Save tile MBTile
 
 **Parameters**
 
--   `tile` **Tile** 
--   `tile_data` **[Buffer](https://nodejs.org/api/buffer.html)** 
+-   `tile` **Tile** Tile [x, y, z]
+-   `tile_data` **[Buffer](https://nodejs.org/api/buffer.html)** Tile image
 
-Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** 
+**Examples**
+
+```javascript
+await mbtiles.save([x, y, z], buffer)
+```
+
+Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** true/false
+
+# metadata
+
+Retrieves Metadata from MBTiles
+
+**Examples**
+
+```javascript
+const metadata = await mbtiles.metadata()
+//=metadata
+```
+
+Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;Metadata>** Metadata as an Object
+
+# update
+
+Update Metadata
+
+**Parameters**
+
+-   `metadata` **Metadata** Metadata according to MBTiles 1.1+ spec
+
+**Examples**
+
+```javascript
+await mbtiles.update({name: 'foo', description: 'bar'})
+```
+
+Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** true/false
+
+# tile
+
+Retrieve Buffer from Tile
+
+**Parameters**
+
+-   `tile` **Tile** Tile [x, y, z]
+
+**Examples**
+
+```javascript
+const tile = await mbtiles.tile([x, y, z])
+//=tile
+```
+
+Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Buffer](https://nodejs.org/api/buffer.html)>** Tile Data
+
+# init
+
+Initialize
+
+**Examples**
+
+```javascript
+await mbtiles.init()
+```
+
+Returns **[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** true/false
+
+# tables
+
+Build Tables
+
+**Examples**
+
+```javascript
+await mbtiles.tables()
+```
+
+Returns **[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** true/false
+
+# index
+
+Builds Index
+
+**Examples**
+
+```javascript
+await mbtiles.index()
+```
+
+Returns **[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** true/false
 
 # Changelog
 

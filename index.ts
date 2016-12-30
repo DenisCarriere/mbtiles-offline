@@ -54,9 +54,6 @@ export interface Metadata {
   [key: string]: any
 }
 
-/**
- * MBTiles
- */
 export class MBTiles {
   public uri: string
   private sequelize: Sequelize.Sequelize
@@ -65,6 +62,16 @@ export class MBTiles {
   private imagesSQL: models.Images.Model
   private mapSQL: models.Map.Model
 
+/**
+ * MBTiles
+ *
+ * @param {string} uri Path to MBTiles
+ * @returns {MBTiles} MBTiles
+ * @example
+ * import {MBTiles} from 'mbtiles-offline'
+ * const mbtiles = MBTiles('example.mbtiles')
+ * //=mbtiles
+ */
   constructor(uri: string) {
     this.uri = uri
     this.sequelize = connect(uri)
@@ -75,7 +82,106 @@ export class MBTiles {
   }
 
   /**
+   * Save tile MBTile
+   *
+   * @param {Tile} tile Tile [x, y, z]
+   * @param {Buffer} tile_data Tile image
+   * @returns {Promise<boolean>} true/false
+   * @example
+   * await mbtiles.save([x, y, z], buffer)
+   */
+  public save(tile: Tile, tile_data: Buffer): Promise<boolean> {
+    const tile_id = mercator.hash(tile)
+    const [x, y, z] = tile
+    const entity = {
+      tile_column: x,
+      tile_row: y,
+      zoom_level: z,
+      tile_id,
+    }
+    return new Promise((resolve, reject) => {
+      this.init().then(() => {
+        queue(1)
+          .defer(callback => this.imagesSQL.create({ tile_data, tile_id }).then(() => callback(null)))
+          .defer(callback => this.mapSQL.create(entity).then(() => callback(null)))
+          .await(() => resolve(true))
+      })
+    })
+  }
+
+  /**
+   * Retrieves Metadata from MBTiles
+   *
+   * @returns {Promise<Metadata>} Metadata as an Object
+   * @example
+   * const metadata = await mbtiles.metadata()
+   * //=metadata
+   */
+  public metadata(): Promise<Metadata> {
+    return new Promise((resolve, reject) => {
+      this.metadataSQL.findAll().then(data => resolve(parseMetadata(data)))
+    })
+  }
+
+  /**
+   * Update Metadata
+   *
+   * @param {Metadata} metadata Metadata according to MBTiles 1.1+ spec
+   * @returns {Promise<boolean>} true/false
+   * @example
+   * await mbtiles.update({name: 'foo', description: 'bar'})
+   */
+  public update(metadata: Metadata): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      this.metadataSQL.sync({ force: true }).then(() => {
+        const q = queue()
+        for (const name of Object.keys(metadata)) {
+          let value = metadata[name]
+
+          if (Array.isArray(value)) { value = value.join(',')
+          } else { value = String(value) }
+
+          q.defer(callback => this.metadataSQL.create({name, value}).then(() => callback(null)))
+        }
+        q.await(() => resolve(true))
+      })
+    })
+  }
+
+  /**
+   * Retrieve Buffer from Tile
+   *
+   * @param {Tile} tile Tile [x, y, z]
+   * @return {Promise<Buffer>} Tile Data
+   * @example
+   * const tile = await mbtiles.tile([x, y, z])
+   * //=tile
+   */
+  public tile(tile: Tile): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+      const [x, y, z] = tile
+      this.tilesSQL.find({
+        attributes: ['tile_data'],
+        where: {
+          tile_column: x,
+          tile_row: y,
+          zoom_level: z,
+        },
+      }).then(
+        data => {
+          if (!data) { return reject('Tile has no data') }
+          return resolve(data.tile_data)
+        }
+      )
+    })
+  }
+
+  /**
    * Initialize
+   *
+   * @returns {boolean} true/false
+   * @example
+   * await mbtiles.init()
    */
   public init(): Promise<boolean> {
     return new Promise((resolve, reject) => {
@@ -88,6 +194,10 @@ export class MBTiles {
 
   /**
    * Build Tables
+   *
+   * @returns {boolean} true/false
+   * @example
+   * await mbtiles.tables()
    */
   public tables(): Promise<boolean> {
     return new Promise((resolve, reject) => {
@@ -102,7 +212,9 @@ export class MBTiles {
   /**
    * Builds Index
    *
-   * @returns {boolean}
+   * @returns {boolean} true/false
+   * @example
+   * await mbtiles.index()
    */
   public index(): Promise<boolean> {
     const queries = [
@@ -126,91 +238,6 @@ export class MBTiles {
           q.defer(callback => this.sequelize.query(query).then(() => callback(null)))
         }
         q.await(() => resolve(true))
-      })
-    })
-  }
-
-  /**
-   * Retrieve Buffer from Tile [x, y, z]
-   *
-   * @param {Tile} tile
-   * @return {Promise<Buffer>} Tile Data
-   */
-  public getTile(tile: Tile): Promise<Buffer> {
-    return new Promise((resolve, reject) => {
-      const [x, y, z] = tile
-      this.tilesSQL.find({
-        attributes: ['tile_data'],
-        where: {
-          tile_column: x,
-          tile_row: y,
-          zoom_level: z,
-        },
-      }).then(
-        data => {
-          if (!data) { return reject('Tile has no data') }
-          return resolve(data.tile_data)
-        }
-      )
-    })
-  }
-
-  /**
-   * Set Metadata
-   *
-   * @param {Metadata} metadata
-   * @returns {Promise<boolean>}
-   */
-  public setMetadata(metadata: Metadata): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      this.metadataSQL.sync({ force: true }).then(() => {
-        const q = queue()
-        for (const name of Object.keys(metadata)) {
-          let value = metadata[name]
-
-          if (Array.isArray(value)) { value = value.join(',')
-          } else { value = String(value) }
-
-          q.defer(callback => this.metadataSQL.create({name, value}).then(() => callback(null)))
-        }
-        q.await(() => resolve(true))
-      })
-    })
-  }
-
-  /**
-   * Retrieves Metadata from MBTiles
-   *
-   * @returns {Promise<Metadata>}
-   */
-  public getMetadata(): Promise<Metadata> {
-    return new Promise((resolve, reject) => {
-      this.metadataSQL.findAll().then(data => resolve(parseMetadata(data)))
-    })
-  }
-
-  /**
-   * Save tile MBTile
-   *
-   * @param {Tile} tile
-   * @param {Buffer} tile_data
-   * @returns {Promise<boolean>}
-   */
-  public save(tile: Tile, tile_data: Buffer): Promise<boolean> {
-    const tile_id = mercator.hash(tile)
-    const [x, y, z] = tile
-    const entity = {
-      tile_column: x,
-      tile_row: y,
-      zoom_level: z,
-      tile_id,
-    }
-    return new Promise((resolve, reject) => {
-      this.init().then(() => {
-        queue(1)
-          .defer(callback => this.imagesSQL.create({ tile_data, tile_id }).then(() => callback(null)))
-          .defer(callback => this.mapSQL.create(entity).then(() => callback(null)))
-          .await(() => resolve(true))
       })
     })
   }
