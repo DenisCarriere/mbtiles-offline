@@ -2,7 +2,6 @@
 // import * as fs from 'fs'
 // import * as crypto from 'crypto'
 // import * as zlib from 'zlib'
-// import * as path from 'path'
 // import * as url from 'url'
 // import * as qs from 'querystring'
 // import * as sqlite3 from 'sqlite3-offline'
@@ -11,7 +10,8 @@
 import * as mercator from 'global-mercator'
 import * as Sequelize from 'sequelize-offline'
 import * as models from './models'
-import { connect, parseMetadata } from './utils'
+import { connect, parseMetadata, createFolder } from './utils'
+
 
 /**
  * Tile - [x, y, zoom]
@@ -60,6 +60,9 @@ export class MBTiles {
   private metadataSQL: models.Metadata.Model
   private imagesSQL: models.Images.Model
   private mapSQL: models.Map.Model
+  private _tables = false
+  private _init = false
+  private _index = false
 
 /**
  * MBTiles
@@ -78,6 +81,7 @@ export class MBTiles {
     this.metadataSQL = this.sequelize.define<models.Metadata.Instance, models.Metadata.Attributes>('metadata', models.Metadata.scheme)
     this.imagesSQL = this.sequelize.define<models.Images.Instance, models.Images.Attributes>('images', models.Images.scheme)
     this.mapSQL = this.sequelize.define<models.Map.Instance, models.Map.Attributes>('map', models.Map.scheme)
+    createFolder(uri)
   }
 
   /**
@@ -90,6 +94,8 @@ export class MBTiles {
    * await mbtiles.save([x, y, z], buffer)
    */
   public async save(tile: Tile, tile_data: Buffer): Promise<boolean> {
+    if (!this._init) { await this.init() }
+
     const tile_id = mercator.hash(tile)
     const [x, y, z] = tile
     const entity = {
@@ -169,6 +175,8 @@ export class MBTiles {
    * //=tile
    */
   public async tile(tile: Tile): Promise<Buffer> {
+    if (!this._init) { await this.init() }
+
     const [x, y, z] = tile
     const data = await this.tilesSQL.find({
       attributes: ['tile_data'],
@@ -178,7 +186,7 @@ export class MBTiles {
         zoom_level: z,
       },
     })
-    if (!data) { throw new Error('Tile has no data') }
+    if (!data) { return undefined }
     return data.tile_data
   }
 
@@ -189,9 +197,11 @@ export class MBTiles {
    * @example
    * await mbtiles.init()
    */
-  public async initAsync(): Promise<boolean> {
+  public async init(): Promise<boolean> {
+    await createFolder(this.uri)
     await this.tables()
     await this.index()
+    this._init = true
     return true
   }
 
@@ -206,6 +216,7 @@ export class MBTiles {
     await this.metadataSQL.sync()
     await this.imagesSQL.sync()
     await this.mapSQL.sync()
+    this._tables = true
     return true
   }
 
@@ -235,6 +246,7 @@ export class MBTiles {
     for (const query of queries) {
       await this.sequelize.query(query)
     }
+    this._index = true
     return true
   }
 }

@@ -25,9 +25,11 @@
   "keywords": [],
   "testEnvironment": "node",
   "dependencies": {
+    "@types/mkdirp": "^0.3.29",
     "d3-queue": "^3.0.3",
     "global-mercator": "^1.5.0",
-    "sequelize-offline": "^4.0.0-beta2"
+    "mkdirp": "^0.5.1",
+    "sequelize-offline": "^4.0.0-beta4"
   },
   "bundledDependencies": [
     "d3-queue",
@@ -35,11 +37,7 @@
     "sequelize-offline"
   ],
   "devDependencies": {
-    "@types/bluebird": "^3.0.37",
     "@types/jest": "^16.0.3",
-    "@types/lodash": "^4.14.45",
-    "@types/node": "^6.0.55",
-    "@types/validator": "^5.7.35",
     "coveralls": "^2.11.15",
     "documentation": "^4.0.0-beta10",
     "jest-cli": "^17.0.3",

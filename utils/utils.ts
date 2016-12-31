@@ -1,3 +1,5 @@
+import * as path from 'path'
+import * as mkdirp from 'mkdirp'
 import * as fs from 'fs'
 import * as Sequelize from 'sequelize-offline'
 import { Metadata } from '../'
@@ -8,6 +10,22 @@ import { Metadata } from '../'
 export interface ParseMetadata {
   name: string
   value: string
+}
+
+/**
+ * Create Folder
+ *
+ * @param {string} uri
+ * @returns {Promise<boolean>}
+ */
+export function createFolder(uri: string): Promise<boolean> {
+  const dirname = path.dirname(uri)
+  return new Promise((resolve, reject) => {
+    if (!fs.existsSync(dirname)) {
+      mkdirp(dirname, () => resolve(true))
+    }
+    return resolve(true)
+  })
 }
 
 /**
