@@ -89,11 +89,12 @@ export class MBTiles {
    *
    * @param {Tile} tile Tile [x, y, z]
    * @param {Buffer} tile_data Tile image
+   * @param {boolean} overwrite Allow overwrite save operations
    * @returns {Promise<boolean>} true/false
    * @example
    * await mbtiles.save([x, y, z], buffer)
    */
-  public async save(tile: Tile, tile_data: Buffer): Promise<boolean> {
+  public async save(tile: Tile, tile_data: Buffer, overwrite = false): Promise<boolean> {
     if (!this._init) { await this.init() }
 
     const tile_id = mercator.hash(tile)
@@ -104,6 +105,14 @@ export class MBTiles {
       zoom_level: z,
       tile_id,
     }
+
+    // Overwrite existing
+    if (overwrite) {
+      const exists = await this.imagesSQL.findOne({where: {tile_id}})
+      if (exists) { await this.delete(tile) }
+    }
+
+    // Save Image
     await this.imagesSQL.create({ tile_data, tile_id })
     await this.mapSQL.create(entity)
     return true
@@ -139,8 +148,10 @@ export class MBTiles {
       zoom_level: z,
       tile_id,
     }
-    const found = await this.imagesSQL.findOne(entity)
-    await found.destroy()
+    const image = await this.imagesSQL.findOne({where: {tile_id}})
+    await image.destroy()
+    const map = await this.mapSQL.findOne({where: entity})
+    await map.destroy()
     return true
   }
 

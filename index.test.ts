@@ -28,6 +28,8 @@ describe('CRUD', async () => {
 
   test('save', async () => expect(await mbtiles.save([0, 0, 0], tileData)).toBeTruthy())
 
+  test('overwrite', async () => expect(await mbtiles.save([0, 0, 0], tileData, true)).toBeTruthy())
+
   test('read', async () => expect(await mbtiles.tile([0, 0, 0])).toEqual(tileData))
 
   test('deleted', async () => expect(await mbtiles.delete([0, 0, 0])).toBeTruthy())

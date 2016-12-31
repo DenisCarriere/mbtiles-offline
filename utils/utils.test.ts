@@ -4,11 +4,7 @@ import { getFiles, parseMetadata, createFolder } from './utils'
 
 describe('Utils', () => {
   test('getFiles', () => expect(getFiles(path.join(__dirname, '..', 'fixtures'))).toBeDefined())
-  test('createFolder', async () => {
-    await createFolder('createFolderTest/test.mbtiles')
-    expect(fs.existsSync('createFolderTest')).toBeTruthy()
-    fs.rmdirSync('createFolderTest/')
-  })
+  test('createFolder', () => createFolder('createFolderTest/test.mbtiles').then(() => expect(fs.existsSync('createFolderTest')).toBeTruthy()))
 })
 
 describe('Metadata', () => {
@@ -21,4 +17,8 @@ describe('Metadata', () => {
   test('version', () => expect(parseMetadata([{name: 'version', value: '1.1.0'}])).toEqual({version: '1.1.0'}))
   test('minzoom', () => expect(parseMetadata([{name: 'minzoom', value: '10'}])).toEqual({minzoom: 10}))
   test('maxzoom', () => expect(parseMetadata([{name: 'maxzoom', value: '18'}])).toEqual({maxzoom: 18}))
+})
+
+afterAll(() => {
+  fs.rmdirSync('createFolderTest/')
 })
