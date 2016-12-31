@@ -84,7 +84,7 @@ export class MBTiles {
   }
 
   /**
-   * Save tile MBTile
+   * Save buffer data to individual Tile
    *
    * @param {Tile} tile Tile [x, y, z]
    * @param {Buffer} tile_data Tile image
@@ -131,7 +131,7 @@ export class MBTiles {
   }
 
   /**
-   * Delete Tile
+   * Delete individual Tile
    *
    * @param {Tile} tile Tile [x, y, z]
    * @returns {Promise<boolean>} true/false
@@ -176,15 +176,15 @@ export class MBTiles {
   }
 
   /**
-   * Retrieve Buffer from Tile
+   * Get Buffer from Tile
    *
    * @param {Tile} tile Tile [x, y, z]
    * @return {Promise<Buffer>} Tile Data
    * @example
-   * const tile = await mbtiles.tile([x, y, z])
+   * const tile = await mbtiles.get([x, y, z])
    * //=tile
    */
-  public async tile(tile: Tile): Promise<Buffer> {
+  public async get(tile: Tile): Promise<Buffer> {
     if (!this._init) { await this.init() }
 
     const [x, y, z] = tile
@@ -201,7 +201,7 @@ export class MBTiles {
   }
 
   /**
-   * Initialize
+   * Initialize MBTiles
    *
    * @returns {boolean} true/false
    * @example
@@ -216,7 +216,7 @@ export class MBTiles {
   }
 
   /**
-   * Build Tables
+   * Build SQL tables
    *
    * @returns {boolean} true/false
    * @example
@@ -231,7 +231,7 @@ export class MBTiles {
   }
 
   /**
-   * Builds Index
+   * Build SQL index
    *
    * @returns {boolean} true/false
    * @example

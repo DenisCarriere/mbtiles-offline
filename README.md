@@ -21,7 +21,18 @@ This library is intented to be used in an offline environment with no dependenci
 $ npm install --save mbtiles-offline
 ```
 
-# MBTiles
+## Features
+
+| Name                      | Description    |
+|---------------------------|:---------------|
+| [save](#save)             | Save buffer data to individual Tile
+| [metadata](#metadata)     | Retrieve Metadata from MBTiles
+| [delete](#delete)         | Delete individual Tile
+| [update](#update)         | Update Metadata
+| [get](#get)               | Get Buffer from Tile
+| [init](#init)             | Initialize MBTiles
+| [tables](#tables)         | Build SQL tables
+| [index](#index)           | Build SQL index# MBTiles
 
 MBTiles
 
@@ -45,7 +56,7 @@ Returns **[MBTiles](#mbtiles)** MBTiles
 
 ## save
 
-Save tile MBTile
+Save buffer data to individual Tile
 
 **Parameters**
 
@@ -76,7 +87,7 @@ Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refe
 
 ## delete
 
-Delete Tile
+Delete individual Tile
 
 **Parameters**
 
@@ -106,9 +117,9 @@ await mbtiles.update({name: 'foo', description: 'bar'})
 
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** true/false
 
-## tile
+## get
 
-Retrieve Buffer from Tile
+Get Buffer from Tile
 
 **Parameters**
 
@@ -117,7 +128,7 @@ Retrieve Buffer from Tile
 **Examples**
 
 ```javascript
-const tile = await mbtiles.tile([x, y, z])
+const tile = await mbtiles.get([x, y, z])
 //=tile
 ```
 
@@ -125,7 +136,7 @@ Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refe
 
 ## init
 
-Initialize
+Initialize MBTiles
 
 **Examples**
 
@@ -137,7 +148,7 @@ Returns **[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refe
 
 ## tables
 
-Build Tables
+Build SQL tables
 
 **Examples**
 
@@ -149,7 +160,7 @@ Returns **[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refe
 
 ## index
 
-Builds Index
+Build SQL index
 
 **Examples**
 

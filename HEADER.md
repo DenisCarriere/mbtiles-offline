@@ -21,3 +21,15 @@ This library is intented to be used in an offline environment with no dependenci
 $ npm install --save mbtiles-offline
 ```
 
+## Features
+
+| Name                      | Description    |
+|---------------------------|:---------------|
+| [save](#save)             | Save buffer data to individual Tile
+| [metadata](#metadata)     | Retrieve Metadata from MBTiles
+| [delete](#delete)         | Delete individual Tile
+| [update](#update)         | Update Metadata
+| [get](#get)               | Get Buffer from Tile
+| [init](#init)             | Initialize MBTiles
+| [tables](#tables)         | Build SQL tables
+| [index](#index)           | Build SQL index

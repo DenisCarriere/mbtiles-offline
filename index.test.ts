@@ -24,13 +24,13 @@ describe('CRUD', async () => {
   const mbtiles = new MBTiles('CRUD.mbtiles')
   const tileData = fs.readFileSync(path.join(__dirname, 'fixtures', 'images', '0', '0', '0.png'))
 
-  test('noData', async () => expect(await mbtiles.tile([0, 0, 0])).toBeUndefined())
+  test('noData', async () => expect(await mbtiles.get([0, 0, 0])).toBeUndefined())
 
   test('save', async () => expect(await mbtiles.save([0, 0, 0], tileData)).toBeTruthy())
 
   test('overwrite', async () => expect(await mbtiles.save([0, 0, 0], tileData, true)).toBeTruthy())
 
-  test('read', async () => expect(await mbtiles.tile([0, 0, 0])).toEqual(tileData))
+  test('get', async () => expect(await mbtiles.get([0, 0, 0])).toEqual(tileData))
 
   test('deleted', async () => expect(await mbtiles.delete([0, 0, 0])).toBeTruthy())
 })
