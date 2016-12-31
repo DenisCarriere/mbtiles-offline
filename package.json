@@ -31,11 +31,6 @@
     "mkdirp": "^0.5.1",
     "sequelize-offline": "^4.0.0-beta4"
   },
-  "bundledDependencies": [
-    "d3-queue",
-    "global-mercator",
-    "sequelize-offline"
-  ],
   "devDependencies": {
     "@types/jest": "^16.0.3",
     "coveralls": "^2.11.15",

@@ -1,0 +1,10 @@
+documentation.yml
+HEADER.md
+tslint.json
+tsconfig.json
+yarn.lock
+fixtures/
+.vscode/
+circle.yml
+coverage/
+*test*
