@@ -73,6 +73,22 @@ const metadata = await mbtiles.metadata()
 
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;Metadata>** Metadata as an Object
 
+## delete
+
+Delete Tile
+
+**Parameters**
+
+-   `tile` **Tile** Tile [x, y, z]
+
+**Examples**
+
+```javascript
+await mbtiles.delete([x, y, z])
+```
+
+Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** true/false
+
 ## update
 
 Update Metadata
