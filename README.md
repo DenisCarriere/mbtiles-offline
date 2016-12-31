@@ -51,6 +51,7 @@ Save tile MBTile
 
 -   `tile` **Tile** Tile [x, y, z]
 -   `tile_data` **[Buffer](https://nodejs.org/api/buffer.html)** Tile image
+-   `overwrite` **\[[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)](default false)** Allow overwrite save operations
 
 **Examples**
 
