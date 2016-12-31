@@ -88,7 +88,7 @@ export class MBTiles {
    *
    * @param {Tile} tile Tile [x, y, z]
    * @param {Buffer} tile_data Tile image
-   * @param {boolean} overwrite Allow overwrite save operations
+   * @param {boolean} [overwrite=false] Allow overwrite save operations
    * @returns {Promise<boolean>} true/false
    * @example
    * await mbtiles.save([x, y, z], buffer)
