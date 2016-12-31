@@ -33,3 +33,4 @@ $ npm install --save mbtiles-offline
 | [init](#init)             | Initialize MBTiles
 | [tables](#tables)         | Build SQL tables
 | [index](#index)           | Build SQL index
+

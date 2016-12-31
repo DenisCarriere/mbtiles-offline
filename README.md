@@ -32,7 +32,9 @@ $ npm install --save mbtiles-offline
 | [get](#get)               | Get Buffer from Tile
 | [init](#init)             | Initialize MBTiles
 | [tables](#tables)         | Build SQL tables
-| [index](#index)           | Build SQL index# MBTiles
+| [index](#index)           | Build SQL index
+
+# MBTiles
 
 MBTiles
 
