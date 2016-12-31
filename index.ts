@@ -12,7 +12,6 @@ import * as Sequelize from 'sequelize-offline'
 import * as models from './models'
 import { connect, parseMetadata, createFolder } from './utils'
 
-
 /**
  * Tile - [x, y, zoom]
  */
