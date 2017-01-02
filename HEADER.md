@@ -29,7 +29,9 @@ $ npm install --save mbtiles-offline
 | [metadata](#metadata)     | Retrieve Metadata from MBTiles
 | [delete](#delete)         | Delete individual Tile
 | [update](#update)         | Update Metadata
-| [get](#get)               | Get Buffer from Tile
+| [findOne](#findone)       | Finds one Tile and returns buffer
+| [findAll](#findall)       | Finds all Tiles
+| [findAllId](#findallid)   | Finds all Tile unique hashes
 | [init](#init)             | Initialize MBTiles
 | [tables](#tables)         | Build SQL tables
 | [index](#index)           | Build SQL index

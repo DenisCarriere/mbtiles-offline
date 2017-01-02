@@ -29,7 +29,9 @@ $ npm install --save mbtiles-offline
 | [metadata](#metadata)     | Retrieve Metadata from MBTiles
 | [delete](#delete)         | Delete individual Tile
 | [update](#update)         | Update Metadata
-| [get](#get)               | Get Buffer from Tile
+| [findOne](#findone)       | Finds one Tile and returns buffer
+| [findAll](#findall)       | Finds all Tiles
+| [findAllId](#findallid)   | Finds all Tile unique hashes
 | [init](#init)             | Initialize MBTiles
 | [tables](#tables)         | Build SQL tables
 | [index](#index)           | Build SQL index
@@ -170,19 +172,35 @@ Finds all Tiles
 -   `attributes` **\[[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;Attributes>]** Tile Attributes (optional, default `['tile_column','tile_row','zoom_level']`)
 -   `buffer`   (optional, default `true`)
 
-Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;any>** 
+**Examples**
+
+```javascript
+const tiles = await findAll()
+//=tiles
+```
+
+Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;Tiles.Attributes>>** 
 
 ## findAllId
 
-Find all Tile unique key
+Finds all Tile unique hashes
 
 **Parameters**
 
--   `tiles`  
+-   `tiles` **\[[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;Tile>]** An array of Tiles
+
+**Examples**
+
+```javascript
+const hashes = await findAllId()
+//=hashes
+```
+
+Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>>** Unique tile hashes
 
 ## findOne
 
-Finds one Tile
+Finds one Tile and returns Buffer
 
 **Parameters**
 

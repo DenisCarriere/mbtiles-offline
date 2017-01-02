@@ -306,7 +306,10 @@ export class MBTiles {
    *
    * @param {Array<Tile>} [tiles] An array of Tiles
    * @param {Array<Attributes>} [attributes=['tile_column', 'tile_row', 'zoom_level']] Tile Attributes
-   * @returns {Promise<any>}
+   * @returns {Promise<Tiles.Attributes[]>}
+   * @example
+   * const tiles = await findAll()
+   * //=tiles
    */
   public async findAll(tiles: Tile[] = [], buffer = true): Promise<models.Tiles.Attributes[]> {
     const selection = tiles.map(tile => Object({tile_column: tile[0], tile_row: tile[1], zoom_level: tile[2]}))
@@ -331,15 +334,21 @@ export class MBTiles {
   }
 
   /**
-   * Find all Tile unique key
+   * Finds all Tile unique hashes
+   *
+   * @param {Tile[]} [tiles] An array of Tiles
+   * @returns {Promise<number[]>} Unique tile hashes
+   * @example
+   * const hashes = await findAllId()
+   * //=hashes
    */
-  public async findAllId(tiles?: Tile[]) {
+  public async findAllId(tiles?: Tile[]): Promise<number[]> {
     const findAll = await this.findAll(tiles, false)
     return findAll.map(tile => mercator.hash([tile.tile_column, tile.tile_row, tile.zoom_level]))
   }
 
   /**
-   * Finds one Tile
+   * Finds one Tile and returns Buffer
    *
    * @param {Tile} tile Tile [x, y, z]
    * @return {Promise<Buffer>} Tile Data
