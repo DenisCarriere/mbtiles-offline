@@ -1,6 +1,6 @@
-import { MBTiles } from '../'
-import * as path from 'path'
 import * as fs from 'fs'
+import * as path from 'path'
+import { MBTiles } from '../'
 
 async function main() {
     const mb = new MBTiles('test.mbtiles')

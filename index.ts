@@ -10,7 +10,7 @@ import * as tiletype from '@mapbox/tiletype'
 import * as mercator from 'global-mercator'
 import * as Sequelize from 'sequelize-offline'
 import * as models from './models'
-import { connect, parseMetadata, createFolder } from './utils'
+import { connect, createFolder, parseMetadata } from './utils'
 
 /**
  * Tile - [x, y, zoom]
@@ -308,7 +308,7 @@ export class MBTiles {
    * @param {Array<Attributes>} [attributes=['tile_column', 'tile_row', 'zoom_level']] Tile Attributes
    * @returns {Promise<any>}
    */
-  public async findAll(tiles: Array<Tile> = [], buffer = true): Promise<models.Tiles.Attributes[]> {
+  public async findAll(tiles: Tile[] = [], buffer = true): Promise<models.Tiles.Attributes[]> {
     const selection = tiles.map(tile => Object({tile_column: tile[0], tile_row: tile[1], zoom_level: tile[2]}))
     const where = (selection.length) ?  { $or: selection } : undefined
     const attributes = ['tile_column', 'tile_row', 'zoom_level']
@@ -320,10 +320,10 @@ export class MBTiles {
     })
     return findAll.map(item => {
       const result: any = {
-        tile_row: item.tile_row,
         tile_column: item.tile_column,
-        zoom_level: item.zoom_level,
         tile_data: item.tile_data,
+        tile_row: item.tile_row,
+        zoom_level: item.zoom_level,
       }
       if (result.tile_data === undefined) { delete result.tile_data }
       return result
@@ -333,7 +333,7 @@ export class MBTiles {
   /**
    * Find all Tile unique key
    */
-  public async findAllId(tiles?: Array<Tile>) {
+  public async findAllId(tiles?: Tile[]) {
     const findAll = await this.findAll(tiles, false)
     return findAll.map(tile => mercator.hash([tile.tile_column, tile.tile_row, tile.zoom_level]))
   }

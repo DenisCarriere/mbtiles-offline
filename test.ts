@@ -1,13 +1,13 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import { MBTiles, Metadata } from './'
+import { MBTiles, Metadata } from '.'
 
 describe('Metadata', async () => {
   const mbtiles = new MBTiles('Metadata.mbtiles')
   const metadata: Metadata = {
-    name: 'foo',
     bounds: [-110, -20, 130, 30],
     format: 'png',
+    name: 'foo',
   }
 
   test('update', async () => expect(await mbtiles.update(metadata)).toBeTruthy())

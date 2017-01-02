@@ -1,16 +1,9 @@
-import * as path from 'path'
-import * as mkdirp from 'mkdirp'
 import * as fs from 'fs'
+import * as mkdirp from 'mkdirp'
+import * as path from 'path'
 import * as Sequelize from 'sequelize-offline'
 import { Metadata } from '../'
-
-/**
- * ParseMetadata
- */
-export interface ParseMetadata {
-  name: string
-  value: string
-}
+import * as models from '../models'
 
 /**
  * Create Folder
@@ -33,11 +26,11 @@ export function createFolder(uri: string): Promise<boolean> {
  *
  * @param {string} path
  * @param {string} regex
- * @returns {Array<string>} matching files
+ * @returns {string[]} matching files
  * getFiles('/home/myfiles')
  * //=['map', 'test']
  */
-export function getFiles(path: string, regex = /\.mbtiles$/): Array<string> {
+export function getFiles(path: string, regex = /\.mbtiles$/): string[] {
   let mbtiles = fs.readdirSync(path).filter(value => value.match(regex))
   mbtiles = mbtiles.map(data => data.replace(regex, ''))
   mbtiles = mbtiles.filter(name => !name.match(/^_.*/))
@@ -62,10 +55,10 @@ export function connect(uri: string): Sequelize.Sequelize {
 
 /**
  * Parse Metadata
- * @param {Array<ParseMetadata>} data
+ * @param {ParseMetadata[]} data
  * @returns Metadata
  */
-export function parseMetadata(data: Array<ParseMetadata>): Metadata {
+export function parseMetadata(data: models.Metadata.Attributes[]): Metadata {
   const metadata: Metadata = {}
   data.map(item => {
     const name = item.name.toLowerCase()

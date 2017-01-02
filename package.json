@@ -36,11 +36,14 @@
     "@types/jest": "^16.0.3",
     "coveralls": "^2.11.15",
     "documentation": "^4.0.0-beta10",
-    "jest-cli": "^17.0.3",
-    "tslint": "^3.15.1",
+    "jest-cli": "^18.1.0",
+    "tslint": "^4.2.0",
     "typescript": "^2.0.10"
   },
   "jest": {
     "verbose": true
+  },
+  "babel": {
+    "sourceMaps": "both"
   }
 }

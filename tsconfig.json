@@ -6,7 +6,7 @@
         "noImplicitAny": true,
         "removeComments": false,
         "preserveConstEnums": true,
-        "sourceMap": false,
+        "sourceMap": true,
         "noEmitOnError": true
     },
     "exclude": [

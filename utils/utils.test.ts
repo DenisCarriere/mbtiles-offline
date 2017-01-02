@@ -1,6 +1,6 @@
-import * as path from 'path'
 import * as fs from 'fs'
-import { getFiles, parseMetadata, createFolder } from './utils'
+import * as path from 'path'
+import { createFolder, getFiles, parseMetadata } from './utils'
 
 describe('Utils', () => {
   test('getFiles', () => expect(getFiles(path.join(__dirname, '..', 'fixtures'))).toBeDefined())

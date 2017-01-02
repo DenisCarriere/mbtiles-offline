@@ -1,5 +1,5 @@
 import * as Sequelize from 'sequelize-offline'
-import { TEXT, INTEGER, DefineAttributes } from 'sequelize-offline'
+import { DefineAttributes, INTEGER, TEXT } from 'sequelize-offline'
 
 /**
  * Map for MBTiles SQL Model
