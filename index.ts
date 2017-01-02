@@ -66,6 +66,7 @@ export interface Metadata {
   name?: string
   type?: Types
   version?: Versions
+  url?: string
   [key: string]: any
 }
 
@@ -83,6 +84,7 @@ export class MBTiles {
   public attribution: string
   public minzoom: number
   public maxzoom: number
+  public url: string
   public type: Types
   private sequelize: Sequelize.Sequelize
   private tilesSQL: models.Tiles.Model
@@ -105,6 +107,7 @@ export class MBTiles {
  * @param {number} metadata.minzoom Minimum zoom level
  * @param {number} metadata.maxzoom Maximum zoom level
  * @param {string} metadata.name Name
+ * @param {string} metadata.url URL source or tile scheme
  * @param {Types} [metadata.type='baselayer'] Type 'baselayer' | 'overlay'
  * @param {Versions} [metadata.version='1.1.0'] Version '1.0.0' | '1.1.0' | '1.2.0'
  * @returns {MBTiles} MBTiles
@@ -130,6 +133,7 @@ export class MBTiles {
     this.bounds = metadata.bounds
     this.center = metadata.center
     this.type = metadata.type || 'baselayer'
+    this.url = metadata.url
   }
 
   /**
@@ -190,6 +194,7 @@ export class MBTiles {
     this.maxzoom = metadata.maxzoom || this.maxzoom
     this.type = metadata.type || this.type
     this.version = metadata.version || this.version
+    this.url = metadata.url || this.url
     return metadata
   }
 
@@ -220,6 +225,7 @@ export class MBTiles {
   /**
    * Update Metadata
    *
+   * @param {Metadata} [metadata={}] Metadata according to MBTiles spec 1.1.0
    * @param {string} metadata.attribution Attribution
    * @param {BBox} metadata.bounds Bounds [west, south, east, north]
    * @param {Center} metadata.center Center [lng, lat] or [lng, lat, height]
@@ -228,6 +234,7 @@ export class MBTiles {
    * @param {number} metadata.minzoom Minimum zoom level
    * @param {number} metadata.maxzoom Maximum zoom level
    * @param {string} metadata.name Name
+   * @param {string} metadata.url URL source or tile scheme
    * @param {Types} [metadata.type='baselayer'] Type 'baselayer' | 'overlay'
    * @param {Versions} [metadata.version='1.1.0'] Version '1.0.0' | '1.1.0' | '1.2.0'
    * @returns {Promise<Metadata>} Metadata
@@ -248,6 +255,7 @@ export class MBTiles {
     if (metadata.name === undefined && this.name) { metadata.name = this.name }
     if (metadata.type === undefined && this.type) { metadata.type = this.type }
     if (metadata.version === undefined && this.version) { metadata.version = this.version }
+    if (metadata.url === undefined && this.url) { metadata.url = this.url }
 
     // Parse center when bounds is available
     if (metadata.center === undefined && metadata.bounds) {

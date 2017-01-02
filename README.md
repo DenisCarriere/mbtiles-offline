@@ -53,6 +53,7 @@ MBTiles
     -   `metadata.attribution` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** Attribution
     -   `metadata.maxzoom` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** Maximum zoom level
     -   `metadata.name` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** Name
+    -   `metadata.url` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** URL source or tile scheme
     -   `metadata.type` **\[Types]** Type 'baselayer' | 'overlay' (optional, default `'baselayer'`)
     -   `metadata.version` **\[Versions]** Version '1.0.0' | '1.1.0' | '1.2.0' (optional, default `'1.1.0'`)
     -   `metadata.minzoom` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** Minimum zoom level
@@ -120,16 +121,17 @@ Update Metadata
 
 **Parameters**
 
--   `metadata.attribution` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** Attribution
--   `metadata`   (optional, default `{}`)
+-   `metadata` **\[Metadata]** Metadata according to MBTiles spec 1.1.0 (optional, default `{}`)
+    -   `metadata.version` **\[Versions]** Version '1.0.0' | '1.1.0' | '1.2.0' (optional, default `'1.1.0'`)
+    -   `metadata.bounds` **BBox** Bounds [west, south, east, north]
     -   `metadata.center` **Center** Center [lng, lat] or [lng, lat, height]
     -   `metadata.description` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** Description
     -   `metadata.format` **Formats** Format 'png' | 'jpg' | 'webp' | 'pbf'
-    -   `metadata.bounds` **BBox** Bounds [west, south, east, north]
+    -   `metadata.attribution` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** Attribution
     -   `metadata.maxzoom` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** Maximum zoom level
     -   `metadata.name` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** Name
+    -   `metadata.url` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** URL source or tile scheme
     -   `metadata.type` **\[Types]** Type 'baselayer' | 'overlay' (optional, default `'baselayer'`)
-    -   `metadata.version` **\[Versions]** Version '1.0.0' | '1.1.0' | '1.2.0' (optional, default `'1.1.0'`)
     -   `metadata.minzoom` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** Minimum zoom level
 
 **Examples**
