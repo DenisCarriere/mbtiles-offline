@@ -25,12 +25,12 @@
   "keywords": [],
   "testEnvironment": "node",
   "dependencies": {
+    "@mapbox/tiletype": "^0.3.0",
     "@types/mkdirp": "^0.3.29",
     "d3-queue": "^3.0.3",
     "global-mercator": "^1.5.0",
     "mkdirp": "^0.5.1",
-    "sequelize-offline": "^4.0.0-beta4",
-    "tiletype": "^0.3.0"
+    "sequelize-offline": "^4.0.0-beta4"
   },
   "devDependencies": {
     "@types/jest": "^16.0.3",

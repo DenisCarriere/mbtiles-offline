@@ -1,6 +1,6 @@
 /// <reference types="node" />
 
-declare module "tiletype" {
+declare module "@mapbox/tiletype" {
     export interface Header {
     'Content-Type'?: string
     'Content-Encoding'?: string

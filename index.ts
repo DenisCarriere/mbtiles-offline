@@ -6,7 +6,7 @@
 // import * as qs from 'querystring'
 // import * as sqlite3 from 'sqlite3-offline'
 
-import * as tiletype from 'tiletype'
+import * as tiletype from '@mapbox/tiletype'
 import * as mercator from 'global-mercator'
 import * as Sequelize from 'sequelize-offline'
 import * as models from './models'
