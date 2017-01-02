@@ -4,7 +4,7 @@ import { getFiles, parseMetadata, createFolder } from './utils'
 
 describe('Utils', () => {
   test('getFiles', () => expect(getFiles(path.join(__dirname, '..', 'fixtures'))).toBeDefined())
-  test('createFolder', () => createFolder('createFolderTest/test.mbtiles').then(() => expect(fs.existsSync('createFolderTest')).toBeTruthy()))
+  test('createFolder', async () => expect(await createFolder('createFolderTest/test.mbtiles')).toBeTruthy())
 })
 
 describe('Metadata', () => {

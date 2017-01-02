@@ -7,6 +7,7 @@ describe('Metadata', async () => {
   const metadata: Metadata = {
     name: 'foo',
     bounds: [-110, -20, 130, 30],
+    format: 'png',
   }
 
   test('update', async () => expect(await mbtiles.update(metadata)).toBeTruthy())

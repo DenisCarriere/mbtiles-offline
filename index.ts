@@ -5,8 +5,8 @@
 // import * as url from 'url'
 // import * as qs from 'querystring'
 // import * as sqlite3 from 'sqlite3-offline'
-// import * as tiletype from 'tiletype'
 
+import * as tiletype from 'tiletype'
 import * as mercator from 'global-mercator'
 import * as Sequelize from 'sequelize-offline'
 import * as models from './models'
@@ -33,17 +33,37 @@ export type LngLat = [number, number]
 export type LngLatZoom = [number, number, number]
 
 /**
+ * Formats
+ */
+export type Formats = 'png' | 'jpg' | 'webp' | 'pbf'
+
+/**
+ * Types
+ */
+export type Types = 'baselayer' | 'overlay'
+
+/**
+ * Versions
+ */
+export type Versions = '1.0.0' | '1.1.0' | '1.2.0'
+
+/**
+ * Center
+ */
+export type Center = LngLat | LngLatZoom
+
+/**
  * Metadata
  */
 export interface Metadata {
   name?: string
-  type?: 'baselayer' | 'overlay'
-  version?: '1.0.0' | '1.1.0' | '1.2.0'
+  type?: Types
+  version?: Versions
   attribution?: string
   description?: string
   bounds?: BBox
-  center?: LngLat | LngLatZoom
-  format?: 'png' | 'jpg'
+  center?: Center
+  format?: Formats
   minzoom?: number
   maxzoom?: number
   [key: string]: any
@@ -54,6 +74,16 @@ export interface Metadata {
  */
 export class MBTiles {
   public uri: string
+  public name: string
+  public description: string
+  public format: Formats
+  public version: Versions
+  public bounds: BBox
+  public center: Center
+  public attribution: string
+  public minzoom: number
+  public maxzoom: number
+  public type: Types
   private sequelize: Sequelize.Sequelize
   private tilesSQL: models.Tiles.Model
   private metadataSQL: models.Metadata.Model
@@ -73,14 +103,23 @@ export class MBTiles {
  * const mbtiles = MBTiles('example.mbtiles')
  * //=mbtiles
  */
-  constructor(uri: string) {
+  constructor(uri: string, options: Metadata = {}) {
     this.uri = uri
     this.sequelize = connect(uri)
     this.tilesSQL = this.sequelize.define<models.Tiles.Instance, models.Tiles.Attributes>('tiles', models.Tiles.scheme)
     this.metadataSQL = this.sequelize.define<models.Metadata.Instance, models.Metadata.Attributes>('metadata', models.Metadata.scheme)
     this.imagesSQL = this.sequelize.define<models.Images.Instance, models.Images.Attributes>('images', models.Images.scheme)
     this.mapSQL = this.sequelize.define<models.Map.Instance, models.Map.Attributes>('map', models.Map.scheme)
-    createFolder(uri)
+    this.version = options.version || '1.1.0'
+    this.format = options.format
+    this.name = options.name
+    this.description = options.description
+    this.attribution = options.attribution
+    this.minzoom = options.minzoom
+    this.maxzoom = options.maxzoom
+    this.bounds = options.bounds
+    this.center = options.center
+    this.type = options.type || 'baselayer'
   }
 
   /**
@@ -88,12 +127,13 @@ export class MBTiles {
    *
    * @param {Tile} tile Tile [x, y, z]
    * @param {Buffer} tile_data Tile image
-   * @param {boolean} [overwrite=false] Allow overwrite save operations
+   * @param {boolean} [overwrite=true] Allow overwrite save operations
    * @returns {Promise<boolean>} true/false
    * @example
    * await mbtiles.save([x, y, z], buffer)
    */
-  public async save(tile: Tile, tile_data: Buffer, overwrite = false): Promise<boolean> {
+  public async save(tile: Tile, tile_data: Buffer, overwrite = true): Promise<boolean> {
+    if (!this.format) { this.format = tiletype.type(tile_data) }
     if (!this._init) { await this.init() }
 
     const tile_id = mercator.hash(tile)
@@ -126,8 +166,21 @@ export class MBTiles {
    * //=metadata
    */
   public async metadata(): Promise<Metadata> {
+    if (!this._tables) { await this.tables() }
+
     const data = await this.metadataSQL.findAll()
-    return parseMetadata(data)
+    const metadata = parseMetadata(data)
+    this.attribution = metadata.attribution || this.attribution
+    this.bounds = metadata.bounds || this.bounds
+    this.center = metadata.center || this.center
+    this.description = metadata.description || this.description
+    this.format = metadata.format || this.format
+    this.name = metadata.name || this.name
+    this.minzoom = metadata.minzoom || this.minzoom
+    this.maxzoom = metadata.maxzoom || this.maxzoom
+    this.type = metadata.type || this.type
+    this.version = metadata.version || this.version
+    return metadata
   }
 
   /**
@@ -162,8 +215,32 @@ export class MBTiles {
    * @example
    * await mbtiles.update({name: 'foo', description: 'bar'})
    */
-  public async update(metadata: Metadata): Promise<boolean> {
+  public async update(metadata: Metadata = {}): Promise<Metadata> {
+    await this.metadata()
     await this.metadataSQL.sync({ force: true })
+    if (metadata.attribution === undefined && this.attribution) { metadata.attribution = this.attribution }
+    if (metadata.bounds === undefined && this.bounds) { metadata.bounds = this.bounds }
+    if (metadata.center === undefined && this.center) { metadata.center = this.center }
+    if (metadata.description === undefined && this.description) { metadata.description = this.description }
+    if (metadata.format === undefined && this.format) { metadata.format = this.format }
+    if (metadata.maxzoom === undefined && this.maxzoom) { metadata.maxzoom = this.maxzoom }
+    if (metadata.minzoom === undefined && this.minzoom) { metadata.minzoom = this.minzoom }
+    if (metadata.name === undefined && this.name) { metadata.name = this.name }
+    if (metadata.type === undefined && this.type) { metadata.type = this.type }
+    if (metadata.version === undefined && this.version) { metadata.version = this.version }
+
+    // Parse center when bounds is available
+    if (metadata.center === undefined && metadata.bounds) {
+      metadata.center = mercator.bboxToCenter(metadata.bounds)
+    }
+
+    // Main attributes throw errors
+    if (metadata.name === undefined) { throw new Error('Metadata <name> is required') }
+    if (metadata.format === undefined) { throw new Error('Metadata <format> is required') }
+    if (metadata.bounds === undefined) { throw new Error('Metadata <bounds> is required') }
+    if (metadata.version === undefined) { throw new Error('Metadata <version> is required') }
+    if (metadata.type === undefined) { throw new Error('Metadata <type> is required') }
+
     for (const name of Object.keys(metadata)) {
       let value = metadata[name]
 
@@ -172,7 +249,8 @@ export class MBTiles {
 
       await this.metadataSQL.create({name, value})
     }
-    return true
+
+    return await this.metadata()
   }
 
   /**
@@ -211,6 +289,7 @@ export class MBTiles {
     await createFolder(this.uri)
     await this.tables()
     await this.index()
+    await this.metadata()
     this._init = true
     return true
   }
