@@ -42,8 +42,5 @@
   },
   "jest": {
     "verbose": true
-  },
-  "babel": {
-    "sourceMaps": "both"
   }
 }
