@@ -1,6 +1,6 @@
 {
   "name": "mbtiles-offline",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "MBTiles for offline",
   "main": "index.js",
   "jsnext:main": "index.js",
