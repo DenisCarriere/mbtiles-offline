@@ -1,6 +1,10 @@
 
 # Changelog
 
+## 1.1.0 - 2017-1-2
+
+- Added `count`, `findOne` & `findAll` functions
+
 ## 1.0.2 - 2017-1-1
 
 - Handle metadata via class attributes

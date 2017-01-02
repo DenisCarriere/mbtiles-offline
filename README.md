@@ -34,6 +34,23 @@ $ npm install --save mbtiles-offline
 | [tables](#tables)         | Build SQL tables
 | [index](#index)           | Build SQL index
 
+# hash
+
+Create hash for Tile ID
+
+**Parameters**
+
+-   `tile` **Tile** [x, y, z]
+
+**Examples**
+
+```javascript
+const id = hash([312, 480, 4])
+//=5728
+```
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** hash
+
 # MBTiles
 
 MBTiles
@@ -115,6 +132,23 @@ await mbtiles.delete([x, y, z])
 
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** true/false
 
+## count
+
+Count the amount of Tiles
+
+**Parameters**
+
+-   `tiles` **\[[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;Tile>]** Tiles (optional, default `[]`)
+
+**Examples**
+
+```javascript
+const count = await mbtiles.count()
+//=count
+```
+
+Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** 
+
 ## update
 
 Update Metadata
@@ -143,9 +177,29 @@ const metadata = await mbtiles.update({name: 'foo', description: 'bar'})
 
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;Metadata>** Metadata
 
-## get
+## findAll
 
-Get Buffer from Tile
+Finds all Tiles
+
+**Parameters**
+
+-   `tiles` **\[[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;Tile>]** An array of Tiles
+-   `attributes` **\[[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;Attributes>]** Tile Attributes (optional, default `['tile_column','tile_row','zoom_level']`)
+-   `buffer`   (optional, default `true`)
+
+Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;any>** 
+
+## findAllId
+
+Find all Tile unique key
+
+**Parameters**
+
+-   `tiles`  
+
+## findOne
+
+Finds one Tile
 
 **Parameters**
 
@@ -154,7 +208,7 @@ Get Buffer from Tile
 **Examples**
 
 ```javascript
-const tile = await mbtiles.get([x, y, z])
+const tile = await mbtiles.findOne([x, y, z])
 //=tile
 ```
 
@@ -197,6 +251,10 @@ await mbtiles.index()
 Returns **[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** true/false
 
 # Changelog
+
+## 1.1.0 - 2017-1-2
+
+- Added `count`, `findOne` & `findAll` functions
 
 ## 1.0.2 - 2017-1-1
 

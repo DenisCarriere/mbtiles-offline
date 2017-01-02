@@ -13,6 +13,17 @@ import * as models from './models'
 import { connect, parseMetadata, createFolder } from './utils'
 
 /**
+ * Create hash for Tile ID
+ *
+ * @param {Tile} tile [x, y, z]
+ * @returns {number} hash
+ * @example
+ * const id = hash([312, 480, 4])
+ * //=5728
+ */
+export const hash = mercator.hash
+
+/**
  * Tile - [x, y, zoom]
  */
 export type Tile = [number, number, number]
@@ -51,6 +62,11 @@ export type Versions = '1.0.0' | '1.1.0' | '1.2.0'
  * Center
  */
 export type Center = LngLat | LngLatZoom
+
+/**
+ * Attributes
+ */
+export type Attributes = 'tile_column' | 'tile_data' | 'tile_row' | 'zoom_level'
 
 /**
  * Metadata
@@ -223,6 +239,21 @@ export class MBTiles {
   }
 
   /**
+   * Count the amount of Tiles
+   *
+   * @param {Array<Tile>} [tiles=[]] Tiles
+   * @returns {Promise<number>}
+   * @example
+   * const count = await mbtiles.count()
+   * //=count
+   */
+  public async count(tiles: Tile[] = []): Promise<number> {
+    if (!tiles.length) { return await this.tilesSQL.count() }
+    const findAll = await this.findAll(tiles, false)
+    return findAll.length
+  }
+
+  /**
    * Update Metadata
    *
    * @param {Metadata} [metadata={}] Metadata according to MBTiles spec 1.1.0
@@ -282,15 +313,52 @@ export class MBTiles {
   }
 
   /**
-   * Get Buffer from Tile
+   * Finds all Tiles
+   *
+   * @param {Array<Tile>} [tiles] An array of Tiles
+   * @param {Array<Attributes>} [attributes=['tile_column', 'tile_row', 'zoom_level']] Tile Attributes
+   * @returns {Promise<any>}
+   */
+  public async findAll(tiles: Array<Tile> = [], buffer = true): Promise<models.Tiles.Attributes[]> {
+    const selection = tiles.map(tile => Object({tile_column: tile[0], tile_row: tile[1], zoom_level: tile[2]}))
+    const where = (selection.length) ?  { $or: selection } : undefined
+    const attributes = ['tile_column', 'tile_row', 'zoom_level']
+    if (buffer) { attributes.push('tile_data') }
+
+    const findAll = await this.tilesSQL.findAll({
+      attributes,
+      where,
+    })
+    return findAll.map(item => {
+      const result: any = {
+        tile_row: item.tile_row,
+        tile_column: item.tile_column,
+        zoom_level: item.zoom_level,
+        tile_data: item.tile_data,
+      }
+      if (result.tile_data === undefined) { delete result.tile_data }
+      return result
+    })
+  }
+
+  /**
+   * Find all Tile unique key
+   */
+  public async findAllId(tiles?: Array<Tile>) {
+    const findAll = await this.findAll(tiles, false)
+    return findAll.map(tile => hash([tile.tile_column, tile.tile_row, tile.zoom_level]))
+  }
+
+  /**
+   * Finds one Tile
    *
    * @param {Tile} tile Tile [x, y, z]
    * @return {Promise<Buffer>} Tile Data
    * @example
-   * const tile = await mbtiles.get([x, y, z])
+   * const tile = await mbtiles.findOne([x, y, z])
    * //=tile
    */
-  public async get(tile: Tile): Promise<Buffer> {
+  public async findOne(tile: Tile): Promise<Buffer> {
     if (!this._init) { await this.init() }
 
     const [x, y, z] = tile
