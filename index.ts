@@ -423,30 +423,4 @@ export class MBTiles {
     this._index = true
     return true
   }
-
-  /**
-   * Create hash for Tile ID
-   *
-   * @param {Tile} tile [x, y, z]
-   * @returns {number} hash
-   * @example
-   * const id = mbtiles.hash([312, 480, 4])
-   * //=5728
-   */
-  public hash(tile: Tile): number {
-    return mercator.hash(tile)
-  }
-
-  /**
-   * Converts BBox to Center
-   *
-   * @param {BBox} bbox - [west, south, east, north] coordinates
-   * @return {LngLat} center
-   * @example
-   * const center = bboxToCenter([90, -45, 85, -50])
-   * //= [ 87.5, -47.5 ]
-   */
-  public bboxToCenter(bbox: BBox): LngLat {
-    return mercator.bboxToCenter(bbox)
-  }
 }
