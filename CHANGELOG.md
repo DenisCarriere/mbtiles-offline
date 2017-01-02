@@ -4,6 +4,7 @@
 ## 1.1.0 - 2017-1-2
 
 - Added `count`, `findOne` & `findAll` functions
+- Include `hash` & `bboxToCenter` from `global-mercator` library
 
 ## 1.0.2 - 2017-1-1
 

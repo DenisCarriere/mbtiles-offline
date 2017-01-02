@@ -13,17 +13,6 @@ import * as models from './models'
 import { connect, parseMetadata, createFolder } from './utils'
 
 /**
- * Create hash for Tile ID
- *
- * @param {Tile} tile [x, y, z]
- * @returns {number} hash
- * @example
- * const id = hash([312, 480, 4])
- * //=5728
- */
-export const hash = mercator.hash
-
-/**
  * Tile - [x, y, zoom]
  */
 export type Tile = [number, number, number]
@@ -346,7 +335,7 @@ export class MBTiles {
    */
   public async findAllId(tiles?: Array<Tile>) {
     const findAll = await this.findAll(tiles, false)
-    return findAll.map(tile => hash([tile.tile_column, tile.tile_row, tile.zoom_level]))
+    return findAll.map(tile => mercator.hash([tile.tile_column, tile.tile_row, tile.zoom_level]))
   }
 
   /**
@@ -433,5 +422,31 @@ export class MBTiles {
     }
     this._index = true
     return true
+  }
+
+  /**
+   * Create hash for Tile ID
+   *
+   * @param {Tile} tile [x, y, z]
+   * @returns {number} hash
+   * @example
+   * const id = mbtiles.hash([312, 480, 4])
+   * //=5728
+   */
+  public hash(tile: Tile): number {
+    return mercator.hash(tile)
+  }
+
+  /**
+   * Converts BBox to Center
+   *
+   * @param {BBox} bbox - [west, south, east, north] coordinates
+   * @return {LngLat} center
+   * @example
+   * const center = bboxToCenter([90, -45, 85, -50])
+   * //= [ 87.5, -47.5 ]
+   */
+  public bboxToCenter(bbox: BBox): LngLat {
+    return mercator.bboxToCenter(bbox)
   }
 }

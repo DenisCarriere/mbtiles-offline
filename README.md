@@ -34,23 +34,6 @@ $ npm install --save mbtiles-offline
 | [tables](#tables)         | Build SQL tables
 | [index](#index)           | Build SQL index
 
-# hash
-
-Create hash for Tile ID
-
-**Parameters**
-
--   `tile` **Tile** [x, y, z]
-
-**Examples**
-
-```javascript
-const id = hash([312, 480, 4])
-//=5728
-```
-
-Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** hash
-
 # MBTiles
 
 MBTiles
@@ -249,6 +232,40 @@ await mbtiles.index()
 ```
 
 Returns **[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** true/false
+
+## hash
+
+Create hash for Tile ID
+
+**Parameters**
+
+-   `tile` **Tile** [x, y, z]
+
+**Examples**
+
+```javascript
+const id = mbtiles.hash([312, 480, 4])
+//=5728
+```
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** hash
+
+## bboxToCenter
+
+Converts BBox to Center
+
+**Parameters**
+
+-   `bbox` **BBox** [west, south, east, north] coordinates
+
+**Examples**
+
+```javascript
+const center = bboxToCenter([90, -45, 85, -50])
+//= [ 87.5, -47.5 ]
+```
+
+Returns **LngLat** center
 
 # Changelog
 
