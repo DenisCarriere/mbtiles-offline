@@ -56,16 +56,16 @@ export type Center = LngLat | LngLatZoom
  * Metadata
  */
 export interface Metadata {
-  name?: string
-  type?: Types
-  version?: Versions
   attribution?: string
-  description?: string
   bounds?: BBox
   center?: Center
+  description?: string
   format?: Formats
   minzoom?: number
   maxzoom?: number
+  name?: string
+  type?: Types
+  version?: Versions
   [key: string]: any
 }
 
@@ -97,29 +97,39 @@ export class MBTiles {
  * MBTiles
  *
  * @param {string} uri Path to MBTiles
+ * @param {string} metadata.attribution Attribution
+ * @param {BBox} metadata.bounds Bounds [west, south, east, north]
+ * @param {Center} metadata.center Center [lng, lat] or [lng, lat, height]
+ * @param {string} metadata.description Description
+ * @param {Formats} metadata.format Format 'png' | 'jpg' | 'webp' | 'pbf'
+ * @param {number} metadata.minzoom Minimum zoom level
+ * @param {number} metadata.maxzoom Maximum zoom level
+ * @param {string} metadata.name Name
+ * @param {Types} [metadata.type='baselayer'] Type 'baselayer' | 'overlay'
+ * @param {Versions} [metadata.version='1.1.0'] Version '1.0.0' | '1.1.0' | '1.2.0'
  * @returns {MBTiles} MBTiles
  * @example
  * import {MBTiles} from 'mbtiles-offline'
  * const mbtiles = MBTiles('example.mbtiles')
  * //=mbtiles
  */
-  constructor(uri: string, options: Metadata = {}) {
+  constructor(uri: string, metadata: Metadata = {}) {
     this.uri = uri
     this.sequelize = connect(uri)
     this.tilesSQL = this.sequelize.define<models.Tiles.Instance, models.Tiles.Attributes>('tiles', models.Tiles.scheme)
     this.metadataSQL = this.sequelize.define<models.Metadata.Instance, models.Metadata.Attributes>('metadata', models.Metadata.scheme)
     this.imagesSQL = this.sequelize.define<models.Images.Instance, models.Images.Attributes>('images', models.Images.scheme)
     this.mapSQL = this.sequelize.define<models.Map.Instance, models.Map.Attributes>('map', models.Map.scheme)
-    this.version = options.version || '1.1.0'
-    this.format = options.format
-    this.name = options.name
-    this.description = options.description
-    this.attribution = options.attribution
-    this.minzoom = options.minzoom
-    this.maxzoom = options.maxzoom
-    this.bounds = options.bounds
-    this.center = options.center
-    this.type = options.type || 'baselayer'
+    this.version = metadata.version || '1.1.0'
+    this.format = metadata.format
+    this.name = metadata.name
+    this.description = metadata.description
+    this.attribution = metadata.attribution
+    this.minzoom = metadata.minzoom
+    this.maxzoom = metadata.maxzoom
+    this.bounds = metadata.bounds
+    this.center = metadata.center
+    this.type = metadata.type || 'baselayer'
   }
 
   /**
@@ -210,10 +220,20 @@ export class MBTiles {
   /**
    * Update Metadata
    *
-   * @param {Metadata} metadata Metadata according to MBTiles 1.1+ spec
-   * @returns {Promise<boolean>} true/false
+   * @param {string} metadata.attribution Attribution
+   * @param {BBox} metadata.bounds Bounds [west, south, east, north]
+   * @param {Center} metadata.center Center [lng, lat] or [lng, lat, height]
+   * @param {string} metadata.description Description
+   * @param {Formats} metadata.format Format 'png' | 'jpg' | 'webp' | 'pbf'
+   * @param {number} metadata.minzoom Minimum zoom level
+   * @param {number} metadata.maxzoom Maximum zoom level
+   * @param {string} metadata.name Name
+   * @param {Types} [metadata.type='baselayer'] Type 'baselayer' | 'overlay'
+   * @param {Versions} [metadata.version='1.1.0'] Version '1.0.0' | '1.1.0' | '1.2.0'
+   * @returns {Promise<Metadata>} Metadata
    * @example
-   * await mbtiles.update({name: 'foo', description: 'bar'})
+   * const metadata = await mbtiles.update({name: 'foo', description: 'bar'})
+   * //=metadata
    */
   public async update(metadata: Metadata = {}): Promise<Metadata> {
     await this.metadata()

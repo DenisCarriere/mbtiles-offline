@@ -45,6 +45,17 @@ MBTiles
 **Parameters**
 
 -   `uri` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** Path to MBTiles
+-   `metadata`   (optional, default `{}`)
+    -   `metadata.bounds` **BBox** Bounds [west, south, east, north]
+    -   `metadata.center` **Center** Center [lng, lat] or [lng, lat, height]
+    -   `metadata.description` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** Description
+    -   `metadata.format` **Formats** Format 'png' | 'jpg' | 'webp' | 'pbf'
+    -   `metadata.attribution` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** Attribution
+    -   `metadata.maxzoom` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** Maximum zoom level
+    -   `metadata.name` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** Name
+    -   `metadata.type` **\[Types]** Type 'baselayer' | 'overlay' (optional, default `'baselayer'`)
+    -   `metadata.version` **\[Versions]** Version '1.0.0' | '1.1.0' | '1.2.0' (optional, default `'1.1.0'`)
+    -   `metadata.minzoom` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** Minimum zoom level
 
 **Examples**
 
@@ -64,7 +75,7 @@ Save buffer data to individual Tile
 
 -   `tile` **Tile** Tile [x, y, z]
 -   `tile_data` **[Buffer](https://nodejs.org/api/buffer.html)** Tile image
--   `overwrite` **\[[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)]** Allow overwrite save operations (optional, default `false`)
+-   `overwrite` **\[[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)]** Allow overwrite save operations (optional, default `true`)
 
 **Examples**
 
@@ -109,15 +120,26 @@ Update Metadata
 
 **Parameters**
 
--   `metadata` **Metadata** Metadata according to MBTiles 1.1+ spec
+-   `metadata.attribution` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** Attribution
+-   `metadata`   (optional, default `{}`)
+    -   `metadata.center` **Center** Center [lng, lat] or [lng, lat, height]
+    -   `metadata.description` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** Description
+    -   `metadata.format` **Formats** Format 'png' | 'jpg' | 'webp' | 'pbf'
+    -   `metadata.bounds` **BBox** Bounds [west, south, east, north]
+    -   `metadata.maxzoom` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** Maximum zoom level
+    -   `metadata.name` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** Name
+    -   `metadata.type` **\[Types]** Type 'baselayer' | 'overlay' (optional, default `'baselayer'`)
+    -   `metadata.version` **\[Versions]** Version '1.0.0' | '1.1.0' | '1.2.0' (optional, default `'1.1.0'`)
+    -   `metadata.minzoom` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** Minimum zoom level
 
 **Examples**
 
 ```javascript
-await mbtiles.update({name: 'foo', description: 'bar'})
+const metadata = await mbtiles.update({name: 'foo', description: 'bar'})
+//=metadata
 ```
 
-Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** true/false
+Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;Metadata>** Metadata
 
 ## get
 
@@ -173,6 +195,11 @@ await mbtiles.index()
 Returns **[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** true/false
 
 # Changelog
+
+## 1.0.2 - 2017-1-1
+
+- Handle metadata via class attributes
+- Detect image type using tiletype
 
 ## 1.0.0 - 2016-12-30
 
