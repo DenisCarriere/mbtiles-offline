@@ -1,10 +1,8 @@
-documentation.yml
 HEADER.md
-tslint.json
-tsconfig.json
 yarn.lock
 fixtures/
 .vscode/
 circle.yml
+.travis.yml
 coverage/
 *test*
