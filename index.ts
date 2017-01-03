@@ -212,6 +212,7 @@ export class MBTiles {
    * await mbtiles.delete([x, y, z])
    */
   public async delete(tile: Tile): Promise<boolean> {
+    if (!this._init) { await this.init() }
     const tile_id = mercator.hash(tile)
     const [x, y, z] = tile
     const entity = {
@@ -237,6 +238,7 @@ export class MBTiles {
    * //=count
    */
   public async count(tiles: Tile[] = []): Promise<number> {
+    if (!this._init) { await this.init() }
     if (!tiles.length) { return await this.tilesSQL.count() }
     const findAll = await this.findAll(tiles, false)
     return findAll.length
@@ -312,6 +314,7 @@ export class MBTiles {
    * //=tiles
    */
   public async findAll(tiles: Tile[] = [], buffer = true): Promise<models.Tiles.Attributes[]> {
+    if (!this._init) { await this.init() }
     const selection = tiles.map(tile => Object({tile_column: tile[0], tile_row: tile[1], zoom_level: tile[2]}))
     const where = (selection.length) ?  { $or: selection } : undefined
     const attributes = ['tile_column', 'tile_row', 'zoom_level']
@@ -411,6 +414,7 @@ export class MBTiles {
    * await mbtiles.index()
    */
   public async index(): Promise<boolean> {
+    if (!this._tables) { await this.tables() }
     const queries = [
       'CREATE UNIQUE INDEX IF NOT EXISTS metadata_name on metadata (name)',
       'CREATE UNIQUE INDEX IF NOT EXISTS map_tile_id on map (tile_id)',
@@ -425,7 +429,6 @@ export class MBTiles {
       FROM map
       JOIN images ON images.tile_id = map.tile_id`,
     ]
-    await this.tables()
     for (const query of queries) {
       await this.sequelize.query(query)
     }
