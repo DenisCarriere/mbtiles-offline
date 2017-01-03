@@ -7,6 +7,7 @@
     "variable-name": [false, "check-format"],
     "max-line-length": [true, 170],
     "arrow-parens": false,
-    "no-console": [false]
+    "no-console": [false],
+    "ordered-imports": [false]
   }
 }
