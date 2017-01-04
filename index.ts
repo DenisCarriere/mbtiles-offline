@@ -386,7 +386,7 @@ export class MBTiles {
     await createFolder(this.uri)
     await this.tables()
     await this.index()
-    await this.metadata()
+    await this.update()
     this._init = true
     return true
   }
