@@ -166,8 +166,7 @@ export class MBTiles {
 
     // Overwrite existing
     if (overwrite) {
-      const exists = await this.imagesSQL.findOne({where: {tile_id}})
-      if (exists) { await this.delete(tile) }
+      await this.delete(tile)
     }
 
     // Save Image
@@ -222,9 +221,9 @@ export class MBTiles {
       tile_id,
     }
     const image = await this.imagesSQL.findOne({where: {tile_id}})
-    await image.destroy()
+    if (image) { await image.destroy() }
     const map = await this.mapSQL.findOne({where: entity})
-    await map.destroy()
+    if (map) { await map.destroy() }
     return true
   }
 
