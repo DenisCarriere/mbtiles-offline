@@ -8,44 +8,44 @@ const metadata: Metadata = {
   name: 'test',
 }
 
-describe('Metadata', async () => {
+describe('Metadata', async() => {
   const mbtiles = new MBTiles('Metadata.mbtiles', metadata)
 
-  test('update', async () => expect(await mbtiles.update(metadata)).toBeTruthy())
+  test('update', async() => expect(await mbtiles.update(metadata)).toBeTruthy())
 
-  test('getMetadata', async () => expect(await mbtiles.metadata()).toEqual(metadata))
+  test('getMetadata', async() => expect(await mbtiles.metadata()).toEqual(metadata))
 
-  test('index', async () => expect(await mbtiles.index()).toBeTruthy())
+  test('index', async() => expect(await mbtiles.index()).toBeTruthy())
 
-  test('init', async () => expect(await mbtiles.init()).toBeTruthy())
+  test('init', async() => expect(await mbtiles.init()).toBeTruthy())
 
-  test('tables', async () => expect(await mbtiles.tables()).toBeTruthy())
+  test('tables', async() => expect(await mbtiles.tables()).toBeTruthy())
 })
 
-describe('CRUD', async () => {
+describe('CRUD', async() => {
   const mbtiles = new MBTiles('CRUD.mbtiles', metadata)
   const tileData = fs.readFileSync(path.join(__dirname, 'fixtures', 'images', '0', '0', '0.png'))
   await mbtiles.index()
 
-  test('noData', async () => expect(await mbtiles.findOne([999, 999, 999])).toBeUndefined())
+  test('noData', async() => expect(await mbtiles.findOne([999, 999, 999])).toBeUndefined())
 
-  test('save', async () => expect(await mbtiles.save([0, 0, 0], tileData)).toBeTruthy())
+  test('save', async() => expect(await mbtiles.save([0, 0, 0], tileData)).toBeTruthy())
 
-  test('overwrite', async () => expect(await mbtiles.save([0, 0, 0], tileData, true)).toBeTruthy())
+  test('overwrite', async() => expect(await mbtiles.save([0, 0, 0], tileData, true)).toBeTruthy())
 
-  test('findOne', async () => expect(await mbtiles.findOne([0, 0, 0])).toEqual(tileData))
+  test('findOne', async() => expect(await mbtiles.findOne([0, 0, 0])).toEqual(tileData))
 
-  test('deleted', async () => expect(await mbtiles.delete([0, 0, 0])).toBeTruthy())
+  test('deleted', async() => expect(await mbtiles.delete([0, 0, 0])).toBeTruthy())
 })
 
-describe('findAll', async () => {
+describe('findAll', async() => {
   const mbtiles = new MBTiles('./fixtures/plain_1.mbtiles')
 
   test('undefined', () => mbtiles.findAllId().then(data => expect(data.length).toBe(285)))
   test('[]', () => mbtiles.findAllId([]).then(data => expect(data.length).toBe(285)))
   test('queue', () => mbtiles.findAllId([], {queue: 50}).then(data => expect(data.length).toBe(285)))
   test('limit', () => mbtiles.findAllId([], {limit: 50}).then(data => expect(data.length).toBe(50)))
-  test('[0, 0, 0]', async () => expect(await mbtiles.findAllId([[0, 0, 0]])).toEqual([1]))
+  test('[0, 0, 0]', async() => expect(await mbtiles.findAllId([[0, 0, 0]])).toEqual([1]))
 })
 
 afterAll(() => {
