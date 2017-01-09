@@ -194,7 +194,7 @@ export class MBTiles {
    * //=metadata
    */
   public async metadata(): Promise<Metadata> {
-    if (!this._tables) { await this.tables() }
+    if (!this._init) { await this.init() }
 
     const data = await this.metadataSQL.findAll()
     const metadata = parseMetadata(data)
@@ -422,11 +422,11 @@ export class MBTiles {
    * await mbtiles.init()
    */
   public async init(): Promise<boolean> {
+    this._init = true
     await createFolder(this.uri)
     await this.tables()
-    try { await this.index() } catch (e) { console.warn(e) }
+    await this.index()
     await this.update()
-    this._init = true
     return true
   }
 
@@ -438,10 +438,10 @@ export class MBTiles {
    * await mbtiles.tables()
    */
   public async tables(): Promise<boolean> {
+    this._tables = true
     await this.metadataSQL.sync()
     await this.imagesSQL.sync()
     await this.mapSQL.sync()
-    this._tables = true
     return true
   }
 
