@@ -169,8 +169,11 @@ Finds all Tiles
 **Parameters**
 
 -   `tiles` **\[[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;Tile>]** An array of Tiles
--   `attributes` **\[[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;Attributes>]** Tile Attributes (optional, default `['tile_column','tile_row','zoom_level']`)
--   `buffer`   (optional, default `true`)
+-   `options` **\[[Object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)]** Find Options
+    -   `options.limit` **\[[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)]** Limit the results
+    -   `options.offset` **\[[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)]** Offset the results (optional, default `0`)
+    -   `options.buffer` **\[[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)]** Allow tile data buffer (optional, default `true`)
+    -   `options.queue` **\[[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)]** Creates multiple SQL connections based on queue amount (optional, default `5000`)
 
 **Examples**
 
@@ -188,6 +191,10 @@ Finds all Tile unique hashes
 **Parameters**
 
 -   `tiles` **\[[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;Tile>]** An array of Tiles
+-   `options` **\[[Object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)]** Find Options
+    -   `options.limit` **\[[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)]** Limit the results
+    -   `options.offset` **\[[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)]** Offset the results (optional, default `0`)
+    -   `options.queue` **\[[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)]** Creates multiple SQL connections based on queue amount (optional, default `5000`)
 
 **Examples**
 
@@ -253,8 +260,13 @@ Returns **[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refe
 
 # Changelog
 
+## 1.2.0 - 2017-1-9
+
+- Add options to `findAll` (queue, limit, offset)
+
 ## 1.1.0 - 2017-1-2
 
+- Fixed overwrite save function `Cannot read property 'destroy' of null`
 - Added `count`, `findOne` & `findAll` functions
 
 ## 1.0.2 - 2017-1-1

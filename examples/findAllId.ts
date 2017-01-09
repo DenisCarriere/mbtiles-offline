@@ -1,8 +1,8 @@
 import { MBTiles } from '../'
 
-async function main() {
-    const mb = new MBTiles('fixtures/calabogie-imagery.mbtiles')
-    // console.log(await mb.findAllId([]))
-    console.log(await mb.count())
-}
-main()
+const mbtiles = new MBTiles('../fixtures/plain_1.mbtiles')
+
+mbtiles.findAll([], {queue: 10000}).then(data => console.log(data.length))
+mbtiles.findAll([], {limit: 5, buffer: true}).then(data => console.log(data.length))
+mbtiles.findAllId().then(data => console.log(data.length))
+mbtiles.findAllId([[0, 0, 0]]).then(data => console.log(data))

@@ -76,6 +76,16 @@ export interface Metadata {
 }
 
 /**
+ * Find Options
+ */
+interface FindOptions {
+  buffer?: boolean
+  queue?: number
+  limit?: number
+  offset?: number
+}
+
+/**
  * MBTiles
  */
 export class MBTiles {
@@ -239,7 +249,7 @@ export class MBTiles {
   public async count(tiles: Tile[] = []): Promise<number> {
     if (!this._init) { await this.init() }
     if (!tiles.length) { return await this.tilesSQL.count() }
-    const findAll = await this.findAll(tiles, false)
+    const findAll = await this.findAll(tiles, {buffer: false})
     return findAll.length
   }
 
@@ -306,46 +316,76 @@ export class MBTiles {
    * Finds all Tiles
    *
    * @param {Array<Tile>} [tiles] An array of Tiles
-   * @param {Array<Attributes>} [attributes=['tile_column', 'tile_row', 'zoom_level']] Tile Attributes
+   * @param {Object} [options] Find Options
+   * @param {number} [options.limit] Limit the results
+   * @param {number} [options.offset = 0] Offset the results
+   * @param {boolean} [options.buffer = true] Allow tile data buffer
+   * @param {number} [options.queue = 5000] Creates multiple SQL connections based on queue amount
    * @returns {Promise<Tiles.Attributes[]>}
    * @example
    * const tiles = await findAll()
    * //=tiles
    */
-  public async findAll(tiles: Tile[] = [], buffer = true): Promise<models.Tiles.Attributes[]> {
-    if (!this._init) { await this.init() }
-    const selection = tiles.map(tile => Object({tile_column: tile[0], tile_row: tile[1], zoom_level: tile[2]}))
-    const where = (selection.length) ?  { $or: selection } : undefined
-    const attributes = ['tile_column', 'tile_row', 'zoom_level']
-    if (buffer) { attributes.push('tile_data') }
+  public async findAll(tiles: Tile[] = [], options: FindOptions = {}): Promise<models.Tiles.Attributes[]> {
+    if (!this._tables) { await this.tables() }
 
-    const findAll = await this.tilesSQL.findAll({
-      attributes,
-      where,
-    })
-    return findAll.map(item => {
-      const result: any = {
-        tile_column: item.tile_column,
-        tile_data: item.tile_data,
-        tile_row: item.tile_row,
-        zoom_level: item.zoom_level,
+    // Define options
+    const limit = options.limit
+    const offset = options.offset || 0
+    const queue = options.queue || 5000
+    const buffer = (options.buffer === undefined) ? true : options.buffer
+
+    // Initialize Find Options
+    const container: models.Tiles.Attributes[] = []
+    const findOptions: Sequelize.FindOptions = {
+      attributes: (buffer) ? ['tile_column', 'tile_row', 'zoom_level', 'tile_data'] : ['tile_column', 'tile_row', 'zoom_level'],
+      limit: (limit) ? limit : queue,
+      offset,
+    }
+
+    // If tiles were given as input
+    if (tiles.length) {
+      const selection = tiles.map(tile => Object({tile_column: tile[0], tile_row: tile[1], zoom_level: tile[2]}))
+      findOptions.where = {$or: selection}
+    }
+
+    // Loop all tiles
+    while (true) {
+      const findAll = await this.tilesSQL.findAll(findOptions)
+      if (findAll.length === 0) { break }
+
+      // Clean results - Remove any Sequelize objects
+      for (const item of findAll) {
+        const result: models.Tiles.Attributes = {
+          tile_column: item.tile_column,
+          tile_row: item.tile_row,
+          zoom_level: item.zoom_level,
+        }
+        if (buffer) { result.tile_data = item.tile_data }
+        container.push(result)
       }
-      if (result.tile_data === undefined) { delete result.tile_data }
-      return result
-    })
+      if (limit) { break }
+      findOptions.offset += queue
+    }
+    return container
   }
 
   /**
    * Finds all Tile unique hashes
    *
    * @param {Tile[]} [tiles] An array of Tiles
+   * @param {Object} [options] Find Options
+   * @param {number} [options.limit] Limit the results
+   * @param {number} [options.offset = 0] Offset the results
+   * @param {number} [options.queue = 5000] Creates multiple SQL connections based on queue amount
    * @returns {Promise<number[]>} Unique tile hashes
    * @example
    * const hashes = await findAllId()
    * //=hashes
    */
-  public async findAllId(tiles?: Tile[]): Promise<number[]> {
-    const findAll = await this.findAll(tiles, false)
+  public async findAllId(tiles?: Tile[], options: FindOptions = {}): Promise<number[]> {
+    options.buffer = false
+    const findAll = await this.findAll(tiles, options)
     return findAll.map(tile => mercator.hash([tile.tile_column, tile.tile_row, tile.zoom_level]))
   }
 
@@ -359,7 +399,7 @@ export class MBTiles {
    * //=tile
    */
   public async findOne(tile: Tile): Promise<Buffer> {
-    if (!this._init) { await this.init() }
+    if (!this._tables) { await this.tables() }
 
     const [x, y, z] = tile
     const data = await this.tilesSQL.find({
@@ -384,7 +424,7 @@ export class MBTiles {
   public async init(): Promise<boolean> {
     await createFolder(this.uri)
     await this.tables()
-    await this.index()
+    try { await this.index() } catch (e) { console.warn(e) }
     await this.update()
     this._init = true
     return true

@@ -1,6 +1,10 @@
 
 # Changelog
 
+## 1.2.0 - 2017-1-9
+
+- Add options to `findAll` (queue, limit, offset)
+
 ## 1.1.0 - 2017-1-2
 
 - Fixed overwrite save function `Cannot read property 'destroy' of null`
