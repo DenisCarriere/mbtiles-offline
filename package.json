@@ -1,10 +1,9 @@
 {
   "name": "mbtiles-offline",
-  "version": "1.2.2",
+  "version": "1.2.1",
   "description": "MBTiles for offline",
   "main": "index.js",
   "jsnext:main": "index.js",
-  "types": "index.d.ts",
   "scripts": {
     "test": "npm run lint && jest --coverage",
     "docs": "tsc && cat HEADER.md > README.md && documentation build index.js -c documentation.yml -f md --shallow >> README.md && cat CHANGELOG.md >> README.md",
