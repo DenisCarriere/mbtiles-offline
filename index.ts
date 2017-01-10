@@ -1,16 +1,8 @@
-// NodeJS packages
-// import * as fs from 'fs'
-// import * as crypto from 'crypto'
-// import * as zlib from 'zlib'
-// import * as url from 'url'
-// import * as qs from 'querystring'
-// import * as sqlite3 from 'sqlite3-offline'
-
-import * as tiletype from '@mapbox/tiletype'
 import * as mercator from 'global-mercator'
 import * as Sequelize from 'sequelize-offline'
 import * as models from './models'
 import { connect, createFolder, parseMetadata } from './utils'
+const tiletype = require('@mapbox/tiletype')
 
 /**
  * Tile - [x, y, zoom]

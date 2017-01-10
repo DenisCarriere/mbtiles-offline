@@ -8,6 +8,7 @@
     "max-line-length": [true, 170],
     "arrow-parens": false,
     "no-console": [false],
-    "ordered-imports": [false]
+    "ordered-imports": [false],
+    "no-var-requires": false
   }
 }
