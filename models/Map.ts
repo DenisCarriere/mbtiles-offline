@@ -23,7 +23,7 @@ export interface Model extends Sequelize.Model<Instance, Attributes> { }
 
 export const scheme: DefineAttributes = {
   tile_column: { type: INTEGER, validate: { isInt: true }},
-  tile_id:     { type: INTEGER, validate: { isInt: true }, primaryKey: true, unique: true },
+  tile_id:     { type: INTEGER, validate: { isInt: true }},
   tile_row:    { type: INTEGER, validate: { isInt: true }},
   zoom_level:  { type: INTEGER, validate: { isInt: true }},
 }

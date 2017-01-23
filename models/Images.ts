@@ -21,5 +21,5 @@ export interface Model extends Sequelize.Model<Instance, Attributes> { }
 
 export const scheme: DefineAttributes = {
   tile_data: { type: BLOB },
-  tile_id:   { type: INTEGER, primaryKey: true, unique: true },
+  tile_id:   { type: INTEGER },
 }
