@@ -48,6 +48,12 @@ describe('findAll', async() => {
   test('[0, 0, 0]', async() => expect(await mbtiles.findAllId([[0, 0, 0]])).toEqual([1]))
 })
 
+describe('MOBAC', async() => {
+  const mbtiles = new MBTiles('./fixtures/MOBAC.mbtiles')
+  const meta = await mbtiles.metadata()
+  test('metadata', () => expect(meta.name).toBeDefined())
+})
+
 afterAll(() => {
   fs.unlinkSync('CRUD.mbtiles')
   fs.unlinkSync('Metadata.mbtiles')
