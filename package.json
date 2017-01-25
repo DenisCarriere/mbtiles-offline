@@ -29,7 +29,7 @@
   ],
   "dependencies": {
     "@mapbox/tiletype": "^0.3.0",
-    "d3-queue": "^3.0.3",
+    "async": "^2.1.4",
     "global-mercator": "^1.7.0",
     "mkdirp": "^0.5.1",
     "sequelize-offline": "^4.0.1"
@@ -41,8 +41,7 @@
     "standard": "^8.6.0"
   },
   "jest": {
-    "verbose": true,
-    "collectCoverage": true
+    "verbose": true
   },
   "testEnvironment": "node",
   "standard": {

@@ -1,9 +1,7 @@
-import * as fs from 'fs'
-import * as mkdirp from 'mkdirp'
-import * as path from 'path'
-import * as Sequelize from 'sequelize-offline'
-import { Metadata } from '../'
-import * as models from '../models'
+const fs = require('fs')
+const mkdirp = require('mkdirp')
+const path = require('path')
+const Sequelize = require('sequelize-offline')
 
 /**
  * Create Folder
@@ -11,7 +9,7 @@ import * as models from '../models'
  * @param {string} uri
  * @returns {Promise<boolean>}
  */
-export function createFolder(uri: string): Promise<boolean> {
+export function createFolder (uri) {
   const dirname = path.dirname(uri)
   return new Promise((resolve, reject) => {
     if (!fs.existsSync(dirname)) {
@@ -30,7 +28,7 @@ export function createFolder(uri: string): Promise<boolean> {
  * getFiles('/home/myfiles')
  * //=['map', 'test']
  */
-export function getFiles(path: string, regex = /\.mbtiles$/): string[] {
+export function getFiles (path, regex = /\.mbtiles$/) {
   let mbtiles = fs.readdirSync(path).filter(value => value.match(regex))
   mbtiles = mbtiles.map(data => data.replace(regex, ''))
   mbtiles = mbtiles.filter(name => !name.match(/^_.*/))
@@ -43,14 +41,14 @@ export function getFiles(path: string, regex = /\.mbtiles$/): string[] {
  * @param {string} uri
  * @returns {Sequelize} Sequelize connection
  */
-export function connect(uri: string): Sequelize.Sequelize {
+export function connect (uri) {
   const options = {
     define: { freezeTableName: true, timestamps: false },
     logging: false,
     pool: { idle: 10000, max: 5, min: 0 },
-    storage: uri,
+    storage: uri
   }
-  return new Sequelize(`sqlite://${ uri }`, options)
+  return new Sequelize('sqlite://' + uri, options)
 }
 
 /**
@@ -58,8 +56,8 @@ export function connect(uri: string): Sequelize.Sequelize {
  * @param {ParseMetadata[]} data
  * @returns Metadata
  */
-export function parseMetadata(data: models.Metadata.Attributes[]): Metadata {
-  const metadata: Metadata = {}
+export function parseMetadata (data) {
+  const metadata = {}
   data.map(item => {
     const name = item.name.toLowerCase()
     const value = item.value
@@ -97,6 +95,7 @@ export function parseMetadata(data: models.Metadata.Attributes[]): Metadata {
             break
           default:
         }
+        break
       case 'format':
         switch (value) {
           case 'png':
@@ -105,6 +104,7 @@ export function parseMetadata(data: models.Metadata.Attributes[]): Metadata {
             break
           default:
         }
+        break
       case 'version':
         switch (value) {
           case '1.0.0':
@@ -114,6 +114,7 @@ export function parseMetadata(data: models.Metadata.Attributes[]): Metadata {
             break
           default:
         }
+        break
       default:
     }
   })
