@@ -1,6 +1,11 @@
 
 # Changelog
 
+## 1.3.0 - 2017-1-25
+
+- Overhaul module to be Standard JS
+- Removed await by `async`
+
 ## 1.2.0 - 2017-1-9
 
 - Add options to `findAll` (queue, limit, offset)
