@@ -1,8 +1,0 @@
-HEADER.md
-yarn.lock
-fixtures/
-.vscode/
-circle.yml
-.travis.yml
-coverage/
-*test*

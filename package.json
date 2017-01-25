@@ -3,11 +3,11 @@
   "version": "1.3.5",
   "description": "MBTiles for offline",
   "main": "index.js",
-  "jsnext:main": "index.js",
+  "types": "index.d.js",
   "scripts": {
     "test": "npm run lint && jest --coverage",
-    "docs": "tsc && cat HEADER.md > README.md && documentation build index.js -c documentation.yml -f md --shallow >> README.md && cat CHANGELOG.md >> README.md",
-    "lint": "tsc && tslint index.ts test.ts && documentation lint index.js"
+    "lint": "standard",
+    "docs": "documentation readme index.js --section=API"
   },
   "repository": {
     "type": "git",
@@ -22,25 +22,30 @@
     "url": "https://github.com/DenisCarriere/mbtiles-offline/issues"
   },
   "homepage": "https://github.com/DenisCarriere/mbtiles-offline#readme",
-  "keywords": [],
-  "testEnvironment": "node",
+  "keywords": [
+    "mbtiles",
+    "sqlite3",
+    "offline"
+  ],
   "dependencies": {
     "@mapbox/tiletype": "^0.3.0",
-    "@types/mkdirp": "^0.3.29",
     "d3-queue": "^3.0.3",
-    "global-mercator": "^1.6.1",
+    "global-mercator": "^1.7.0",
     "mkdirp": "^0.5.1",
     "sequelize-offline": "^4.0.1"
   },
   "devDependencies": {
-    "@types/jest": "^16.0.3",
     "coveralls": "^2.11.15",
     "documentation": "^4.0.0-beta.18",
     "jest-cli": "^18.1.0",
-    "tslint": "^4.3.1",
-    "typescript": "^2.1.4"
+    "standard": "^8.6.0"
   },
   "jest": {
-    "verbose": true
+    "verbose": true,
+    "collectCoverage": true
+  },
+  "testEnvironment": "node",
+  "standard": {
+    "env": "jest"
   }
 }
