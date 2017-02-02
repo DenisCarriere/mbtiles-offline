@@ -1,6 +1,15 @@
 
 # Changelog
 
+## 2.0.0 - 2017-2-2
+
+- Removed Sequelize for SQLite3 (offline)
+- Entire rewrite of methods:
+  - metadata
+  - count
+  - update
+  - tables
+
 ## 1.3.0 - 2017-1-25
 
 - Overhaul module to be Standard JS

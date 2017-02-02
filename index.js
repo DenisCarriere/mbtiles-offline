@@ -1,9 +1,10 @@
-const sqlite3 = require('sqlite3-offline')
+const assign = require('lodash').assign
+const entries = require('lodash').entries
 const async = require('async')
 const mercator = require('global-mercator')
 const tiletype = require('@mapbox/tiletype')
-const models = require('./models')
 const utils = require('./utils')
+const schema = require('./schema')
 
 /**
  * MBTiles
@@ -26,29 +27,23 @@ module.exports = class MBTiles {
    * @param {Versions} [metadata.version='1.1.0'] Version '1.0.0' | '1.1.0' | '1.2.0'
    * @returns {MBTiles} MBTiles
    * @example
-   * import {MBTiles} from 'mbtiles-offline'
-   * const mbtiles = MBTiles('example.mbtiles')
+   * const mbtiles = new MBTiles('example.mbtiles')
    * //=mbtiles
    */
   constructor (uri, metadata = {}) {
-    // this.uri = uri
-    this.db = new sqlite3.Database(uri)
-    // this.sequelize = utils.connect(uri)
-    // this.tilesSQL = this.sequelize.define('tiles', models.Tiles.scheme)
-    // this.metadataSQL = this.sequelize.define('metadata', models.Metadata)
-    // this.imagesSQL = this.sequelize.define('images', models.Images.scheme)
-    // this.mapSQL = this.sequelize.define('map', models.Map.scheme)
-    // this.version = metadata.version || '1.1.0'
-    // this.format = metadata.format
-    // this.name = metadata.name
-    // this.description = metadata.description
-    // this.attribution = metadata.attribution
-    // this.minzoom = metadata.minzoom
-    // this.maxzoom = metadata.maxzoom
-    // this.bounds = metadata.bounds
-    // this.center = metadata.center
-    // this.type = metadata.type || 'baselayer'
-    // this.url = metadata.url
+    this.db = utils.connect(uri)
+    this.uri = uri
+    this.version = metadata.version || '1.1.0'
+    this.format = metadata.format
+    this.name = metadata.name
+    this.description = metadata.description
+    this.attribution = metadata.attribution
+    this.minzoom = metadata.minzoom
+    this.maxzoom = metadata.maxzoom
+    this.bounds = metadata.bounds
+    this.center = metadata.center
+    this.type = metadata.type || 'baselayer'
+    this.url = metadata.url
   }
 
   /**
@@ -59,7 +54,8 @@ module.exports = class MBTiles {
    * @param {boolean} [overwrite=true] Allow overwrite save operations
    * @returns {Promise<boolean>} true/false
    * @example
-   * await mbtiles.save([x, y, z], buffer)
+   * mbtiles.save([x, y, z], buffer)
+   *   .then(status => console.log(status))
    */
   save (tile, image, overwrite = true) {
     // Variables
@@ -106,25 +102,33 @@ module.exports = class MBTiles {
    *
    * @returns {Promise<Metadata>} Metadata as an Object
    * @example
-   * const metadata = await mbtiles.metadata()
-   * //=metadata
+   * mbtiles.metadata()
+   *   .then(metadata => console.log(metadata))
    */
   metadata () {
     return new Promise((resolve, reject) => {
-      this.db.all('SELECT * FROM metadata', (erro, rows) => {
-        const metadata = utils.parseMetadata(rows)
-        this.attribution = metadata.attribution || this.attribution
-        this.bounds = metadata.bounds || this.bounds
-        this.center = metadata.center || this.center
-        this.description = metadata.description || this.description
-        this.format = metadata.format || this.format
-        this.name = metadata.name || this.name
-        this.minzoom = metadata.minzoom || this.minzoom
-        this.maxzoom = metadata.maxzoom || this.maxzoom
-        this.type = metadata.type || this.type
-        this.version = metadata.version || this.version
-        this.url = metadata.url || this.url
-        return resolve(metadata)
+      this.db.serialize(() => {
+        this.db.run(schema.TABLE.metadata)
+        this.db.all('SELECT * FROM metadata', (error, rows) => {
+          if (error) { utils.error(error) }
+
+          const metadata = utils.parseMetadata(rows)
+          this.attribution = metadata.attribution || this.attribution
+          this.bounds = metadata.bounds || this.bounds
+          this.center = metadata.center || this.center
+          this.description = metadata.description || this.description
+          this.format = metadata.format || this.format
+          this.name = metadata.name || this.name
+          this.minzoom = metadata.minzoom || this.minzoom
+          this.maxzoom = metadata.maxzoom || this.maxzoom
+          this.type = metadata.type || this.type
+          this.version = metadata.version || this.version
+          this.url = metadata.url || this.url
+          const results = JSON.parse(JSON.stringify(this))
+          delete results.db
+          delete results.uri
+          return resolve(results)
+        })
       })
     })
   }
@@ -182,21 +186,20 @@ module.exports = class MBTiles {
   /**
    * Count the amount of Tiles
    *
-   * @param {Array<Tile>} [tiles=[]] Tiles
    * @returns {Promise<number>}
    * @example
-   * const count = await mbtiles.count()
-   * //=count
+   * mbtiles.count()
+   *   .then(count => console.log(count))
    */
-  count (tiles = []) {
+  count () {
     return new Promise(resolve => {
-      // Initialize
-      this.init().then(() => {
-        // If no lists given, count all
-        if (!tiles.length) { this.tilesSQL.count().then(count => resolve(count)) }
-
-        // Count all from list
-        this.findAll(tiles, {buffer: false}).then(data => resolve(data.length))
+      this.db.serialize(() => {
+        this.db.run(schema.TABLE.tiles)
+        this.db.get('SELECT count(*) FROM tiles', (error, row) => {
+          const result = row && row['count(*)'] || 0
+          if (error) { utils.warning(error) }
+          return resolve(Number(result))
+        })
       })
     })
   }
@@ -218,54 +221,58 @@ module.exports = class MBTiles {
    * @param {Versions} [metadata.version='1.1.0'] Version '1.0.0' | '1.1.0' | '1.2.0'
    * @returns {Promise<Metadata>} Metadata
    * @example
-   * const metadata = await mbtiles.update({name: 'foo', description: 'bar'})
-   * //=metadata
+   * const options = {
+   *   name: 'Foo',
+   *   description: 'Bar',
+   *   minzoom: 1,
+   *   maxzoom: 3,
+   *   format: 'png',
+   *   bounds: [-110, -40, 95, 50]
+   * }
+   * mbtiles.update(options)
+   *   .then(metadata => console.log(metadata))
    */
   update (metadata = {}) {
     return new Promise((resolve, reject) => {
-      this.metadata().then(() => {
-        this.metadataSQL.sync({ force: true }).then(() => {
-          if (metadata.attribution === undefined && this.attribution) { metadata.attribution = this.attribution }
-          if (metadata.bounds === undefined && this.bounds) { metadata.bounds = this.bounds }
-          if (metadata.center === undefined && this.center) { metadata.center = this.center }
-          if (metadata.description === undefined && this.description) { metadata.description = this.description }
-          if (metadata.format === undefined && this.format) { metadata.format = this.format }
-          if (metadata.maxzoom === undefined && this.maxzoom) { metadata.maxzoom = this.maxzoom }
-          if (metadata.minzoom === undefined && this.minzoom) { metadata.minzoom = this.minzoom }
-          if (metadata.name === undefined && this.name) { metadata.name = this.name }
-          if (metadata.type === undefined && this.type) { metadata.type = this.type }
-          if (metadata.version === undefined && this.version) { metadata.version = this.version }
-          if (metadata.url === undefined && this.url) { metadata.url = this.url }
+      this.metadata().then(currentMetadata => {
+        this.db.serialize(() => {
+          this.db.run(schema.TABLE.metadata)
+          this.db.run('DELETE FROM metadata')
+          const results = assign(currentMetadata, metadata)
 
-          // Parse center when bounds is available
-          if (metadata.center === undefined && metadata.bounds) {
-            metadata.center = mercator.bboxToCenter(metadata.bounds)
+          // Validate Metadata
+          // MBTiles spec 1.0.0
+          if (results.name === undefined) { utils.error('Metadata <name> is required') }
+          if (results.bounds === undefined) { utils.error('Metadata <bounds> is required') }
+          if (results.version === undefined) { utils.error('Metadata <version> is required') }
+          if (results.type === undefined) { utils.error('Metadata <type> is required') }
+
+          // MBTiles spec 1.1.0
+          if (results.version === '1.1.0') {
+            if (results.format === undefined) { utils.error('Metadata <format> is required') }
           }
 
-          // Main attributes throw errors
-          if (metadata.name === undefined) { throw new Error('Metadata <name> is required') }
-          if (metadata.format === undefined) { throw new Error('Metadata <format> is required') }
-          if (metadata.bounds === undefined) { throw new Error('Metadata <bounds> is required') }
-          if (metadata.version === undefined) { throw new Error('Metadata <version> is required') }
-          if (metadata.type === undefined) { throw new Error('Metadata <type> is required') }
+          // Parse center when bounds is available
+          if (results.center === undefined && metadata.bounds) {
+            results.center = mercator.bboxToCenter(metadata.bounds)
+          }
 
-          async.waterfall(
-            Object.keys(metadata).map(name => {
-              return callback => {
-                let value = metadata[name]
-                if (Array.isArray(value)) {
-                  value = value.join(',')
-                } else { value = String(value) }
-
-                this.metadataSQL.create({name, value}).then(() => callback())
-              }
-            }),
-            // Finished
-            err => {
-              if (err) { return reject(err) }
-              return this.metadata.then(data => resolve(data))
+          // Load Metadata to database
+          const stmt = this.db.prepare('INSERT INTO metadata VALUES (?, ?)')
+          for (const [name, value] of entries(results)) {
+            // String or Number
+            if (typeof value !== 'object') {
+              stmt.run([name, String(value)])
+            // Array
+            } else if (value.length) {
+              stmt.run([name, value.join(',')])
+            // JSON
+            } else {
+              stmt.run([name, JSON.stringify(value)])
             }
-          )
+          }
+          stmt.finalize()
+          return resolve(results)
         })
       })
     })
@@ -378,6 +385,7 @@ module.exports = class MBTiles {
         zoom_level: z
       }
     }
+
     return new Promise(resolve => {
       this.tables().then(() => {
         this.tilesSQL.find(find).then(data => {
@@ -389,42 +397,19 @@ module.exports = class MBTiles {
   }
 
   /**
-   * Initialize MBTiles
-   *
-   * @returns {boolean} true/false
-   * @example
-   * await mbtiles.init()
-   */
-  init () {
-    this._init = true
-    return new Promise(resolve => {
-      utils.createFolder(this.uri).then(() => {
-        this.tables().then(() => {
-          this.index().then(() => {
-            this.update().then(() => {
-              resolve(true)
-            })
-          })
-        })
-      })
-    })
-  }
-
-  /**
    * Build SQL tables
    *
-   * @returns {boolean} true/false
+   * @returns {Promise}
    * @example
-   * await mbtiles.tables()
+   * mbtiles.tables()
+   *   .then(() => console.log('done'))
    */
   tables () {
-    this._tables = true
     return new Promise(resolve => {
-      this.metadataSQL.sync().then(() => {
-        this.imagesSQL.sync().then(() => {
-          this.mapSQL.sync().then(() => {
-            resolve(true)
-          })
+      this.db.serialize(() => {
+        this.db.run(schema.TABLE.metadata)
+        this.db.run(schema.TABLE.tiles, () => {
+          return resolve()
         })
       })
     })
@@ -433,36 +418,17 @@ module.exports = class MBTiles {
   /**
    * Build SQL index
    *
-   * @returns {boolean} true/false
+   * @returns {Promise}
    * @example
-   * await mbtiles.index()
+   * mbtiles.index()
+   *   .then(() => console.log('done'))
    */
   index () {
-    const queries = [
-      'CREATE UNIQUE INDEX IF NOT EXISTS metadata_name on metadata (name)',
-      'CREATE UNIQUE INDEX IF NOT EXISTS map_tile_id on map (tile_id)',
-      'CREATE UNIQUE INDEX IF NOT EXISTS map_tile on map (tile_row, tile_column, zoom_level)',
-      'CREATE UNIQUE INDEX IF NOT EXISTS images_tile_id on images (tile_id)',
-      `CREATE VIEW IF NOT EXISTS tiles AS
-      SELECT
-        map.zoom_level AS zoom_level,
-        map.tile_column AS tile_column,
-        map.tile_row AS tile_row,
-        images.tile_data AS tile_data
-      FROM map
-      JOIN images ON images.tile_id = map.tile_id`
-    ]
-    this._index = true
-    return new Promise((resolve, reject) => {
-      this.tables().then(() => {
-        async.waterfall(queries.map(query => {
-          return callback => this.sequelize.query(query).then(() => callback())
-        }),
-          err => {
-            if (err) { return reject(err) }
-            return resolve(true)
-          }
-        )
+    return new Promise(resolve => {
+      this.db.serialize(() => {
+        this.db.run(schema.INDEX.metadata, () => {
+          return resolve()
+        })
       })
     })
   }
