@@ -14,36 +14,25 @@ module.exports = class MBTiles {
    * MBTiles
    *
    * @param {string} uri Path to MBTiles
-   * @param {string} metadata.attribution Attribution
-   * @param {BBox} metadata.bounds Bounds [west, south, east, north]
-   * @param {Center} metadata.center Center [lng, lat] or [lng, lat, height]
-   * @param {string} metadata.description Description
-   * @param {Formats} metadata.format Format 'png' | 'jpg' | 'webp' | 'pbf'
-   * @param {number} metadata.minzoom Minimum zoom level
-   * @param {number} metadata.maxzoom Maximum zoom level
-   * @param {string} metadata.name Name
-   * @param {string} metadata.url URL source or tile scheme
-   * @param {Types} [metadata.type='baselayer'] Type 'baselayer' | 'overlay'
-   * @param {Versions} [metadata.version='1.1.0'] Version '1.0.0' | '1.1.0' | '1.2.0'
    * @returns {MBTiles} MBTiles
    * @example
    * const mbtiles = new MBTiles('example.mbtiles')
    * //=mbtiles
    */
-  constructor (uri, metadata = {}) {
+  constructor (uri) {
     this.db = utils.connect(uri)
     this.uri = uri
-    this.version = metadata.version || '1.1.0'
-    this.format = metadata.format
-    this.name = metadata.name
-    this.description = metadata.description
-    this.attribution = metadata.attribution
-    this.minzoom = metadata.minzoom
-    this.maxzoom = metadata.maxzoom
-    this.bounds = metadata.bounds
-    this.center = metadata.center
-    this.type = metadata.type || 'baselayer'
-    this.url = metadata.url
+    this.version = '1.1.0'
+    this.type = 'baselayer'
+  }
+
+  /**
+   * Detects format from image type
+   *
+   * @returns {Promise<string>}
+   */
+  format (image) {
+    return tiletype.type(image)
   }
 
   /**
@@ -51,49 +40,18 @@ module.exports = class MBTiles {
    *
    * @param {Tile} tile Tile [x, y, z]
    * @param {Buffer} image Tile image
-   * @param {boolean} [overwrite=true] Allow overwrite save operations
-   * @returns {Promise<boolean>} true/false
+   * @returns {Promise}
    * @example
    * mbtiles.save([x, y, z], buffer)
-   *   .then(status => console.log(status))
+   *   .then(() => console.log('done'))
    */
-  save (tile, image, overwrite = true) {
-    // Variables
-    const tileId = mercator.hash(tile)
+  save (tile, image) {
     const [x, y, z] = tile
-    const entity = {
-      tile_column: x,
-      tile_row: y,
-      zoom_level: z,
-      tile_id: tileId
-    }
-    // Detect Image file type if unknown
-    if (!this.format) {
-      this.format = tiletype.type(image)
-    }
-
-    return new Promise(resolve => {
-      async.waterfall([
-
-        // Init
-        callback => {
-          if (!this._init) {
-            this.init().then(() => callback())
-          } else { callback() }
-        },
-
-        // Overwrite existing
-        callback => {
-          if (overwrite) {
-            this.delete(tile).then(() => callback())
-          } else { callback() }
-        },
-
-        // Save Image
-        callback => this.imagesSQL.create({ tile_data: image, tile_id: tileId }).then(() => callback()),
-        callback => this.mapSQL.create(entity).then(() => callback()),
-        callback => resolve(true)
-      ])
+    return new Promise((resolve, reject) => {
+      this.db.run('INSERT INTO tiles (tile_column, tile_row, zoom_level, tile_data) VALUES (?, ?, ?, ?)', [x, y, z, image], error => {
+        if (error) { utils.error(error) }
+        return resolve()
+      })
     })
   }
 

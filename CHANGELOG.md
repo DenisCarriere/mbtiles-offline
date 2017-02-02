@@ -9,6 +9,7 @@
   - count
   - update
   - tables
+  - save
 
 ## 1.3.0 - 2017-1-25
 
