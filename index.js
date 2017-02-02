@@ -1,19 +1,14 @@
+const sqlite3 = require('sqlite3-offline')
 const async = require('async')
 const mercator = require('global-mercator')
 const tiletype = require('@mapbox/tiletype')
 const models = require('./models')
 const utils = require('./utils')
 
-// function asyncInit (callback) {
-//   if (!this._init) {
-//     this.init().then(data => callback())
-//   } else { callback() }
-// }
-
 /**
  * MBTiles
  */
-export class MBTiles {
+module.exports = class MBTiles {
   /**
    * MBTiles
    *
@@ -36,23 +31,24 @@ export class MBTiles {
    * //=mbtiles
    */
   constructor (uri, metadata = {}) {
-    this.uri = uri
-    this.sequelize = utils.connect(uri)
-    this.tilesSQL = this.sequelize.define('tiles', models.Tiles.scheme)
-    this.metadataSQL = this.sequelize.define('metadata', models.Metadata.scheme)
-    this.imagesSQL = this.sequelize.define('images', models.Images.scheme)
-    this.mapSQL = this.sequelize.define('map', models.Map.scheme)
-    this.version = metadata.version || '1.1.0'
-    this.format = metadata.format
-    this.name = metadata.name
-    this.description = metadata.description
-    this.attribution = metadata.attribution
-    this.minzoom = metadata.minzoom
-    this.maxzoom = metadata.maxzoom
-    this.bounds = metadata.bounds
-    this.center = metadata.center
-    this.type = metadata.type || 'baselayer'
-    this.url = metadata.url
+    // this.uri = uri
+    this.db = new sqlite3.Database(uri)
+    // this.sequelize = utils.connect(uri)
+    // this.tilesSQL = this.sequelize.define('tiles', models.Tiles.scheme)
+    // this.metadataSQL = this.sequelize.define('metadata', models.Metadata)
+    // this.imagesSQL = this.sequelize.define('images', models.Images.scheme)
+    // this.mapSQL = this.sequelize.define('map', models.Map.scheme)
+    // this.version = metadata.version || '1.1.0'
+    // this.format = metadata.format
+    // this.name = metadata.name
+    // this.description = metadata.description
+    // this.attribution = metadata.attribution
+    // this.minzoom = metadata.minzoom
+    // this.maxzoom = metadata.maxzoom
+    // this.bounds = metadata.bounds
+    // this.center = metadata.center
+    // this.type = metadata.type || 'baselayer'
+    // this.url = metadata.url
   }
 
   /**
@@ -115,37 +111,19 @@ export class MBTiles {
    */
   metadata () {
     return new Promise((resolve, reject) => {
-      async.waterfall([
-
-        // Initialize database
-        callback => {
-          if (!this._init) {
-            this.init().then(() => callback())
-          } else { callback() }
-        },
-
-        // Retrieve Metadata data from Database
-        callback => this.metadataSQL.findAll().then(data => callback(null, data)),
-
-        // Parse metadata
-        (data, callback) => {
-          const metadata = utils.parseMetadata(data)
-          this.attribution = metadata.attribution || this.attribution
-          this.bounds = metadata.bounds || this.bounds
-          this.center = metadata.center || this.center
-          this.description = metadata.description || this.description
-          this.format = metadata.format || this.format
-          this.name = metadata.name || this.name
-          this.minzoom = metadata.minzoom || this.minzoom
-          this.maxzoom = metadata.maxzoom || this.maxzoom
-          this.type = metadata.type || this.type
-          this.version = metadata.version || this.version
-          this.url = metadata.url || this.url
-          callback(null, metadata)
-        }
-      // Finished
-      ], (err, metadata) => {
-        if (err) { return reject(err) }
+      this.db.all('SELECT * FROM metadata', (erro, rows) => {
+        const metadata = utils.parseMetadata(rows)
+        this.attribution = metadata.attribution || this.attribution
+        this.bounds = metadata.bounds || this.bounds
+        this.center = metadata.center || this.center
+        this.description = metadata.description || this.description
+        this.format = metadata.format || this.format
+        this.name = metadata.name || this.name
+        this.minzoom = metadata.minzoom || this.minzoom
+        this.maxzoom = metadata.maxzoom || this.maxzoom
+        this.type = metadata.type || this.type
+        this.version = metadata.version || this.version
+        this.url = metadata.url || this.url
         return resolve(metadata)
       })
     })

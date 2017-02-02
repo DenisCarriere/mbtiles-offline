@@ -1,6 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-const MBTiles = require('.').MBTiles
+const MBTiles = require('.')
 
 const metadata = {
   bounds: [-110, -20, 130, 30],

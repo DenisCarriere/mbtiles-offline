@@ -9,7 +9,7 @@ const Sequelize = require('sequelize-offline')
  * @param {string} uri
  * @returns {Promise<boolean>}
  */
-export function createFolder (uri) {
+module.exports.createFolder = function (uri) {
   const dirname = path.dirname(uri)
   return new Promise((resolve, reject) => {
     if (!fs.existsSync(dirname)) {
@@ -28,7 +28,7 @@ export function createFolder (uri) {
  * getFiles('/home/myfiles')
  * //=['map', 'test']
  */
-export function getFiles (path, regex = /\.mbtiles$/) {
+module.exports.getFiles = function (path, regex = /\.mbtiles$/) {
   let mbtiles = fs.readdirSync(path).filter(value => value.match(regex))
   mbtiles = mbtiles.map(data => data.replace(regex, ''))
   mbtiles = mbtiles.filter(name => !name.match(/^_.*/))
@@ -41,7 +41,7 @@ export function getFiles (path, regex = /\.mbtiles$/) {
  * @param {string} uri
  * @returns {Sequelize} Sequelize connection
  */
-export function connect (uri) {
+module.exports.connect = function (uri) {
   const options = {
     define: { freezeTableName: true, timestamps: false },
     logging: false,
@@ -56,7 +56,7 @@ export function connect (uri) {
  * @param {ParseMetadata[]} data
  * @returns Metadata
  */
-export function parseMetadata (data) {
+module.exports.parseMetadata = function (data) {
   const metadata = {}
   data.map(item => {
     const name = item.name.toLowerCase()
@@ -116,6 +116,7 @@ export function parseMetadata (data) {
         }
         break
       default:
+        metadata[name] = value
     }
   })
   return metadata
