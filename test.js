@@ -34,5 +34,5 @@ describe('blank', () => {
   test('index', () => mbtiles.index().then(data => expect(data).toBeDefined()))
   test('save', () => mbtiles.save([0, 0, 0], image).then(data => expect(data).toBeDefined()))
   test('update', () => mbtiles.update(options).then(data => expect(data).toEqual(metadata)))
-  test('delete', () => mbtiles.delete([0, 0, 0], image).then(data => expect(data).toBeDefined()))
+  test('delete', () => mbtiles.delete([0, 0, 0]).then(data => expect(data).toBeDefined()))
 })
