@@ -16,4 +16,3 @@ describe('Metadata', () => {
   test('minzoom', () => expect(utils.parseMetadata([{name: 'minzoom', value: '10'}])).toEqual({minzoom: 10}))
   test('maxzoom', () => expect(utils.parseMetadata([{name: 'maxzoom', value: '18'}])).toEqual({maxzoom: 18}))
 })
-

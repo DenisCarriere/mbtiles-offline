@@ -1,8 +1,6 @@
 const assign = require('lodash').assign
 const entries = require('lodash').entries
-const async = require('async')
 const mercator = require('global-mercator')
-const tiletype = require('@mapbox/tiletype')
 const utils = require('./utils')
 const schema = require('./schema')
 
@@ -27,20 +25,11 @@ module.exports = class MBTiles {
   }
 
   /**
-   * Detects format from image type
-   *
-   * @returns {Promise<string>}
-   */
-  format (image) {
-    return tiletype.type(image)
-  }
-
-  /**
    * Save buffer data to individual Tile
    *
    * @param {Tile} tile Tile [x, y, z]
    * @param {Buffer} image Tile image
-   * @returns {Promise}
+   * @returns {Promise<boolean>}
    * @example
    * mbtiles.save([x, y, z], buffer)
    *   .then(() => console.log('done'))
@@ -48,9 +37,11 @@ module.exports = class MBTiles {
   save (tile, image) {
     const [x, y, z] = tile
     return new Promise((resolve, reject) => {
-      this.db.run('INSERT INTO tiles (tile_column, tile_row, zoom_level, tile_data) VALUES (?, ?, ?, ?)', [x, y, z, image], error => {
-        if (error) { utils.error(error) }
-        return resolve()
+      this.tables().then(() => {
+        this.db.run('INSERT INTO tiles (tile_column, tile_row, zoom_level, tile_data) VALUES (?, ?, ?, ?)', [x, y, z, image], error => {
+          if (error) { utils.error(error) }
+          return resolve(true)
+        })
       })
     })
   }
@@ -95,47 +86,15 @@ module.exports = class MBTiles {
    * Delete individual Tile
    *
    * @param {Tile} tile Tile [x, y, z]
-   * @returns {Promise<boolean>} true/false
+   * @returns {Promise<boolean>}
    * @example
-   * await mbtiles.delete([x, y, z])
+   * mbtiles.delete([x, y, z])
+   *   .then(() => console.log('done'))
    */
   delete (tile) {
-    // Variables
-    const tileId = mercator.hash(tile)
-    const [x, y, z] = tile
-    const entity = {
-      tile_column: x,
-      tile_row: y,
-      zoom_level: z,
-      tile_id: tileId
-    }
     return new Promise((resolve, reject) => {
-      async.waterfall([
-        // Initalize database
-        callback => {
-          if (!this._init) {
-            this.init().then(() => callback())
-          } else { callback() }
-        },
-        // Find one image tile & destroy
-        callback => {
-          this.imagesSQL.findOne({where: {tile_id: tileId}}).then(data => {
-            if (data) {
-              data.destroy().then(() => callback())
-            } else { callback() }
-          })
-        },
-        // Find one map tile & destroy
-        callback => {
-          this.mapSQL.findOne({where: entity}).then(data => {
-            if (data) {
-              data.destroy().then(() => callback())
-            } else { callback() }
-          })
-        }
-      // Finished
-      ], err => {
-        if (err) { reject(err) }
+      this.db.run('DELETE FROM tiles WHERE tile_column=? AND tile_row=? AND zoom_level=?', tile, error => {
+        if (error) { utils.error(error) }
         return resolve(true)
       })
     })
@@ -237,89 +196,18 @@ module.exports = class MBTiles {
   }
 
   /**
-   * Finds all Tiles
-   *
-   * @param {Array<Tile>} [tiles] An array of Tiles
-   * @param {Object} [options] Find Options
-   * @param {number} [options.limit] Limit the results
-   * @param {number} [options.offset = 0] Offset the results
-   * @param {boolean} [options.buffer = true] Allow tile data buffer
-   * @param {number} [options.queue = 5000] Creates multiple SQL connections based on queue amount
-   * @returns {Promise<Tiles.Attributes[]>}
-   * @example
-   * const tiles = await findAll()
-   * //=tiles
-   */
-  findAll (tiles = [], options = {}) {
-    // Define options
-    const limit = options.limit
-    const offset = options.offset || 0
-    const queue = options.queue || 5000
-    const buffer = (options.buffer === undefined) ? true : options.buffer
-
-    // Initialize Find Options
-    const container = []
-    const findOptions = {
-      attributes: (buffer) ? ['tile_column', 'tile_row', 'zoom_level', 'tile_data'] : ['tile_column', 'tile_row', 'zoom_level'],
-      limit: limit || queue,
-      offset
-    }
-    // If tiles were given as input
-    if (tiles.length) {
-      const selection = tiles.map(tile => Object({tile_column: tile[0], tile_row: tile[1], zoom_level: tile[2]}))
-      findOptions.where = {$or: selection}
-    }
-    return new Promise(resolve => {
-      this.tables().then(() => {
-        // Loop all tiles
-        let loop = true
-        while (loop) {
-          this.tilesSQL.findAll(findOptions).then(findAll => {
-            if (findAll.length === 0) {
-              loop = false
-              return
-            }
-
-            // Clean results - Remove any Sequelize objects
-            for (const item of findAll) {
-              const result = {
-                tile_column: item.tile_column,
-                tile_row: item.tile_row,
-                zoom_level: item.zoom_level
-              }
-              if (buffer) { result.tile_data = item.tile_data }
-              container.push(result)
-            }
-            if (limit) {
-              loop = false
-              return
-            }
-            findOptions.offset += queue
-          })
-        }
-        return resolve(container)
-      })
-    })
-  }
-
-  /**
    * Finds all Tile unique hashes
    *
-   * @param {Tile[]} [tiles] An array of Tiles
-   * @param {Object} [options] Find Options
-   * @param {number} [options.limit] Limit the results
-   * @param {number} [options.offset = 0] Offset the results
-   * @param {number} [options.queue = 5000] Creates multiple SQL connections based on queue amount
-   * @returns {Promise<number[]>} Unique tile hashes
+   * @returns {Promise<Tile[]>} An array of Tiles [x, y, z]
    * @example
-   * const hashes = await findAllId()
-   * //=hashes
+   * const tiles = await findAllId()
+   * //=tiles
    */
-  findAllId (tiles, options = {}) {
-    options.buffer = false
-    return new Promise(resolve => {
-      this.findAll(tiles, options).then(findAll => {
-        return resolve(findAll.map(tile => mercator.hash([tile.tile_column, tile.tile_row, tile.zoom_level])))
+  findAll () {
+    return new Promise((resolve, reject) => {
+      this.db.all(`SELECT tile_row, tile_column, zoom_level FROM tiles`, (error, rows) => {
+        if (error) { utils.error(error) }
+        return resolve(rows.map(row => [row.tile_column, row.tile_row, row.zoom_level]))
       })
     })
   }
@@ -335,21 +223,15 @@ module.exports = class MBTiles {
    */
   findOne (tile) {
     const [x, y, z] = tile
-    const find = {
-      attributes: ['tile_data'],
-      where: {
-        tile_column: x,
-        tile_row: y,
-        zoom_level: z
-      }
-    }
-
-    return new Promise(resolve => {
-      this.tables().then(() => {
-        this.tilesSQL.find(find).then(data => {
-          if (!data) { return resolve(undefined) }
-          return resolve(data.tile_data)
-        })
+    return new Promise((resolve, reject) => {
+      this.db.get('SELECT tile_data FROM tiles WHERE tile_row=? AND tile_column=? AND zoom_level=?', [x, y, z], (error, row) => {
+        if (error) {
+          utils.error(error)
+        } else if (row) {
+          return resolve(row.tile_data)
+        } else {
+          utils.warning('no tile found')
+        }
       })
     })
   }
@@ -357,17 +239,19 @@ module.exports = class MBTiles {
   /**
    * Build SQL tables
    *
-   * @returns {Promise}
+   * @returns {Promise<boolean>}
    * @example
    * mbtiles.tables()
    *   .then(() => console.log('done'))
    */
   tables () {
     return new Promise(resolve => {
+      if (this._table) { return resolve(true) }
       this.db.serialize(() => {
         this.db.run(schema.TABLE.metadata)
         this.db.run(schema.TABLE.tiles, () => {
-          return resolve()
+          this._table = true
+          return resolve(true)
         })
       })
     })
@@ -376,16 +260,18 @@ module.exports = class MBTiles {
   /**
    * Build SQL index
    *
-   * @returns {Promise}
+   * @returns {Promise<boolean>}
    * @example
    * mbtiles.index()
    *   .then(() => console.log('done'))
    */
   index () {
     return new Promise(resolve => {
+      if (this._index) { return resolve(true) }
       this.db.serialize(() => {
         this.db.run(schema.INDEX.metadata, () => {
-          return resolve()
+          this._index = true
+          return resolve(true)
         })
       })
     })

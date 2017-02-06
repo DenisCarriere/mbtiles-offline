@@ -1,24 +1,6 @@
 const fs = require('fs')
-const mkdirp = require('mkdirp')
-const path = require('path')
 const sqlite3 = require('sqlite3-offline')
 const chalk = require('chalk')
-
-/**
- * Create Folder
- *
- * @param {string} uri
- * @returns {Promise<boolean>}
- */
-module.exports.createFolder = (uri) => {
-  const dirname = path.dirname(uri)
-  return new Promise((resolve, reject) => {
-    if (!fs.existsSync(dirname)) {
-      mkdirp(dirname, () => resolve(true))
-    }
-    return resolve(true)
-  })
-}
 
 /**
  * Pretty Error message
