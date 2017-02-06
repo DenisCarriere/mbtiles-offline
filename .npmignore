@@ -1,0 +1,5 @@
+fixtures/
+.vscode/
+*test.js
+test.js
+.travis.yml
