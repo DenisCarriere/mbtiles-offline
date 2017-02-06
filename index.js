@@ -206,7 +206,7 @@ module.exports = class MBTiles {
    */
   findAll () {
     return new Promise((resolve, reject) => {
-      this.db.all(`SELECT tile_row, tile_column, zoom_level FROM tiles`, (error, rows) => {
+      this.db.all(`SELECT tile_column, tile_row, zoom_level FROM tiles`, (error, rows) => {
         if (error) { utils.error(error) }
         return resolve(rows.map(row => [row.tile_column, row.tile_row, row.zoom_level]))
       })
@@ -223,9 +223,8 @@ module.exports = class MBTiles {
    * //=tile
    */
   findOne (tile) {
-    const [x, y, z] = tile
     return new Promise((resolve, reject) => {
-      this.db.get('SELECT tile_data FROM tiles WHERE tile_row=? AND tile_column=? AND zoom_level=?', [x, y, z], (error, row) => {
+      this.db.get('SELECT tile_data FROM tiles WHERE tile_column=? AND tile_row=? AND zoom_level=?', tile, (error, row) => {
         if (error) {
           utils.error(error)
         } else if (row) {
