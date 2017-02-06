@@ -1,3 +1,4 @@
+const assign = require('lodash').assign
 const fs = require('fs')
 const MBTiles = require('.')
 
@@ -9,6 +10,13 @@ const options = {
   format: 'png',
   bounds: [-110, -40, 95, 50]
 }
+
+const metadata = assign(options, {
+  type: 'baselayer',
+  version: '1.1.0',
+  center: [-7.5, 5]
+})
+
 const image = fs.readFileSync('./fixtures/images/0/0/0.png')
 
 describe('plain_1', () => {
@@ -17,14 +25,14 @@ describe('plain_1', () => {
   test('count', () => mbtiles.count().then(data => expect(data).toBeDefined()))
   test('tables', () => mbtiles.tables().then(data => expect(data).toBeDefined()))
   test('findAll', () => mbtiles.findAll().then(data => expect(data).toBeDefined()))
-  test('findOne', () => mbtiles.findOne([0, 0, 0]).then(data => expect(data).toBeDefined()))
-  test('findOne', () => mbtiles.findOne([10, 0, 0]).then(data => expect(data).toBeDefined()))
+  test('findOne', () => mbtiles.findOne([0, 0, 0]).then(data => expect(data).toBeTruthy()))
+  test('findOne - undefined', () => mbtiles.findOne([10, 0, 0]).then(data => expect(data).toBeUndefined()))
 })
 
 describe('blank', () => {
   const mbtiles = new MBTiles('./fixtures/blank.mbtiles')
   test('index', () => mbtiles.index().then(data => expect(data).toBeDefined()))
   test('save', () => mbtiles.save([0, 0, 0], image).then(data => expect(data).toBeDefined()))
-  test('update', () => mbtiles.update(options).then(data => expect(data).toBeDefined()))
+  test('update', () => mbtiles.update(options).then(data => expect(data).toEqual(metadata)))
   test('delete', () => mbtiles.delete([0, 0, 0], image).then(data => expect(data).toBeDefined()))
 })

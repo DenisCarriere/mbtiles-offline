@@ -1,5 +1,6 @@
 const assign = require('lodash').assign
 const entries = require('lodash').entries
+const omit = require('lodash').omit
 const mercator = require('global-mercator')
 const utils = require('./utils')
 const schema = require('./schema')
@@ -73,7 +74,7 @@ module.exports = class MBTiles {
           this.type = metadata.type || this.type
           this.version = metadata.version || this.version
           this.url = metadata.url || this.url
-          const results = JSON.parse(JSON.stringify(this))
+          const results = JSON.parse(JSON.stringify(omit(this, ['_table', '_index'])))
           delete results.db
           delete results.uri
           return resolve(results)
@@ -231,6 +232,7 @@ module.exports = class MBTiles {
           return resolve(row.tile_data)
         } else {
           utils.warning('no tile found')
+          return resolve(undefined)
         }
       })
     })
