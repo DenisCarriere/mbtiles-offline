@@ -34,6 +34,7 @@
     "sqlite3-offline": "^3.1.10"
   },
   "devDependencies": {
+    "@types/node": "^7.0.5",
     "coveralls": "^2.11.15",
     "documentation": "^4.0.0-beta.18",
     "jest-cli": "^18.1.0",

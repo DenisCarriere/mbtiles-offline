@@ -33,7 +33,7 @@ module.exports = class MBTiles {
    * @returns {Promise<boolean>}
    * @example
    * mbtiles.save([x, y, z], buffer)
-   *   .then(() => console.log('done'))
+   *   .then(status => console.log(status))
    */
   save (tile, image) {
     const [x, y, z] = tile
@@ -90,7 +90,7 @@ module.exports = class MBTiles {
    * @returns {Promise<boolean>}
    * @example
    * mbtiles.delete([x, y, z])
-   *   .then(() => console.log('done'))
+   *   .then(status => console.log(status))
    */
   delete (tile) {
     return new Promise((resolve, reject) => {
@@ -201,8 +201,8 @@ module.exports = class MBTiles {
    *
    * @returns {Promise<Tile[]>} An array of Tiles [x, y, z]
    * @example
-   * const tiles = await findAllId()
-   * //=tiles
+   * mbtiles.findAll()
+   *   .then(tiles => console.log(tiles))
    */
   findAll () {
     return new Promise((resolve, reject) => {
@@ -219,8 +219,8 @@ module.exports = class MBTiles {
    * @param {Tile} tile Tile [x, y, z]
    * @return {Promise<Buffer>} Tile Data
    * @example
-   * const tile = await mbtiles.findOne([x, y, z])
-   * //=tile
+   * mbtiles.findOne([x, y, z])
+   *   .then(image => console.log(image))
    */
   findOne (tile) {
     return new Promise((resolve, reject) => {
@@ -243,7 +243,7 @@ module.exports = class MBTiles {
    * @returns {Promise<boolean>}
    * @example
    * mbtiles.tables()
-   *   .then(() => console.log('done'))
+   *   .then(status => console.log(status))
    */
   tables () {
     return new Promise(resolve => {
@@ -264,7 +264,7 @@ module.exports = class MBTiles {
    * @returns {Promise<boolean>}
    * @example
    * mbtiles.index()
-   *   .then(() => console.log('done'))
+   *   .then(status => console.log(status))
    */
   index () {
     return new Promise(resolve => {

@@ -2,7 +2,7 @@ const path = require('path')
 const utils = require('./utils')
 
 describe('Utils', () => {
-  test('getFiles', () => expect(utils.getFiles(path.join(__dirname, '..', 'fixtures'))).toBeDefined())
+  test('getFiles', () => expect(utils.getFiles(path.join(__dirname, '..', 'test', 'in'))).toBeDefined())
 })
 
 describe('Metadata', () => {

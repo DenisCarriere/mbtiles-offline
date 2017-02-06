@@ -17,10 +17,10 @@ const metadata = assign(options, {
   center: [-7.5, 5]
 })
 
-const image = fs.readFileSync('./fixtures/images/0/0/0.png')
+const image = fs.readFileSync('./test/in/images/0/0/0.png')
 
 describe('plain_1', () => {
-  const mbtiles = new MBTiles('./fixtures/plain_1.mbtiles')
+  const mbtiles = new MBTiles('./test/in/plain_1.mbtiles')
   test('metadata', () => mbtiles.metadata().then(data => expect(data).toBeDefined()))
   test('count', () => mbtiles.count().then(data => expect(data).toBeDefined()))
   test('tables', () => mbtiles.tables().then(data => expect(data).toBeDefined()))
@@ -30,7 +30,7 @@ describe('plain_1', () => {
 })
 
 describe('blank', () => {
-  const mbtiles = new MBTiles('./fixtures/blank.mbtiles')
+  const mbtiles = new MBTiles('./test/out/blank.mbtiles')
   test('index', () => mbtiles.index().then(data => expect(data).toBeDefined()))
   test('save', () => mbtiles.save([0, 0, 0], image).then(data => expect(data).toBeDefined()))
   test('update', () => mbtiles.update(options).then(data => expect(data).toEqual(metadata)))
