@@ -189,8 +189,9 @@ module.exports = class MBTiles {
               stmt.run([name, JSON.stringify(value)])
             }
           }
-          stmt.finalize()
-          return resolve(results)
+          stmt.finalize(() => {
+            return resolve(results)
+          })
         })
       })
     })
@@ -199,19 +200,73 @@ module.exports = class MBTiles {
   /**
    * Finds all Tile unique hashes
    *
+   * @param {Tile[]} [tiles] Only find given tiles
    * @returns {Promise<Tile[]>} An array of Tiles [x, y, z]
    * @example
-   * mbtiles.findAll()
+   * const tile1 = [33, 40, 6]
+   * const tile2 = [20, 50, 7]
+   * mbtiles.findAll([tile1, tile2])
    *   .then(tiles => console.log(tiles))
    */
-  findAll () {
-    return new Promise((resolve, reject) => {
-      this.tables().then(() => {
-        this.db.all(`SELECT tile_column, tile_row, zoom_level FROM tiles`, (error, rows) => {
+  findAll (tiles = []) {
+    // Search all - Not optimized for memory leaks
+    if (tiles.length === 0) {
+      return new Promise((resolve, reject) => {
+        this.db.all('SELECT tile_column, tile_row, zoom_level FROM tiles', (error, rows) => {
           if (error) { utils.error(error) }
-          const tiles = rows.map(row => [row.tile_column, row.tile_row, row.zoom_level])
-          if (tiles.length === 0) { utils.warning('<findAll> is empty') }
-          resolve(tiles)
+          return resolve(rows.map(row => [row.tile_column, row.tile_row, row.zoom_level]))
+        })
+      })
+    }
+
+    // Searh by defined set of tiles
+    const levels = {}
+    for (const tile of tiles) {
+      const [x, y, z] = tile
+      if (levels[z] === undefined) {
+        levels[z] = {
+          west: x,
+          south: y,
+          east: x,
+          north: y,
+          tiles: [],
+          index: {}
+        }
+      }
+      if (x < levels[z].west) { levels[z].west = x }
+      if (x > levels[z].east) { levels[z].east = x }
+      if (y < levels[z].south) { levels[z].south = y }
+      if (y > levels[z].north) { levels[z].north = y }
+      levels[z].tiles.push(tile)
+      levels[z].index[mercator.hash(tile)] = true
+    }
+
+    // Execute SQL queries
+    return new Promise((resolve, reject) => {
+      const results = []
+      this.db.serialize(() => {
+        const stmt = this.db.prepare(`
+          SELECT tile_column, tile_row, zoom_level
+          FROM tiles
+          WHERE zoom_level=?
+          AND tile_column>=?
+          AND tile_column<=?
+          AND tile_row>=?
+          AND tile_row<=?`)
+        for (const [zoom, { west, south, east, north, index }] of entries(levels)) {
+          stmt.all([zoom, west, east, south, north], (error, rows) => {
+            if (error) { utils.error(error) }
+
+            // Remove any extra tiles
+            for (const row of rows) {
+              const tile = [row.tile_column, row.tile_row, row.zoom_level]
+              const hash = mercator.hash(tile)
+              if (index[hash]) { results.push(tile) }
+            }
+          })
+        }
+        stmt.finalize(() => {
+          return resolve(results)
         })
       })
     })
@@ -297,11 +352,12 @@ module.exports = class MBTiles {
   /**
    * Creates a hash table for all tiles
    *
+   * @param {Tile[]} [tiles] Only find given tiles
    * @return {Promise<Object>} hashes
    */
-  hashes () {
+  hashes (tiles) {
     return new Promise((resolve, reject) => {
-      this.findAll().then(tiles => {
+      this.findAll(tiles).then(tiles => {
         const index = {}
         for (const tile of tiles) { index[mercator.hash(tile)] = true }
         if (Object.keys(index).length === 0) { utils.warning('<hashes> is empty') }
