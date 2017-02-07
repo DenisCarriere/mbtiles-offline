@@ -277,4 +277,31 @@ module.exports = class MBTiles {
       })
     })
   }
+  /**
+   * Creates hash from a single Tile
+   *
+   * @param {Tile} tile
+   * @return {number} hash
+   * @example
+   * const hash = mbtiles.hash([5, 25, 30])
+   * //=hash
+   */
+  hash (tile) {
+    return mercator.hash(tile)
+  }
+
+  /**
+   * Creates a hash table for all tiles
+   *
+   * @return {Promise<Object>} hashes
+   */
+  hashes () {
+    return new Promise((resolve, reject) => {
+      this.findAll().then(tiles => {
+        const index = {}
+        for (const tile of tiles) { index[mercator.hash(tile)] = true }
+        return resolve(index)
+      })
+    })
+  }
 }

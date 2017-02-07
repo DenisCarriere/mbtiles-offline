@@ -3,6 +3,7 @@
 
 ## 2.0.0 - 2017-2-2
 
+- Add hashes to quickly build an index
 - Removed Sequelize for SQLite3 (offline)
 - Entire rewrite of methods:
   - metadata
