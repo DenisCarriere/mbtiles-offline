@@ -310,11 +310,8 @@ module.exports = class MBTiles {
       this.db.serialize(() => {
         this.db.run(schema.TABLE.metadata)
         this.db.run(schema.TABLE.tiles, () => {
-          // Create Index after tables are created
-          this.index().then(() => {
-            this._table = true
-            return resolve(true)
-          })
+          this._table = true
+          return resolve(true)
         })
       })
     })
@@ -331,11 +328,13 @@ module.exports = class MBTiles {
   index () {
     return new Promise(resolve => {
       if (this._index) { return resolve(true) }
-      this.db.serialize(() => {
-        this.db.run(schema.INDEX.tiles)
-        this.db.run(schema.INDEX.metadata, () => {
-          this._index = true
-          return resolve(true)
+      this.tables().then(() => {
+        this.db.serialize(() => {
+          this.db.run(schema.INDEX.tiles)
+          this.db.run(schema.INDEX.metadata, () => {
+            this._index = true
+            return resolve(true)
+          })
         })
       })
     })
