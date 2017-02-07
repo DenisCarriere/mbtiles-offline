@@ -206,9 +206,13 @@ module.exports = class MBTiles {
    */
   findAll () {
     return new Promise((resolve, reject) => {
-      this.db.all(`SELECT tile_column, tile_row, zoom_level FROM tiles`, (error, rows) => {
-        if (error) { utils.error(error) }
-        return resolve(rows.map(row => [row.tile_column, row.tile_row, row.zoom_level]))
+      this.tables().then(() => {
+        this.db.all(`SELECT tile_column, tile_row, zoom_level FROM tiles`, (error, rows) => {
+          if (error) { utils.error(error) }
+          const tiles = rows.map(row => [row.tile_column, row.tile_row, row.zoom_level])
+          if (tiles.length === 0) { utils.warning('<findAll> is empty') }
+          resolve(tiles)
+        })
       })
     })
   }
@@ -230,7 +234,7 @@ module.exports = class MBTiles {
         } else if (row) {
           return resolve(row.tile_data)
         } else {
-          utils.warning('no tile found')
+          utils.warning('<findOne> not found')
           return resolve(undefined)
         }
       })
@@ -300,6 +304,7 @@ module.exports = class MBTiles {
       this.findAll().then(tiles => {
         const index = {}
         for (const tile of tiles) { index[mercator.hash(tile)] = true }
+        if (Object.keys(index).length === 0) { utils.warning('<hashes> is empty') }
         return resolve(index)
       })
     })

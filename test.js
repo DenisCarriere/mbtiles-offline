@@ -31,10 +31,22 @@ describe('plain_1', () => {
   test('hash', () => expect(mbtiles.hash([0, 0, 0])).toBeDefined())
 })
 
-describe('blank', () => {
-  const mbtiles = new MBTiles('./test/out/blank.mbtiles')
+describe('save', () => {
+  const mbtiles = new MBTiles('./test/out/save.mbtiles')
   test('index', () => mbtiles.index().then(data => expect(data).toBeDefined()))
   test('save', () => mbtiles.save([0, 0, 0], image).then(data => expect(data).toBeDefined()))
   test('update', () => mbtiles.update(options).then(data => expect(data).toEqual(metadata)))
   test('delete', () => mbtiles.delete([0, 0, 0]).then(data => expect(data).toBeDefined()))
+})
+
+describe('blank', () => {
+  const mbtiles = new MBTiles('./test/out/blank.mbtiles')
+  test('metadata', () => mbtiles.metadata().then(data => expect(data).toBeDefined()))
+  test('count', () => mbtiles.count().then(data => expect(data).toBeDefined()))
+  test('tables', () => mbtiles.tables().then(data => expect(data).toBeDefined()))
+  test('findAll', () => mbtiles.findAll().then(data => expect(data).toBeDefined()))
+  test('findOne', () => mbtiles.findOne([0, 0, 0]).then(data => expect(data).toBeUndefined()))
+  test('findOne - undefined', () => mbtiles.findOne([10, 0, 0]).then(data => expect(data).toBeUndefined()))
+  test('hashes', () => mbtiles.hashes().then(index => expect(index).toBeDefined()))
+  test('hash', () => expect(mbtiles.hash([0, 0, 0])).toBeDefined())
 })
