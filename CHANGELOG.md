@@ -3,6 +3,7 @@
 
 ## 2.0.0 - 2017-2-2
 
+- Add tiles index
 - Add tiles @param to findAll & hashes
 - Improve operations on blank mbtiles
 - Add hashes to quickly build an index

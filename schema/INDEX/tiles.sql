@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS index_tiles ON tiles (zoom_level, tile_row, tile_column);

@@ -310,8 +310,11 @@ module.exports = class MBTiles {
       this.db.serialize(() => {
         this.db.run(schema.TABLE.metadata)
         this.db.run(schema.TABLE.tiles, () => {
-          this._table = true
-          return resolve(true)
+          // Create Index after tables are created
+          this.index().then(() => {
+            this._table = true
+            return resolve(true)
+          })
         })
       })
     })
@@ -329,6 +332,7 @@ module.exports = class MBTiles {
     return new Promise(resolve => {
       if (this._index) { return resolve(true) }
       this.db.serialize(() => {
+        this.db.run(schema.INDEX.tiles)
         this.db.run(schema.INDEX.metadata, () => {
           this._index = true
           return resolve(true)
@@ -336,6 +340,7 @@ module.exports = class MBTiles {
       })
     })
   }
+
   /**
    * Creates hash from a single Tile
    *

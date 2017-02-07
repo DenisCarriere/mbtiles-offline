@@ -1,1 +1,1 @@
-CREATE UNIQUE INDEX IF NOT EXISTS name ON metadata (name);
+CREATE UNIQUE INDEX IF NOT EXISTS index_metadata ON metadata (name, value);
