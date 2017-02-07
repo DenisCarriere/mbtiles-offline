@@ -3,15 +3,17 @@ type Metadata = MBTiles.Metadata
 
 declare class MBTiles {
   constructor(uri: string)
-  public save(tile: Tile, image: Buffer): Promise<boolean>
-  public metadata(): Promise<Metadata>
-  public delete(tile: Tile): Promise<boolean>
-  public update(metadata: Metadata): Promise<Metadata>
-  public findOne(tile: Tile): Promise<Buffer>
-  public findAll(): Promise<Tile[]>
-  public tables(): Promise<boolean>
-  public count(): Promise<boolean>
-  public index(): Promise<boolean>
+  save(tile: Tile, image: Buffer): Promise<boolean>
+  metadata(): Promise<Metadata>
+  delete(tile: Tile): Promise<boolean>
+  update(metadata: Metadata): Promise<Metadata>
+  findOne(tile: Tile): Promise<Buffer>
+  findAll(): Promise<Tile[]>
+  tables(): Promise<boolean>
+  count(): Promise<boolean>
+  index(): Promise<boolean>
+  hash(tile: Tile): number
+  hashes(): Promise<MBTiles.Hashes>
 }
 
 declare namespace MBTiles {
@@ -21,6 +23,10 @@ declare namespace MBTiles {
   type Formats = 'png' | 'jpeg' | 'jpeg' | 'pbf'
   type Types = 'baselayer' | 'overlay'
   type Versions = '1.0.0' | '1.1.0' | '1.2.0'
+
+  interface Hashes {
+    [key: number]: boolean
+  }
 
   interface Metadata {
     name: string
