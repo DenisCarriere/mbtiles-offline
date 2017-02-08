@@ -86,7 +86,6 @@ module.exports = class MBTiles {
   /**
    * Delete individual Tile
    *
-   * @param {Tile[]} [tiles] Only find given tiles
    * @param {Tile} tile Tile [x, y, z]
    * @returns {Promise<boolean>}
    * @example
@@ -105,6 +104,7 @@ module.exports = class MBTiles {
   /**
    * Count the amount of Tiles
    *
+   * @param {Tile[]} [tiles] Only find given tiles
    * @returns {Promise<number>}
    * @example
    * mbtiles.count()
@@ -205,64 +205,64 @@ module.exports = class MBTiles {
    *   .then(tiles => console.log(tiles))
    */
   findAll (tiles = []) {
-    // Search all - Not optimized for memory leaks
-    if (tiles.length === 0) {
-      return new Promise((resolve, reject) => {
-        this.db.all('SELECT tile_column, tile_row, zoom_level FROM tiles', (error, rows) => {
-          if (error) { utils.error(error) }
-          return resolve(rows.map(row => [row.tile_column, row.tile_row, row.zoom_level]))
-        })
-      })
-    }
-
-    // Searh by defined set of tiles
-    const levels = {}
-    for (const tile of tiles) {
-      const [x, y, z] = tile
-      if (levels[z] === undefined) {
-        levels[z] = {
-          west: x,
-          south: y,
-          east: x,
-          north: y,
-          tiles: [],
-          index: {}
-        }
-      }
-      if (x < levels[z].west) { levels[z].west = x }
-      if (x > levels[z].east) { levels[z].east = x }
-      if (y < levels[z].south) { levels[z].south = y }
-      if (y > levels[z].north) { levels[z].north = y }
-      levels[z].tiles.push(tile)
-      levels[z].index[mercator.hash(tile)] = true
-    }
-
-    // Execute SQL queries
-    return new Promise((resolve, reject) => {
-      const results = []
-      this.db.serialize(() => {
-        const stmt = this.db.prepare(`
-          SELECT tile_column, tile_row, zoom_level
-          FROM tiles
-          WHERE zoom_level=?
-          AND tile_column>=?
-          AND tile_column<=?
-          AND tile_row>=?
-          AND tile_row<=?`)
-        for (const [zoom, { west, south, east, north, index }] of entries(levels)) {
-          stmt.all([zoom, west, east, south, north], (error, rows) => {
+    return new Promise(resolve => {
+      this.tables().then(() => {
+        // Search all - Not optimized for memory leaks
+        if (tiles.length === 0) {
+          this.db.all('SELECT tile_column, tile_row, zoom_level FROM tiles', (error, rows) => {
             if (error) { utils.error(error) }
-
-            // Remove any extra tiles
-            for (const row of rows) {
-              const tile = [row.tile_column, row.tile_row, row.zoom_level]
-              const hash = mercator.hash(tile)
-              if (index[hash]) { results.push(tile) }
-            }
+            return resolve(rows.map(row => [row.tile_column, row.tile_row, row.zoom_level]))
           })
         }
-        stmt.finalize(() => {
-          return resolve(results)
+
+        // Searh by defined set of tiles
+        const levels = {}
+        for (const tile of tiles) {
+          const [x, y, z] = tile
+          if (levels[z] === undefined) {
+            levels[z] = {
+              west: x,
+              south: y,
+              east: x,
+              north: y,
+              tiles: [],
+              index: {}
+            }
+          }
+          if (x < levels[z].west) { levels[z].west = x }
+          if (x > levels[z].east) { levels[z].east = x }
+          if (y < levels[z].south) { levels[z].south = y }
+          if (y > levels[z].north) { levels[z].north = y }
+          levels[z].tiles.push(tile)
+          levels[z].index[mercator.hash(tile)] = true
+        }
+
+        // Execute SQL queries
+        const results = []
+        this.db.serialize(() => {
+          const stmt = this.db.prepare(`
+            SELECT tile_column, tile_row, zoom_level
+            FROM tiles
+            WHERE zoom_level=?
+            AND tile_column>=?
+            AND tile_column<=?
+            AND tile_row>=?
+            AND tile_row<=?`)
+          for (const [zoom, { west, south, east, north, index }] of entries(levels)) {
+            stmt.all([zoom, west, east, south, north], (error, rows) => {
+              if (error) { utils.error(error) }
+
+              // Remove any extra tiles
+              for (const row of rows) {
+                const tile = [row.tile_column, row.tile_row, row.zoom_level]
+                const hash = mercator.hash(tile)
+                if (index[hash]) { results.push(tile) }
+              }
+            })
+          }
+          stmt.finalize(() => {
+            return resolve(results)
+          })
         })
       })
     })
