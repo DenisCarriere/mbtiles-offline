@@ -25,7 +25,7 @@ declare class MBTiles {
   /**
    * Count the amount of Tiles
    */
-  count(tiles?: Tile[]): Promise<boolean>
+  count(tiles?: Tile[]): Promise<number>
 
 
   /**
