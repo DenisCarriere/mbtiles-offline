@@ -86,6 +86,7 @@ module.exports = class MBTiles {
   /**
    * Delete individual Tile
    *
+   * @param {Tile[]} [tiles] Only find given tiles
    * @param {Tile} tile Tile [x, y, z]
    * @returns {Promise<boolean>}
    * @example
@@ -109,15 +110,10 @@ module.exports = class MBTiles {
    * mbtiles.count()
    *   .then(count => console.log(count))
    */
-  count () {
+  count (tiles) {
     return new Promise(resolve => {
-      this.db.serialize(() => {
-        this.db.run(schema.TABLE.tiles)
-        this.db.get('SELECT count(*) FROM tiles', (error, row) => {
-          const result = row && row['count(*)'] || 0
-          if (error) { utils.warning(error) }
-          return resolve(Number(result))
-        })
+      this.findAll(tiles).then(existingTiles => {
+        return resolve(existingTiles.length)
       })
     })
   }
@@ -361,9 +357,9 @@ module.exports = class MBTiles {
    */
   hashes (tiles) {
     return new Promise((resolve, reject) => {
-      this.findAll(tiles).then(tiles => {
+      this.findAll(tiles).then(existingTiles => {
         const index = {}
-        for (const tile of tiles) { index[mercator.hash(tile)] = true }
+        for (const tile of existingTiles) { index[mercator.hash(tile)] = true }
         if (Object.keys(index).length === 0) { utils.warning('<hashes> is empty') }
         return resolve(index)
       })

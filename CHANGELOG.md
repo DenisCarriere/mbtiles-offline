@@ -3,6 +3,8 @@
 
 ## 2.0.0 - 2017-2-2
 
+- Update Typescript definitions
+- Add tiles as param for count
 - Add tiles index
 - Add tiles @param to findAll & hashes
 - Improve operations on blank mbtiles

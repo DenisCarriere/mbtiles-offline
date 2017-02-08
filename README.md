@@ -110,6 +110,7 @@ Delete individual Tile
 
 **Parameters**
 
+-   `tiles` **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;Tile>?** Only find given tiles
 -   `tile` **Tile** Tile [x, y, z]
 
 **Examples**
@@ -124,6 +125,10 @@ Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refe
 #### count
 
 Count the amount of Tiles
+
+**Parameters**
+
+-   `tiles`  
 
 **Examples**
 
@@ -174,10 +179,16 @@ Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refe
 
 Finds all Tile unique hashes
 
+**Parameters**
+
+-   `tiles` **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;Tile>?** Only find given tiles
+
 **Examples**
 
 ```javascript
-mbtiles.findAll()
+const tile1 = [33, 40, 6]
+const tile2 = [20, 50, 7]
+mbtiles.findAll([tile1, tile2])
   .then(tiles => console.log(tiles))
 ```
 
@@ -225,3 +236,30 @@ mbtiles.index()
 ```
 
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** 
+
+#### hash
+
+Creates hash from a single Tile
+
+**Parameters**
+
+-   `tile` **Tile** 
+
+**Examples**
+
+```javascript
+const hash = mbtiles.hash([5, 25, 30])
+//=hash
+```
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** hash
+
+#### hashes
+
+Creates a hash table for all tiles
+
+**Parameters**
+
+-   `tiles` **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;Tile>?** Only find given tiles
+
+Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)>** hashes
