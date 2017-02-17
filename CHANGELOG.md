@@ -3,6 +3,7 @@
 
 ## 2.1.0 - 2017-2-17
 
+- Update SQLite3-offline dependency
 - Add validation method `validate()`
 - Auto detect Image format (png/jpg) `format()`
 - Auto detect min & max zoom level `getMinZoom()` & `getMaxZoom()`
