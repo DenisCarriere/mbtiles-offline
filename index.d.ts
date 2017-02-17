@@ -5,6 +5,16 @@ type Metadata = MBTiles.Metadata
  * MBTiles
  */
 declare class MBTiles {
+  name: string
+  description: string
+  minzoom?: number
+  maxzoom?: number
+  format?: string
+  bounds?: MBTiles.Bounds
+  type?: string
+  version?: string
+  center?: MBTiles.Center
+
   constructor(uri: string)
 
   /**
@@ -62,6 +72,31 @@ declare class MBTiles {
    * Creates a hash table for all tiles
    */
   hashes(tiles?: Tile[]): Promise<MBTiles.Hashes>
+
+  /**
+   * Retrieves Minimum Zoom level
+   */
+  getMinZoom(): Promise<number>
+
+  /**
+   * Retrieves Maximum Zoom level
+   */
+  getMaxZoom(): Promise<number>
+
+  /**
+   * Retrieves Image Format
+   */
+  getFormat(): Promise<MBTiles.Formats>
+
+  /**
+   * Retrieves Bounds
+   */
+  getBounds(zoom?: number): Promise<MBTiles.Bounds>
+
+  /**
+   * Validate MBTiles according to the specifications
+   */
+  validate(): Promise<boolean>
 }
 
 declare namespace MBTiles {
@@ -79,10 +114,10 @@ declare namespace MBTiles {
   interface Metadata {
     name: string
     description: string
-    minzoom: number
-    maxzoom: number
-    format: string
-    bounds: Bounds
+    minzoom?: number
+    maxzoom?: number
+    format?: string
+    bounds?: Bounds
     type?: string
     version?: string
     center?: Center

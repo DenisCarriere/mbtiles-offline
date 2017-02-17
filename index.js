@@ -2,6 +2,7 @@ const assign = require('lodash').assign
 const entries = require('lodash').entries
 const omit = require('lodash').omit
 const mercator = require('global-mercator')
+const tiletype = require('@mapbox/tiletype')
 const utils = require('./utils')
 const schema = require('./schema')
 
@@ -64,20 +65,21 @@ module.exports = class MBTiles {
 
           const metadata = utils.parseMetadata(rows)
           this.attribution = metadata.attribution || this.attribution
-          this.bounds = metadata.bounds || this.bounds
-          this.center = metadata.center || this.center
           this.description = metadata.description || this.description
-          this.format = metadata.format || this.format
           this.name = metadata.name || this.name
-          this.minzoom = metadata.minzoom || this.minzoom
-          this.maxzoom = metadata.maxzoom || this.maxzoom
           this.type = metadata.type || this.type
           this.version = metadata.version || this.version
           this.url = metadata.url || this.url
-          const results = JSON.parse(JSON.stringify(omit(this, ['_table', '_index'])))
-          delete results.db
-          delete results.uri
-          return resolve(results)
+          this.getFormat().then(format => {
+            this.getMinZoom().then(minZoom => {
+              this.getMaxZoom().then(maxZoom => {
+                this.getBounds().then(bounds => {
+                  const results = JSON.parse(JSON.stringify(omit(this, ['_table', '_index', 'db', 'uri'])))
+                  return resolve(results)
+                })
+              })
+            })
+          })
         })
       })
     })
@@ -94,9 +96,123 @@ module.exports = class MBTiles {
    */
   delete (tile) {
     return new Promise((resolve, reject) => {
-      this.db.run('DELETE FROM tiles WHERE tile_column=? AND tile_row=? AND zoom_level=?', tile, error => {
-        if (error) { utils.error(error) }
-        return resolve(true)
+      this.tables().then(() => {
+        this.db.run('DELETE FROM tiles WHERE tile_column=? AND tile_row=? AND zoom_level=?', tile, error => {
+          if (error) { utils.error(error) }
+          return resolve(true)
+        })
+      })
+    })
+  }
+
+  /**
+   * Retrieves Minimum Zoom level
+   *
+   * @returns {Promise<number>}
+   * @example
+   * mbtiles.getMinZoom()
+   *   .then(minZoom => console.log(minZoom))
+   */
+  getMinZoom () {
+    return new Promise((resolve, reject) => {
+      this.tables().then(() => {
+        this.db.get('SELECT MIN(zoom_level) FROM tiles', (error, row) => {
+          if (error) { utils.error(error) }
+          if (row === undefined || row === null) { return resolve(undefined) }
+
+          const minzoom = row['MIN(zoom_level)']
+          if (minzoom === null || minzoom === undefined) { return resolve(undefined) }
+          this.minzoom = minzoom
+          return resolve(minzoom)
+        })
+      })
+    })
+  }
+
+  /**
+   * Retrieves Maximum Zoom level
+   *
+   * @returns {Promise<number>}
+   * @example
+   * mbtiles.getMaxZoom()
+   *   .then(maxZoom => console.log(maxZoom))
+   */
+  getMaxZoom () {
+    return new Promise((resolve, reject) => {
+      this.tables().then(() => {
+        this.db.get('SELECT MAX(zoom_level) FROM tiles', (error, row) => {
+          if (error) { utils.error(error) }
+          if (row === undefined || row === null) { return resolve(undefined) }
+
+          const maxzoom = row['MAX(zoom_level)']
+          if (maxzoom === null || maxzoom === undefined) { return resolve(undefined) }
+          this.maxzoom = maxzoom
+          return resolve(maxzoom)
+        })
+      })
+    })
+  }
+
+  /**
+   * Retrieves Image Format
+   *
+   * @returns {Promise<Formats>}
+   * @example
+   * mbtiles.getFormat()
+   *   .then(format => console.log(format))
+   */
+  getFormat () {
+    return new Promise((resolve, reject) => {
+      this.tables().then(() => {
+        this.db.get('SELECT tile_data FROM tiles LIMIT 1', (error, row) => {
+          if (error) { utils.error(error) }
+          if (row === undefined || row === null) { return resolve(undefined) }
+
+          const format = tiletype.type(row['tile_data'])
+          if (format === undefined || format === null) { return resolve(undefined) }
+          this.format = format
+          return resolve(format)
+        })
+      })
+    })
+  }
+
+  /**
+   * Retrieves Bounds
+   *
+   * @param {number} zoom Zoom level
+   * @returns {Promise<Bounds>}
+   * @example
+   * mbtiles.getBounds()
+   *   .then(bounds => console.log(bounds))
+   */
+  getBounds (zoom) {
+    return new Promise((resolve, reject) => {
+      this.tables().then(() => {
+        this.getMaxZoom().then(maxzoom => {
+          this.getMinZoom().then(minzoom => {
+            // Validate zoom input based on Min & Max zoom levels
+            let zoomLevel = (zoom === undefined) ? maxzoom : zoom
+            if (zoom > maxzoom) { zoomLevel = maxzoom }
+            if (zoom < minzoom) { zoomLevel = minzoom }
+
+            this.db.get('SELECT MIN(tile_column), MIN(tile_row), MAX(tile_column), MAX(tile_row) FROM tiles WHERE zoom_level=?', zoomLevel, (error, row) => {
+              if (error) { utils.error(error) }
+              if (row === undefined || row === null) { return resolve(undefined) }
+              if (zoomLevel === undefined || zoomLevel === null) { return resolve(undefined) }
+
+              // Retrieve BBox from southwest & northeast tiles
+              const southwest = mercator.tileToBBox([row['MIN(tile_column)'], row['MIN(tile_row)'], zoomLevel])
+              const northeast = mercator.tileToBBox([row['MAX(tile_column)'], row['MAX(tile_row)'], zoomLevel])
+              const [west, south] = southwest.slice(0, 2)
+              const [east, north] = northeast.slice(2, 4)
+
+              this.bounds = [west, south, east, north]
+              this.center = mercator.bboxToCenter(this.bounds)
+              return resolve(this.bounds)
+            })
+          })
+        })
       })
     })
   }
@@ -154,23 +270,6 @@ module.exports = class MBTiles {
           this.db.run('DELETE FROM metadata')
           const results = assign(currentMetadata, metadata)
 
-          // Validate Metadata
-          // MBTiles spec 1.0.0
-          if (results.name === undefined) { utils.error('Metadata <name> is required') }
-          if (results.bounds === undefined) { utils.error('Metadata <bounds> is required') }
-          if (results.version === undefined) { utils.error('Metadata <version> is required') }
-          if (results.type === undefined) { utils.error('Metadata <type> is required') }
-
-          // MBTiles spec 1.1.0
-          if (results.version === '1.1.0') {
-            if (results.format === undefined) { utils.error('Metadata <format> is required') }
-          }
-
-          // Parse center when bounds is available
-          if (results.center === undefined && metadata.bounds) {
-            results.center = mercator.bboxToCenter(metadata.bounds)
-          }
-
           // Load Metadata to database
           const stmt = this.db.prepare('INSERT INTO metadata VALUES (?, ?)')
           for (const [name, value] of entries(results)) {
@@ -190,6 +289,32 @@ module.exports = class MBTiles {
           })
         })
       })
+    })
+  }
+
+  /**
+   * Validate MBTiles according to the specifications
+   *
+   * @returns Promise<boolean>
+   * @example
+   * mbtiles.validate()
+   *  .then(status => console.log(status), error => console.log(error))
+   */
+  validate () {
+    return new Promise(resolve => {
+      this.metadata().then(metadata => {
+        // MBTiles spec 1.0.0
+        if (metadata.name === undefined) { utils.error('Metadata <name> is required') }
+        if (metadata.format === undefined) { utils.error('Metadata <format> is required') }
+        if (metadata.version === undefined) { utils.error('Metadata <version> is required') }
+        if (metadata.type === undefined) { utils.error('Metadata <type> is required') }
+
+        // MBTiles spec 1.1.0
+        if (metadata.version === '1.1.0') {
+          if (metadata.bounds === undefined) { utils.error('Metadata <bounds> is required') }
+        }
+      })
+      return resolve(true)
     })
   }
 

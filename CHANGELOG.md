@@ -1,6 +1,13 @@
 
 # Changelog
 
+## 2.1.0 - 2017-2-17
+
+- Add validation method `validate()`
+- Auto detect Image format (png/jpg) `format()`
+- Auto detect min & max zoom level `getMinZoom()` & `getMaxZoom()`
+- Auto detect bounding box `getBounds(zoom)`
+
 ## 2.0.0 - 2017-2-2
 
 - Update Typescript definitions
