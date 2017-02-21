@@ -2,6 +2,7 @@ const fs = require('fs')
 const sqlite3 = require('sqlite3-offline')
 const chalk = require('chalk')
 const turfBBox = require('@turf/bbox')
+const mercator = require('global-mercator')
 
 /**
  * Pretty Error message
@@ -127,25 +128,5 @@ module.exports.parseBounds = (extent) => {
   if (extent.type === 'FeatureCollection' || extent.type === 'Feature') {
     return turfBBox(extent)
   }
-
-  // Array
-  if (extent[0] && extent.length === 4 && extent[0][0] === undefined) {
-    return extent
-  }
-
-  // Multiple Arrays
-  if (extent[0] && extent[0][0] !== undefined) {
-    let west = extent[0][0]
-    let south = extent[0][1]
-    let east = extent[0][2]
-    let north = extent[0][3]
-
-    for (const bbox of extent) {
-      if (bbox[0] < west) { west = bbox[0] }
-      if (bbox[1] < south) { south = bbox[1] }
-      if (bbox[2] > east) { east = bbox[2] }
-      if (bbox[3] > north) { north = bbox[3] }
-    }
-    return [west, south, east, north]
-  }
+  return mercator.maxBBox(extent)
 }
