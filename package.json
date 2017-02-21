@@ -1,6 +1,6 @@
 {
   "name": "mbtiles-offline",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "MBTiles for offline",
   "main": "index.js",
   "types": "index.d.js",
@@ -39,6 +39,7 @@
     "chalk": "^1.1.3",
     "global-mercator": "^2.1.0",
     "lodash": "^4.17.4",
+    "slippy-tile": "^1.10.2",
     "sqlite3-offline": "^3.1.18"
   },
   "devDependencies": {
