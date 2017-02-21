@@ -1,5 +1,8 @@
+/// <reference types="geojson" />
+
 type Tile = MBTiles.Tile
 type Metadata = MBTiles.Metadata
+type Bounds = MBTiles.Bounds
 
 /**
  * MBTiles
@@ -10,7 +13,7 @@ declare class MBTiles {
   minzoom?: number
   maxzoom?: number
   format?: string
-  bounds?: MBTiles.Bounds
+  bounds?: Bounds | Bounds[] | GeoJSON.FeatureCollection<any> | GeoJSON.Feature<any>
   type?: string
   version?: string
   center?: MBTiles.Center

@@ -15,4 +15,7 @@ describe('Metadata', () => {
   test('version', () => expect(utils.parseMetadata([{name: 'version', value: '1.1.0'}])).toEqual({version: '1.1.0'}))
   test('minzoom', () => expect(utils.parseMetadata([{name: 'minzoom', value: '10'}])).toEqual({minzoom: 10}))
   test('maxzoom', () => expect(utils.parseMetadata([{name: 'maxzoom', value: '18'}])).toEqual({maxzoom: 18}))
+  test('bounds single', () => expect(utils.parseBounds([-20, -30, 20, 30])).toEqual([-20, -30, 20, 30]))
+  test('bounds multiple', () => expect(utils.parseBounds([[-20, -30, 20, 30], [-110, -30, 120, 80]])).toEqual([-110, -30, 120, 80]))
+  test('bounds geojson', () => expect(utils.parseBounds(require(path.join(__dirname, '..', 'test', 'in', 'extent.json')))).toEqual([-80, 45, -75, 50]))
 })

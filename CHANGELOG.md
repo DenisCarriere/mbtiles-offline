@@ -1,6 +1,10 @@
 
 # Changelog
 
+## 2.2.0 - 2017-2-20
+
+- Allow multiple extent inputs (BBox & BBox[] & GeoJSON)
+
 ## 2.1.0 - 2017-2-17
 
 - Update SQLite3-offline dependency

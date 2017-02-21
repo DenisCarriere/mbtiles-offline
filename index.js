@@ -70,6 +70,9 @@ module.exports = class MBTiles {
           this.type = metadata.type || this.type
           this.version = metadata.version || this.version
           this.url = metadata.url || this.url
+          this.bounds = metadata.bounds || this.bounds
+          if (this.bounds) { this.center = mercator.bboxToCenter(this.bounds) }
+
           this.getFormat().then(format => {
             this.getMinZoom().then(minZoom => {
               this.getMaxZoom().then(maxZoom => {
@@ -191,6 +194,7 @@ module.exports = class MBTiles {
       this.tables().then(() => {
         this.getMaxZoom().then(maxzoom => {
           this.getMinZoom().then(minzoom => {
+            console.log('getbounds')
             // Validate zoom input based on Min & Max zoom levels
             let zoomLevel = (zoom === undefined) ? maxzoom : zoom
             if (zoom > maxzoom) { zoomLevel = maxzoom }
@@ -268,6 +272,7 @@ module.exports = class MBTiles {
         this.db.serialize(() => {
           this.db.run(schema.TABLE.metadata)
           this.db.run('DELETE FROM metadata')
+          if (metadata.bounds) { metadata.bounds = utils.parseBounds(metadata.bounds) }
           const results = assign(currentMetadata, metadata)
 
           // Load Metadata to database
