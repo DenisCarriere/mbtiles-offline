@@ -2,6 +2,7 @@
 
 type Tile = MBTiles.Tile
 type Metadata = MBTiles.Metadata
+type UpdateMetadata = MBTiles.UpdateMetadata
 type Bounds = MBTiles.Bounds
 type BBox = MBTiles.BBox
 type Center = MBTiles.Center
