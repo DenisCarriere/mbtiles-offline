@@ -3,6 +3,8 @@
 type Tile = MBTiles.Tile
 type Metadata = MBTiles.Metadata
 type Bounds = MBTiles.Bounds
+type BBox = MBTiles.BBox
+type Center = MBTiles.Center
 
 /**
  * MBTiles
@@ -13,10 +15,10 @@ declare class MBTiles {
   minzoom?: number
   maxzoom?: number
   format?: string
-  bounds?: Bounds
+  bounds?: BBox
   type?: string
   version?: string
-  center?: MBTiles.Center
+  center?: Center
 
   constructor(uri: string)
 
@@ -44,7 +46,7 @@ declare class MBTiles {
   /**
    * Update Metadata
    */
-  update(metadata: Metadata): Promise<Metadata>
+  update(metadata: UpdateMetadata): Promise<Metadata>
 
   /**
    * Finds all Tile unique hashes
@@ -94,7 +96,7 @@ declare class MBTiles {
   /**
    * Retrieves Bounds
    */
-  getBounds(zoom?: number): Promise<MBTiles.Bounds>
+  getBounds(zoom?: number): Promise<MBTiles.BBox>
 
   /**
    * Validate MBTiles according to the specifications
@@ -119,13 +121,20 @@ declare namespace MBTiles {
     [key: number]: boolean
   }
 
-  export interface Metadata {
+  export interface Metadata extends BaseMetadata {
+    bounds?: BBox
+  }
+
+  export interface UpdateMetadata extends BaseMetadata {
+    bounds?: Bounds
+  }
+
+  export interface BaseMetadata {
     name: string
     description: string
     minzoom?: number
     maxzoom?: number
     format?: string
-    bounds?: Bounds
     type?: string
     version?: string
     center?: Center

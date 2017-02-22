@@ -70,8 +70,12 @@ module.exports = class MBTiles {
           this.type = metadata.type || this.type
           this.version = metadata.version || this.version
           this.url = metadata.url || this.url
-          this.bounds = metadata.bounds || this.bounds
-          if (this.bounds) { this.center = mercator.bboxToCenter(this.bounds) }
+          const bounds = metadata.bounds || this.bounds
+          if (bounds) {
+            const bbox = utils.parseBounds(bounds)
+            this.bounds = bbox
+            this.center = mercator.bboxToCenter(bbox)
+          }
 
           this.getFormat().then(format => {
             this.getMinZoom().then(minZoom => {
@@ -184,10 +188,10 @@ module.exports = class MBTiles {
    * Retrieves Bounds
    *
    * @param {number} zoom Zoom level
-   * @returns {Promise<Bounds>}
+   * @returns {Promise<BBox>}
    * @example
    * mbtiles.getBounds()
-   *   .then(bounds => console.log(bounds))
+   *   .then(bbox => console.log(bbox))
    */
   getBounds (zoom) {
     return new Promise((resolve, reject) => {
@@ -210,9 +214,10 @@ module.exports = class MBTiles {
               const [west, south] = southwest.slice(0, 2)
               const [east, north] = northeast.slice(2, 4)
 
-              this.bounds = [west, south, east, north]
-              this.center = mercator.bboxToCenter(this.bounds)
-              return resolve(this.bounds)
+              const bbox = [west, south, east, north]
+              this.bounds = bbox
+              this.center = mercator.bboxToCenter(bbox)
+              return resolve(bbox)
             })
           })
         })
