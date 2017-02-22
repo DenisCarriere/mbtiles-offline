@@ -20,6 +20,8 @@ declare class MBTiles {
   type?: string
   version?: string
   center?: Center
+  attribution?: string
+  url?: string
 
   constructor(uri: string)
 
