@@ -1,6 +1,10 @@
 
 # Changelog
 
+## 2.3.0 - 2017-2-22
+
+- Drop `extent` input, now `bounds` can handle BBox|BBox[]|GeoJSON
+
 ## 2.2.0 - 2017-2-20
 
 - Allow multiple extent inputs (BBox & BBox[] & GeoJSON)

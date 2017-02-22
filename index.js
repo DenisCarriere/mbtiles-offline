@@ -242,7 +242,7 @@ module.exports = class MBTiles {
    *
    * @param {Metadata} [metadata={}] Metadata according to MBTiles spec 1.1.0
    * @param {string} metadata.attribution Attribution
-   * @param {BBox} metadata.bounds Bounds [west, south, east, north]
+   * @param {BBox} metadata.bounds BBox [west, south, east, north] or Polygon GeoJSON
    * @param {Center} metadata.center Center [lng, lat] or [lng, lat, height]
    * @param {string} metadata.description Description
    * @param {Formats} metadata.format Format 'png' | 'jpg' | 'webp' | 'pbf'

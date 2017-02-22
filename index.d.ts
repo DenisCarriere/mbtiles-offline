@@ -13,7 +13,7 @@ declare class MBTiles {
   minzoom?: number
   maxzoom?: number
   format?: string
-  bounds?: Bounds | Bounds[] | GeoJSON.FeatureCollection<any> | GeoJSON.Feature<any>
+  bounds?: Bounds
   type?: string
   version?: string
   center?: MBTiles.Center
@@ -103,18 +103,23 @@ declare class MBTiles {
 }
 
 declare namespace MBTiles {
-  type Center = [number, number]
-  type Tile = [number, number, number]
-  type Bounds = [number, number, number, number]
-  type Formats = 'png' | 'jpeg' | 'jpeg' | 'pbf'
-  type Types = 'baselayer' | 'overlay'
-  type Versions = '1.0.0' | '1.1.0' | '1.2.0'
+  export type Center = [number, number]
+  export type Tile = [number, number, number]
+  export type BBox = [number, number, number, number]
+  export type Formats = 'png' | 'jpeg' | 'jpeg' | 'pbf'
+  export type Types = 'baselayer' | 'overlay'
+  export type Versions = '1.0.0' | '1.1.0' | '1.2.0'
+  export type Polygon = GeoJSON.Feature<GeoJSON.Polygon>
+  export type Polygons = GeoJSON.FeatureCollection<GeoJSON.Polygon>
+  export type MultiPolygon = GeoJSON.Feature<GeoJSON.MultiPolygon>
+  export type MultiPolygons = GeoJSON.FeatureCollection<GeoJSON.MultiPolygon>
+  export type Bounds = BBox | BBox[] | Polygon | Polygons | MultiPolygon | MultiPolygons
 
-  interface Hashes {
+  export interface Hashes {
     [key: number]: boolean
   }
 
-  interface Metadata {
+  export interface Metadata {
     name: string
     description: string
     minzoom?: number
