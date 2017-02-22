@@ -194,7 +194,6 @@ module.exports = class MBTiles {
       this.tables().then(() => {
         this.getMaxZoom().then(maxzoom => {
           this.getMinZoom().then(minzoom => {
-            console.log('getbounds')
             // Validate zoom input based on Min & Max zoom levels
             let zoomLevel = (zoom === undefined) ? maxzoom : zoom
             if (zoom > maxzoom) { zoomLevel = maxzoom }
