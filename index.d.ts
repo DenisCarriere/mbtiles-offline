@@ -129,6 +129,8 @@ declare namespace MBTiles {
     type?: string
     version?: string
     center?: Center
+    attribution?: string
+    url?: string
   }
 }
 export = MBTiles
