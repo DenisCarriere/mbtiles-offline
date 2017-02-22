@@ -1,6 +1,6 @@
 {
   "name": "mbtiles-offline",
-  "version": "2.3.2",
+  "version": "2.3.3",
   "description": "MBTiles for offline",
   "main": "index.js",
   "types": "index.d.js",
@@ -11,6 +11,8 @@
     "schema/"
   ],
   "scripts": {
+    "prepublish": "npm run lint && npm run types && npm run test",
+    "types": "tsc index.d.ts --lib es6",
     "test": "npm run lint && jest --coverage",
     "lint": "standard",
     "docs": "documentation readme index.js --shallow --section=API --markdown-toc"
