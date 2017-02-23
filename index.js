@@ -64,6 +64,8 @@ module.exports = class MBTiles {
           if (error) { utils.error(error) }
 
           const metadata = utils.parseMetadata(rows)
+          this.minzoom = metadata.minzoom
+          this.maxzoom = metadata.maxzoom
           this.attribution = metadata.attribution || this.attribution
           this.description = metadata.description || this.description
           this.name = metadata.name || this.name
@@ -122,6 +124,7 @@ module.exports = class MBTiles {
    */
   getMinZoom () {
     return new Promise((resolve, reject) => {
+      if (this.minzoom !== undefined) { return resolve(this.minzoom) }
       this.tables().then(() => {
         this.db.get('SELECT MIN(zoom_level) FROM tiles', (error, row) => {
           if (error) { utils.error(error) }
@@ -146,6 +149,7 @@ module.exports = class MBTiles {
    */
   getMaxZoom () {
     return new Promise((resolve, reject) => {
+      if (this.maxzoom !== undefined) { return resolve(this.maxzoom) }
       this.tables().then(() => {
         this.db.get('SELECT MAX(zoom_level) FROM tiles', (error, row) => {
           if (error) { utils.error(error) }
@@ -170,6 +174,7 @@ module.exports = class MBTiles {
    */
   getFormat () {
     return new Promise((resolve, reject) => {
+      if (this.format !== undefined) { return resolve(this.format) }
       this.tables().then(() => {
         this.db.get('SELECT tile_data FROM tiles LIMIT 1', (error, row) => {
           if (error) { utils.error(error) }
@@ -195,6 +200,7 @@ module.exports = class MBTiles {
    */
   getBounds (zoom) {
     return new Promise((resolve, reject) => {
+      if (this.bounds !== undefined) { return resolve(this.bounds) }
       this.tables().then(() => {
         this.getMaxZoom().then(maxzoom => {
           this.getMinZoom().then(minzoom => {
