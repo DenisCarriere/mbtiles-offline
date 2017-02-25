@@ -24,6 +24,8 @@ module.exports = class MBTiles {
     this.uri = uri
     this.version = '1.1.0'
     this.type = 'baselayer'
+    this.errors = []
+    this.ok = true
   }
 
   /**
@@ -40,8 +42,14 @@ module.exports = class MBTiles {
     const [x, y, z] = tile
     return new Promise((resolve, reject) => {
       this.tables().then(() => {
-        this.db.run('INSERT INTO tiles (tile_column, tile_row, zoom_level, tile_data) VALUES (?, ?, ?, ?)', [x, y, z, image], error => {
-          if (error) { utils.error(error) }
+        const query = 'INSERT INTO tiles (tile_column, tile_row, zoom_level, tile_data) VALUES (?, ?, ?, ?)'
+        this.db.run(query, [x, y, z, image], error => {
+          if (error) {
+            utils.warning(error)
+            this.errors.push(error)
+            this.ok = false
+            return resolve(false)
+          }
           return resolve(true)
         })
       })
@@ -59,9 +67,21 @@ module.exports = class MBTiles {
   metadata () {
     return new Promise((resolve, reject) => {
       this.db.serialize(() => {
-        this.db.run(schema.TABLE.metadata)
+        this.db.run(schema.TABLE.metadata, error => {
+          if (error) {
+            utils.warning(error)
+            this.errors.push(error)
+            this.ok = false
+            return resolve({})
+          }
+        })
         this.db.all('SELECT * FROM metadata', (error, rows) => {
-          if (error) { utils.error(error) }
+          if (error) {
+            utils.warning(error)
+            this.errors.push(error)
+            this.ok = false
+            return resolve(undefined)
+          }
 
           const metadata = utils.parseMetadata(rows)
           this.minzoom = metadata.minzoom
@@ -83,7 +103,8 @@ module.exports = class MBTiles {
             this.getMinZoom().then(minZoom => {
               this.getMaxZoom().then(maxZoom => {
                 this.getBounds().then(bounds => {
-                  const results = JSON.parse(JSON.stringify(omit(this, ['_table', '_index', 'db', 'uri'])))
+                  const exclude = ['_table', '_index', 'db', 'uri', 'ok', 'errors']
+                  const results = JSON.parse(JSON.stringify(omit(this, exclude)))
                   return resolve(results)
                 })
               })
@@ -106,8 +127,14 @@ module.exports = class MBTiles {
   delete (tile) {
     return new Promise((resolve, reject) => {
       this.tables().then(() => {
-        this.db.run('DELETE FROM tiles WHERE tile_column=? AND tile_row=? AND zoom_level=?', tile, error => {
-          if (error) { utils.error(error) }
+        const query = 'DELETE FROM tiles WHERE tile_column=? AND tile_row=? AND zoom_level=?'
+        this.db.run(query, tile, error => {
+          if (error) {
+            utils.warning(error)
+            this.errors.push(error)
+            this.ok = false
+            resolve(false)
+          }
           return resolve(true)
         })
       })
@@ -127,7 +154,12 @@ module.exports = class MBTiles {
       if (this.minzoom !== undefined) { return resolve(this.minzoom) }
       this.tables().then(() => {
         this.db.get('SELECT MIN(zoom_level) FROM tiles', (error, row) => {
-          if (error) { utils.error(error) }
+          if (error) {
+            utils.warning(error)
+            this.errors.push(error)
+            this.ok = false
+            return resolve(undefined)
+          }
           if (row === undefined || row === null) { return resolve(undefined) }
 
           const minzoom = row['MIN(zoom_level)']
@@ -149,10 +181,16 @@ module.exports = class MBTiles {
    */
   getMaxZoom () {
     return new Promise((resolve, reject) => {
+      if (this.db === undefined) { return resolve(undefined) }
       if (this.maxzoom !== undefined) { return resolve(this.maxzoom) }
       this.tables().then(() => {
         this.db.get('SELECT MAX(zoom_level) FROM tiles', (error, row) => {
-          if (error) { utils.error(error) }
+          if (error) {
+            utils.warning(error)
+            this.errors.push(error)
+            this.ok = false
+            return resolve(undefined)
+          }
           if (row === undefined || row === null) { return resolve(undefined) }
 
           const maxzoom = row['MAX(zoom_level)']
@@ -177,7 +215,12 @@ module.exports = class MBTiles {
       if (this.format !== undefined) { return resolve(this.format) }
       this.tables().then(() => {
         this.db.get('SELECT tile_data FROM tiles LIMIT 1', (error, row) => {
-          if (error) { utils.error(error) }
+          if (error) {
+            utils.warning(error)
+            this.errors.push(error)
+            this.ok = false
+            return resolve(undefined)
+          }
           if (row === undefined || row === null) { return resolve(undefined) }
 
           const format = tiletype.type(row['tile_data'])
@@ -209,8 +252,14 @@ module.exports = class MBTiles {
             if (zoom > maxzoom) { zoomLevel = maxzoom }
             if (zoom < minzoom) { zoomLevel = minzoom }
 
-            this.db.get('SELECT MIN(tile_column), MIN(tile_row), MAX(tile_column), MAX(tile_row) FROM tiles WHERE zoom_level=?', zoomLevel, (error, row) => {
-              if (error) { utils.error(error) }
+            const query = 'SELECT MIN(tile_column), MIN(tile_row), MAX(tile_column), MAX(tile_row) FROM tiles WHERE zoom_level=?'
+            this.db.get(query, zoomLevel, (error, row) => {
+              if (error) {
+                utils.warning(error)
+                this.errors.push(error)
+                this.ok = false
+                return resolve(undefined)
+              }
               if (row === undefined || row === null) { return resolve(undefined) }
               if (zoomLevel === undefined || zoomLevel === null) { return resolve(undefined) }
 
@@ -280,8 +329,22 @@ module.exports = class MBTiles {
     return new Promise((resolve, reject) => {
       this.metadata().then(currentMetadata => {
         this.db.serialize(() => {
-          this.db.run(schema.TABLE.metadata)
-          this.db.run('DELETE FROM metadata')
+          this.db.run(schema.TABLE.metadata, error => {
+            if (error) {
+              utils.warning(error)
+              this.errors.push(error)
+              this.ok = false
+              return resolve(undefined)
+            }
+          })
+          this.db.run('DELETE FROM metadata', error => {
+            if (error) {
+              utils.warning(error)
+              this.errors.push(error)
+              this.ok = false
+              return resolve(undefined)
+            }
+          })
           if (metadata.bounds) { metadata.bounds = utils.parseBounds(metadata.bounds) }
           const results = assign(currentMetadata, metadata)
 
@@ -289,17 +352,32 @@ module.exports = class MBTiles {
           const stmt = this.db.prepare('INSERT INTO metadata VALUES (?, ?)')
           for (const [name, value] of entries(results)) {
             // String or Number
+            let query
             if (typeof value !== 'object') {
-              stmt.run([name, String(value)])
+              query = [name, String(value)]
             // Array
             } else if (value.length) {
-              stmt.run([name, value.join(',')])
+              query = [name, value.join(',')]
             // JSON
             } else {
-              stmt.run([name, JSON.stringify(value)])
+              query = [name, JSON.stringify(value)]
             }
+            stmt.run(query, error => {
+              if (error) {
+                utils.warning(error)
+                this.errors.push(error)
+                this.ok = false
+                return resolve(undefined)
+              }
+            })
           }
-          stmt.finalize(() => {
+          stmt.finalize(error => {
+            if (error) {
+              utils.warning(error)
+              this.errors.push(error)
+              this.ok = false
+              return resolve(undefined)
+            }
             return resolve(results)
           })
         })
@@ -318,6 +396,8 @@ module.exports = class MBTiles {
   validate () {
     return new Promise(resolve => {
       this.metadata().then(metadata => {
+        if (this.errors.length) { utils.error(this.errors) }
+
         // MBTiles spec 1.0.0
         if (metadata.name === undefined) { utils.error('Metadata <name> is required') }
         if (metadata.format === undefined) { utils.error('Metadata <format> is required') }
@@ -349,9 +429,16 @@ module.exports = class MBTiles {
       this.tables().then(() => {
         // Search all - Not optimized for memory leaks
         if (tiles.length === 0) {
-          this.db.all('SELECT tile_column, tile_row, zoom_level FROM tiles', (error, rows) => {
-            if (error) { utils.error(error) }
-            return resolve(rows.map(row => [row.tile_column, row.tile_row, row.zoom_level]))
+          const query = 'SELECT tile_column, tile_row, zoom_level FROM tiles'
+          this.db.all(query, (error, rows) => {
+            if (error) {
+              utils.warning(error)
+              this.errors.push(error)
+              this.ok = false
+              return resolve(undefined)
+            }
+            const tiles = rows.map(row => [row.tile_column, row.tile_row, row.zoom_level])
+            return resolve(tiles)
           })
         }
 
@@ -390,7 +477,12 @@ module.exports = class MBTiles {
             AND tile_row<=?`)
           for (const [zoom, { west, south, east, north, index }] of entries(levels)) {
             stmt.all([zoom, west, east, south, north], (error, rows) => {
-              if (error) { utils.error(error) }
+              if (error) {
+                utils.warning(error)
+                this.errors.push(error)
+                this.ok = false
+                return resolve(undefined)
+              }
 
               // Remove any extra tiles
               for (const row of rows) {
@@ -419,9 +511,13 @@ module.exports = class MBTiles {
    */
   findOne (tile) {
     return new Promise((resolve, reject) => {
-      this.db.get('SELECT tile_data FROM tiles WHERE tile_column=? AND tile_row=? AND zoom_level=?', tile, (error, row) => {
+      const query = 'SELECT tile_data FROM tiles WHERE tile_column=? AND tile_row=? AND zoom_level=?'
+      this.db.get(query, tile, (error, row) => {
         if (error) {
-          utils.error(error)
+          utils.warning(error)
+          this.errors.push(error)
+          this.ok = false
+          return resolve(undefined)
         } else if (row) {
           return resolve(row.tile_data)
         } else {
@@ -444,8 +540,21 @@ module.exports = class MBTiles {
     return new Promise(resolve => {
       if (this._table) { return resolve(true) }
       this.db.serialize(() => {
-        this.db.run(schema.TABLE.metadata)
-        this.db.run(schema.TABLE.tiles, () => {
+        this.db.run(schema.TABLE.metadata, error => {
+          if (error) {
+            utils.warning(error)
+            this.errors.push(error)
+            this.ok = false
+            return resolve(false)
+          }
+        })
+        this.db.run(schema.TABLE.tiles, error => {
+          if (error) {
+            utils.warning(error)
+            this.errors.push(error)
+            this.ok = false
+            return resolve(false)
+          }
           this._table = true
           return resolve(true)
         })
@@ -466,8 +575,21 @@ module.exports = class MBTiles {
       if (this._index) { return resolve(true) }
       this.tables().then(() => {
         this.db.serialize(() => {
-          this.db.run(schema.INDEX.tiles)
-          this.db.run(schema.INDEX.metadata, () => {
+          this.db.run(schema.INDEX.tiles, error => {
+            if (error) {
+              utils.warning(error)
+              this.errors.push(error)
+              this.ok = false
+              return resolve(false)
+            }
+          })
+          this.db.run(schema.INDEX.metadata, error => {
+            if (error) {
+              utils.warning(error)
+              this.errors.push(error)
+              this.ok = false
+              return resolve(false)
+            }
             this._index = true
             return resolve(true)
           })

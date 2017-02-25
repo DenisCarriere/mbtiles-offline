@@ -1,0 +1,19 @@
+{
+	"version": "1.1.0",
+	"type": "baselayer",
+	"minzoom": 0,
+	"maxzoom": 4,
+	"description": "demo description",
+	"name": "corrupt_null",
+	"bounds": [
+		-179.9999999749438,
+		-69.99999999526695,
+		179.9999999749438,
+		84.99999999782301
+	],
+	"center": [
+		0,
+		7.5
+	],
+	"format": "png"
+}

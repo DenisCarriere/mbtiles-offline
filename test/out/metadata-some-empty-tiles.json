@@ -1,0 +1,18 @@
+{
+	"version": "1.0.0",
+	"type": "baselayer",
+	"minzoom": 1,
+	"maxzoom": 2,
+	"name": "US Debt Held By Foreign Nations",
+	"bounds": [
+		-180,
+		-85.05112877980659,
+		180,
+		85.05112877980659
+	],
+	"center": [
+		0,
+		0
+	],
+	"format": "png"
+}

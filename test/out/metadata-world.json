@@ -1,0 +1,17 @@
+{
+	"version": "1.1.0",
+	"type": "baselayer",
+	"minzoom": 0,
+	"maxzoom": 0,
+	"format": "jpg",
+	"bounds": [
+		-180,
+		-85.051129,
+		180,
+		85.051129
+	],
+	"center": [
+		0,
+		0
+	]
+}

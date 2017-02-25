@@ -1,0 +1,19 @@
+{
+	"version": "1.1.0",
+	"type": "baselayer",
+	"minzoom": 2,
+	"maxzoom": 4,
+	"description": "Unnamed atlas created on 2017-01-25 14:08:12 by MOBAC",
+	"name": "Unnamed atlas",
+	"bounds": [
+		-67.5,
+		41.046,
+		-45.088,
+		55.777
+	],
+	"center": [
+		-56.294,
+		48.4115
+	],
+	"format": "png"
+}

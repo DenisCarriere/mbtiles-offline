@@ -1,5 +1,8 @@
+const path = require('path')
 const MBTiles = require('../')
-const mbtiles = new MBTiles('/Users/mac/mbtiles/World-DigitalGlobe-Imagery.mbtiles')
+
+// const mbtiles = new MBTiles('./in/corrupt.mbtiles')
+const mbtiles = new MBTiles(path.join(__dirname,  'in', 'corrupt.mbtiles'))
 // const utils = ('./utils')
 // mbtiles.metadata().then(data => console.log(data))
 // mbtiles.findOne([1, 2, 2]).then(data => fs.writeFileSync('tile.png', data))
@@ -13,6 +16,7 @@ const mbtiles = new MBTiles('/Users/mac/mbtiles/World-DigitalGlobe-Imagery.mbtil
 
 // mbtiles.update({bounds: [[-20, -30, 20, 30], [-110, -30, 120, 80]]}).then(metadata => console.log(metadata))
 mbtiles.metadata().then(metadata => {
+  console.log(metadata)
   mbtiles.getMaxZoom().then(maxzoom => console.log(maxzoom))
 })
 // mbtiles.update()

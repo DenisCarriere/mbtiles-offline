@@ -1,0 +1,17 @@
+{
+	"version": "1.0.0",
+	"type": "baselayer",
+	"minzoom": 8,
+	"maxzoom": 8,
+	"name": "ne-countries",
+	"bounds": [
+		-180,
+		-85.0511,
+		180,
+		85.0511
+	],
+	"center": [
+		0,
+		0
+	]
+}

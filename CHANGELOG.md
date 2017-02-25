@@ -1,6 +1,11 @@
 
 # Changelog
 
+## 2.4.0 - 2017-2-25
+
+- Test for corrupt MBTiles
+- Add more error detection
+
 ## 2.3.0 - 2017-2-22
 
 - Update `bounds` Typescript definition
