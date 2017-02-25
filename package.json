@@ -48,6 +48,7 @@
     "@types/node": "^7.0.5",
     "coveralls": "^2.11.15",
     "documentation": "^4.0.0-beta.18",
+    "fs-extra": "^2.0.0",
     "jest-cli": "^18.1.0",
     "load-json-file": "^2.0.0",
     "standard": "^8.6.0",

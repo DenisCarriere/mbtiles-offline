@@ -4,6 +4,7 @@ const fs = require('fs')
 const MBTiles = require('.')
 const load = require('load-json-file')
 const write = require('write-json-file')
+const copySync = require('fs-extra').copySync
 
 const options = {
   name: 'Foo',
@@ -42,11 +43,13 @@ describe('plain_1', () => {
 })
 
 describe('save', () => {
-  const mbtiles = new MBTiles(directories.in + 'save.mbtiles')
+  copySync(directories.in + 'save.mbtiles', directories.out + 'save.mbtiles')
+  const mbtiles = new MBTiles(directories.out + 'save.mbtiles')
   test('index', () => mbtiles.index().then(data => expect(data).toBeDefined()))
-  test('save', () => mbtiles.save([0, 0, 0], image).then(data => expect(data).toBeDefined()))
+  test('save - [0, 0, 0]', () => mbtiles.save([0, 0, 0], image).then(data => expect(data).toBeDefined()))
+  test('save - [1, 1, 1]', () => mbtiles.save([1, 1, 1], image).then(data => expect(data).toBeDefined()))
   test('update', () => mbtiles.update(options).then(data => expect(data).toEqual(metadata)))
-  test('delete', () => mbtiles.delete([0, 0, 0]).then(data => expect(data).toBeDefined()))
+  test('delete - [1, 1, 1]', () => mbtiles.delete([1, 1, 1]).then(data => expect(data).toBeDefined()))
 })
 
 describe('blank', () => {
