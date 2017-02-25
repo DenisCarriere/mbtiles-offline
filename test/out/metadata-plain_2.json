@@ -14,5 +14,6 @@
 		0,
 		5
 	],
-	"format": "png"
+	"format": "png",
+	"formatter": "function(options, data) { if (options.format === 'full') { return '' + data.NAME + ' (Population: ' + data.POP2005 + ')'; } else { return '' + data.NAME + ''; } }"
 }

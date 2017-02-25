@@ -52,9 +52,12 @@ module.exports.connect = (uri) => {
 module.exports.parseMetadata = (data) => {
   const metadata = {}
   if (data) {
-    data.map(item => {
+    for (const item of data) {
       const name = item.name.toLowerCase()
       const value = item.value
+
+      if (value === null || value === undefined || value === '') { continue }
+
       switch (name) {
         case 'minzoom':
         case 'maxzoom':
@@ -112,7 +115,7 @@ module.exports.parseMetadata = (data) => {
         default:
           metadata[name] = value
       }
-    })
+    }
   }
   return metadata
 }

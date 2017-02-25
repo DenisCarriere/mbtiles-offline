@@ -11,7 +11,9 @@
 		85.0511
 	],
 	"center": [
-		0,
-		0
-	]
+		-74,
+		40.75,
+		8
+	],
+	"template": "{{#__location__}}{{/__location__}}{{#__teaser__}}<pre>Name:   {{name}}\nSearch: {{search}}\nPop'n:  {{population}}\nLon:    {{lon}}\nLat:    {{lat}}\nBounds: {{bounds}}</pre>{{/__teaser__}}{{#__full__}}{{/__full__}}"
 }

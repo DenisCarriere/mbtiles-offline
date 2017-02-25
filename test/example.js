@@ -2,7 +2,7 @@ const path = require('path')
 const MBTiles = require('../')
 
 // const mbtiles = new MBTiles('./in/corrupt.mbtiles')
-const mbtiles = new MBTiles(path.join(__dirname,  'in', 'corrupt.mbtiles'))
+const mbtiles = new MBTiles(path.join(__dirname,  'in', 'geocoder_data.mbtiles'))
 // const utils = ('./utils')
 // mbtiles.metadata().then(data => console.log(data))
 // mbtiles.findOne([1, 2, 2]).then(data => fs.writeFileSync('tile.png', data))

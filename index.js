@@ -104,7 +104,8 @@ module.exports = class MBTiles {
               this.getMaxZoom().then(maxZoom => {
                 this.getBounds().then(bounds => {
                   const exclude = ['_table', '_index', 'db', 'uri', 'ok', 'errors']
-                  const results = JSON.parse(JSON.stringify(omit(this, exclude)))
+                  const json = omit(assign(this, metadata), exclude)
+                  const results = JSON.parse(JSON.stringify(json))
                   return resolve(results)
                 })
               })

@@ -14,5 +14,8 @@
 		0,
 		0
 	],
-	"format": "png"
+	"format": "png",
+	"legend": "<div id='legend-debt'>\n  Total US foreign held debt:<br>\n  <strong style=\"font-size: 18px; font-weight: bold; line-height: 1\">$4.45 trillion</strong><br>\n<span style=\"font-size: 10px\">\nSource: <a href='http://www.washingtonpost.com/wp-srv/special/business/foreign-held-us-debt/' target='_blank'>The Washington Post, 2011</a>\n</span>\n</div>",
+	"template": "{{#__teaser__}}{{Country}}{{/__teaser__}}",
+	"spec": "1.2"
 }

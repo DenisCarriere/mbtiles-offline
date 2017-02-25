@@ -5,6 +5,7 @@
 
 - Test for corrupt MBTiles
 - Add more error detection
+- Remove undefined, blank & null values from metadata() & update()
 
 ## 2.3.0 - 2017-2-22
 

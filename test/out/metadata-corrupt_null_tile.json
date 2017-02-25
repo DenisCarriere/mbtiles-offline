@@ -15,5 +15,6 @@
 		0,
 		7.5
 	],
-	"format": "png"
+	"format": "png",
+	"json": "{\"level1\":{\"level2\":\"property\"},\"version\":\"2.0.0\"}"
 }
