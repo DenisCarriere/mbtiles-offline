@@ -3,6 +3,7 @@ const sqlite3 = require('sqlite3-offline')
 const chalk = require('chalk')
 const turfBBox = require('@turf/bbox')
 const mercator = require('global-mercator')
+const dateline = require('bbox-dateline')
 
 /**
  * Pretty Error message
@@ -129,7 +130,7 @@ module.exports.parseMetadata = (data) => {
 module.exports.parseBounds = (extent) => {
   // GeoJSON.FeatureCollection
   if (extent.type === 'FeatureCollection' || extent.type === 'Feature') {
-    return turfBBox(extent)
+    return dateline.bbox(turfBBox(extent))
   }
-  return mercator.maxBBox(extent)
+  return dateline.bbox(mercator.maxBBox(extent))
 }

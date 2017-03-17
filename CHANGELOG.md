@@ -1,6 +1,10 @@
 
 # Changelog
 
+## 2.5.0 - 2017-3-16
+
+- Add `bbox-dateline` to support malformed bbox extents (+/-180 longitudes "Fiji extent")
+
 ## 2.4.0 - 2017-2-25
 
 - Test for corrupt MBTiles
