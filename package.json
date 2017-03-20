@@ -1,14 +1,14 @@
 {
   "name": "mbtiles-offline",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "description": "MBTiles for offline",
   "main": "index.js",
   "types": "index.d.js",
   "files": [
     "index.js",
     "index.d.ts",
-    "utils/",
-    "schema/"
+    "utils",
+    "schema"
   ],
   "scripts": {
     "prepublish": "npm run lint && npm run types && npm run test",
@@ -38,7 +38,7 @@
   "dependencies": {
     "@mapbox/tiletype": "^0.3.1",
     "@turf/bbox": "^3.10.3",
-    "bbox-dateline": "^1.0.3",
+    "bbox-dateline": "^1.1.0",
     "chalk": "^1.1.3",
     "global-mercator": "^2.1.0",
     "lodash": "^4.17.4",
