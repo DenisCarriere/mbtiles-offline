@@ -3,7 +3,7 @@
 	"type": "baselayer",
 	"minzoom": 0,
 	"maxzoom": 0,
-	"format": "jpg",
+	"format": "jpeg",
 	"bounds": [
 		-180,
 		-85.051129,

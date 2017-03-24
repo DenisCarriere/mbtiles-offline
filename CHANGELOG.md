@@ -1,6 +1,10 @@
 
 # Changelog
 
+## 2.7.0 - 2017-3-24
+
+- Use `jpeg` in metadata instead of `jpg` (bug in GeoServer, cannot be detected as valid MBTiles)
+
 ## 2.5.0 - 2017-3-16
 
 - Add `bbox-dateline` to support malformed bbox extents (+/-180 longitudes "Fiji extent")

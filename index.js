@@ -224,8 +224,9 @@ module.exports = class MBTiles {
           }
           if (row === undefined || row === null) { return resolve(undefined) }
 
-          const format = tiletype.type(row['tile_data'])
+          let format = tiletype.type(row['tile_data'])
           if (format === undefined || format === null) { return resolve(undefined) }
+          if (format === 'jpg') format = 'jpeg'
           this.format = format
           return resolve(format)
         })
@@ -347,6 +348,7 @@ module.exports = class MBTiles {
             }
           })
           if (metadata.bounds) { metadata.bounds = utils.parseBounds(metadata.bounds) }
+          if (metadata.format && metadata.format.toLowerCase() === 'jpg') metadata.format = 'jpeg'
           const results = assign(currentMetadata, metadata)
 
           // Load Metadata to database

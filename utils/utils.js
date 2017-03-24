@@ -81,8 +81,6 @@ module.exports.parseMetadata = (data) => {
               break
             case 3:
               metadata.center = [center[0], center[1], center[2]]
-              break
-            default:
           }
           break
         case 'type':
@@ -90,17 +88,16 @@ module.exports.parseMetadata = (data) => {
             case 'overlay':
             case 'baselayer':
               metadata[name] = value
-              break
-            default:
           }
           break
         case 'format':
-          switch (value) {
+          switch (value.toLowerCase()) {
             case 'png':
-            case 'jpg':
               metadata[name] = value
               break
-            default:
+            case 'jpeg':
+            case 'jpg':
+              metadata[name] = 'jpeg'
           }
           break
         case 'version':
@@ -109,8 +106,6 @@ module.exports.parseMetadata = (data) => {
             case '1.1.0':
             case '1.2.0':
               metadata[name] = value
-              break
-            default:
           }
           break
         default:
