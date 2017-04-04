@@ -5,6 +5,7 @@ const mercator = require('global-mercator')
 const tiletype = require('@mapbox/tiletype')
 const utils = require('./utils')
 const schema = require('./schema')
+const warning = require('debug')('mbtiles-offline:warning')
 
 /**
  * MBTiles
@@ -45,7 +46,7 @@ module.exports = class MBTiles {
         const query = 'INSERT INTO tiles (tile_column, tile_row, zoom_level, tile_data) VALUES (?, ?, ?, ?)'
         this.db.run(query, [x, y, z, image], error => {
           if (error) {
-            utils.warning(error)
+            warning(error)
             this.errors.push(error)
             this.ok = false
             return resolve(false)
@@ -69,7 +70,7 @@ module.exports = class MBTiles {
       this.db.serialize(() => {
         this.db.run(schema.TABLE.metadata, error => {
           if (error) {
-            utils.warning(error)
+            warning(error)
             this.errors.push(error)
             this.ok = false
             return resolve({})
@@ -77,7 +78,7 @@ module.exports = class MBTiles {
         })
         this.db.all('SELECT * FROM metadata', (error, rows) => {
           if (error) {
-            utils.warning(error)
+            warning(error)
             this.errors.push(error)
             this.ok = false
             return resolve(undefined)
@@ -131,7 +132,7 @@ module.exports = class MBTiles {
         const query = 'DELETE FROM tiles WHERE tile_column=? AND tile_row=? AND zoom_level=?'
         this.db.run(query, tile, error => {
           if (error) {
-            utils.warning(error)
+            warning(error)
             this.errors.push(error)
             this.ok = false
             resolve(false)
@@ -156,7 +157,7 @@ module.exports = class MBTiles {
       this.tables().then(() => {
         this.db.get('SELECT MIN(zoom_level) FROM tiles', (error, row) => {
           if (error) {
-            utils.warning(error)
+            warning(error)
             this.errors.push(error)
             this.ok = false
             return resolve(undefined)
@@ -187,7 +188,7 @@ module.exports = class MBTiles {
       this.tables().then(() => {
         this.db.get('SELECT MAX(zoom_level) FROM tiles', (error, row) => {
           if (error) {
-            utils.warning(error)
+            warning(error)
             this.errors.push(error)
             this.ok = false
             return resolve(undefined)
@@ -217,7 +218,7 @@ module.exports = class MBTiles {
       this.tables().then(() => {
         this.db.get('SELECT tile_data FROM tiles LIMIT 1', (error, row) => {
           if (error) {
-            utils.warning(error)
+            warning(error)
             this.errors.push(error)
             this.ok = false
             return resolve(undefined)
@@ -257,7 +258,7 @@ module.exports = class MBTiles {
             const query = 'SELECT MIN(tile_column), MIN(tile_row), MAX(tile_column), MAX(tile_row) FROM tiles WHERE zoom_level=?'
             this.db.get(query, zoomLevel, (error, row) => {
               if (error) {
-                utils.warning(error)
+                warning(error)
                 this.errors.push(error)
                 this.ok = false
                 return resolve(undefined)
@@ -333,7 +334,7 @@ module.exports = class MBTiles {
         this.db.serialize(() => {
           this.db.run(schema.TABLE.metadata, error => {
             if (error) {
-              utils.warning(error)
+              warning(error)
               this.errors.push(error)
               this.ok = false
               return resolve(undefined)
@@ -341,7 +342,7 @@ module.exports = class MBTiles {
           })
           this.db.run('DELETE FROM metadata', error => {
             if (error) {
-              utils.warning(error)
+              warning(error)
               this.errors.push(error)
               this.ok = false
               return resolve(undefined)
@@ -367,7 +368,7 @@ module.exports = class MBTiles {
             }
             stmt.run(query, error => {
               if (error) {
-                utils.warning(error)
+                warning(error)
                 this.errors.push(error)
                 this.ok = false
                 return resolve(undefined)
@@ -376,7 +377,7 @@ module.exports = class MBTiles {
           }
           stmt.finalize(error => {
             if (error) {
-              utils.warning(error)
+              warning(error)
               this.errors.push(error)
               this.ok = false
               return resolve(undefined)
@@ -399,17 +400,17 @@ module.exports = class MBTiles {
   validate () {
     return new Promise(resolve => {
       this.metadata().then(metadata => {
-        if (this.errors.length) { utils.error(this.errors) }
+        if (this.errors.length) throw new Error(this.errors)
 
         // MBTiles spec 1.0.0
-        if (metadata.name === undefined) { utils.error('Metadata <name> is required') }
-        if (metadata.format === undefined) { utils.error('Metadata <format> is required') }
-        if (metadata.version === undefined) { utils.error('Metadata <version> is required') }
-        if (metadata.type === undefined) { utils.error('Metadata <type> is required') }
+        if (metadata.name === undefined) throw new Error('Metadata <name> is required')
+        if (metadata.format === undefined) throw new Error('Metadata <format> is required')
+        if (metadata.version === undefined) throw new Error('Metadata <version> is required')
+        if (metadata.type === undefined) throw new Error('Metadata <type> is required')
 
         // MBTiles spec 1.1.0
         if (metadata.version === '1.1.0') {
-          if (metadata.bounds === undefined) { utils.error('Metadata <bounds> is required') }
+          if (metadata.bounds === undefined) throw new Error('Metadata <bounds> is required')
         }
       })
       return resolve(true)
@@ -435,7 +436,7 @@ module.exports = class MBTiles {
           const query = 'SELECT tile_column, tile_row, zoom_level FROM tiles'
           this.db.all(query, (error, rows) => {
             if (error) {
-              utils.warning(error)
+              warning(error)
               this.errors.push(error)
               this.ok = false
               return resolve(undefined)
@@ -481,7 +482,7 @@ module.exports = class MBTiles {
           for (const [zoom, { west, south, east, north, index }] of entries(levels)) {
             stmt.all([zoom, west, east, south, north], (error, rows) => {
               if (error) {
-                utils.warning(error)
+                warning(error)
                 this.errors.push(error)
                 this.ok = false
                 return resolve(undefined)
@@ -517,14 +518,14 @@ module.exports = class MBTiles {
       const query = 'SELECT tile_data FROM tiles WHERE tile_column=? AND tile_row=? AND zoom_level=?'
       this.db.get(query, tile, (error, row) => {
         if (error) {
-          utils.warning(error)
+          warning(error)
           this.errors.push(error)
           this.ok = false
           return resolve(undefined)
         } else if (row) {
           return resolve(row.tile_data)
         } else {
-          utils.warning('<findOne> not found')
+          warning('<findOne> not found')
           return resolve(undefined)
         }
       })
@@ -545,7 +546,7 @@ module.exports = class MBTiles {
       this.db.serialize(() => {
         this.db.run(schema.TABLE.metadata, error => {
           if (error) {
-            utils.warning(error)
+            warning(error)
             this.errors.push(error)
             this.ok = false
             return resolve(false)
@@ -553,7 +554,7 @@ module.exports = class MBTiles {
         })
         this.db.run(schema.TABLE.tiles, error => {
           if (error) {
-            utils.warning(error)
+            warning(error)
             this.errors.push(error)
             this.ok = false
             return resolve(false)
@@ -580,7 +581,7 @@ module.exports = class MBTiles {
         this.db.serialize(() => {
           this.db.run(schema.INDEX.tiles, error => {
             if (error) {
-              utils.warning(error)
+              warning(error)
               this.errors.push(error)
               this.ok = false
               return resolve(false)
@@ -588,7 +589,7 @@ module.exports = class MBTiles {
           })
           this.db.run(schema.INDEX.metadata, error => {
             if (error) {
-              utils.warning(error)
+              warning(error)
               this.errors.push(error)
               this.ok = false
               return resolve(false)
@@ -625,7 +626,7 @@ module.exports = class MBTiles {
       this.findAll(tiles).then(existingTiles => {
         const index = {}
         for (const tile of existingTiles) { index[mercator.hash(tile)] = true }
-        if (Object.keys(index).length === 0) { utils.warning('<hashes> is empty') }
+        if (Object.keys(index).length === 0) warning('<hashes> is empty')
         return resolve(index)
       })
     })

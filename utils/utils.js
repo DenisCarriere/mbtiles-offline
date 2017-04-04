@@ -1,23 +1,8 @@
 const fs = require('fs')
 const sqlite3 = require('sqlite3-offline')
-const chalk = require('chalk')
 const turfBBox = require('@turf/bbox')
 const mercator = require('global-mercator')
 const dateline = require('bbox-dateline')
-
-/**
- * Pretty Error message
- */
-module.exports.error = (message) => {
-  throw new Error(chalk.bgRed.white(message))
-}
-
-/**
- * Pretty Warning message
- */
-module.exports.warning = (message) => {
-  console.log(chalk.bgYellow.black(message))
-}
 
 /**
  * Get all files that match regex
