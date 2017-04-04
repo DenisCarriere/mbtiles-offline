@@ -1,6 +1,10 @@
 
 # Changelog
 
+## 2.8.0 - 2017-04-04
+
+- Switch to `debug` instead of `console.log`
+
 ## 2.7.0 - 2017-3-24
 
 - Use `jpeg` in metadata instead of `jpg` (bug in GeoServer, cannot be detected as valid MBTiles)
