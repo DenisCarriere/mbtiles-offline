@@ -1,7 +1,7 @@
 {
   "name": "mbtiles-offline",
   "version": "2.8.0",
-  "description": "MBTiles for offline",
+  "description": "MBTiles SQLite3 binding (for offline environments)",
   "main": "index.js",
   "types": "index.d.js",
   "files": [
