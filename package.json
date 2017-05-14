@@ -17,19 +17,8 @@
     "lint": "standard",
     "docs": "documentation readme index.js --shallow --section=API --markdown-toc"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/DenisCarriere/mbtiles-offline.git"
-  },
-  "author": "Denis Carriere <carriere.denis@gmail.com>",
-  "contributors": [
-    "Denis Carriere <carriere.denis@gmail.com>"
-  ],
+  "author": "Denis Carriere <@DenisCarriere>",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/DenisCarriere/mbtiles-offline/issues"
-  },
-  "homepage": "https://github.com/DenisCarriere/mbtiles-offline#readme",
   "keywords": [
     "mbtiles",
     "sqlite3",
