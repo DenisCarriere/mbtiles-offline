@@ -516,6 +516,9 @@ module.exports = class MBTiles {
   findOne (tile) {
     return new Promise((resolve, reject) => {
       const query = 'SELECT tile_data FROM tiles WHERE tile_column=? AND tile_row=? AND zoom_level=?'
+      // Flip the Y, MBTiles are TMS
+      // https://gist.github.com/tmcw/4954720
+      tile[1] = (1 << tile[2]) - 1 - tile[1]
       this.db.get(query, tile, (error, row) => {
         if (error) {
           warning(error)
