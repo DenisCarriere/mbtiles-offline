@@ -1,6 +1,10 @@
 
 # Changelog
 
+## 2.9.0 - 2017-06-28
+
+- Update sqlite-offline to support NodeJS v8
+
 ## 2.8.0 - 2017-04-04
 
 - Switch to `debug` instead of `console.log`

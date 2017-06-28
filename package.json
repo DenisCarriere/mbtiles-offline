@@ -1,6 +1,6 @@
 {
   "name": "mbtiles-offline",
-  "version": "2.8.0",
+  "version": "2.9.0",
   "description": "MBTiles SQLite3 binding (for offline environments)",
   "main": "index.js",
   "types": "index.d.js",
@@ -31,7 +31,7 @@
     "debug": "^2.6.3",
     "global-mercator": "^2.6.0",
     "lodash": "^4.17.4",
-    "sqlite3-offline": "^3.1.18"
+    "sqlite3-offline": "3.1.8-1"
   },
   "devDependencies": {
     "@types/geojson": "^1.0.0",
