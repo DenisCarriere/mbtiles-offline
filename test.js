@@ -37,6 +37,7 @@ describe('plain_1', () => {
   test('tables', () => mbtiles.tables().then(data => expect(data).toBeDefined()))
   test('findAll', () => mbtiles.findAll().then(data => expect(data).toBeDefined()))
   test('findOne', () => mbtiles.findOne([0, 0, 0]).then(data => expect(data).toBeTruthy()))
+  test('findOne - resolves correctly', () => mbtiles.findOne([15, 9, 4]).then(data => expect(data.toString().length).toBe(1139)))
   test('findOne - undefined', () => mbtiles.findOne([10, 0, 0]).then(data => expect(data).toBeUndefined()))
   test('hashes', () => mbtiles.hashes().then(index => expect(index).toBeDefined()))
   test('hash', () => expect(mbtiles.hash([0, 0, 0])).toBeDefined())
