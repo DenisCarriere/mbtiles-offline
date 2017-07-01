@@ -6,11 +6,12 @@ type UpdateMetadata = MBTiles.UpdateMetadata
 type Bounds = MBTiles.Bounds
 type BBox = MBTiles.BBox
 type Center = MBTiles.Center
+type Schema = 'xyz' | 'tms' | 'quadkey'
 
 /**
  * MBTiles
  */
-declare class MBTiles {
+declare class MBTiles<T extends Tile> {
   name: string
   description: string
   minzoom?: number
@@ -23,7 +24,7 @@ declare class MBTiles {
   attribution?: string
   url?: string
 
-  constructor(uri: string)
+  constructor(uri: string, schema?: Schema)
 
   /**
    * Save buffer data to individual Tile
@@ -54,12 +55,12 @@ declare class MBTiles {
   /**
    * Finds all Tile unique hashes
    */
-  findAll(tiles?: Tile[]): Promise<Tile[]>
+  findAll<T>(tiles?: T[]): Promise<T[]>
 
   /**
    * Finds one Tile and returns Buffer
    */
-  findOne(tile: Tile): Promise<Buffer>
+  findOne<T>(tile: T): Promise<Buffer>
 
   /**
    * Build SQL tables
@@ -74,12 +75,12 @@ declare class MBTiles {
   /**
    * Creates hash from a single Tile
    */
-  hash(tile: Tile): number
+  hash<T>(tile: T): number
 
   /**
    * Creates a hash table for all tiles
    */
-  hashes(tiles?: Tile[]): Promise<MBTiles.Hashes>
+  hashes<T>(tiles?: T[]): Promise<MBTiles.Hashes>
 
   /**
    * Retrieves Minimum Zoom level
@@ -119,10 +120,7 @@ declare namespace MBTiles {
   export type MultiPolygon = GeoJSON.Feature<GeoJSON.MultiPolygon>
   export type MultiPolygons = GeoJSON.FeatureCollection<GeoJSON.MultiPolygon>
   export type Bounds = BBox | BBox[] | Polygon | Polygons | MultiPolygon | MultiPolygons
-
-  export interface Hashes {
-    [key: number]: boolean
-  }
+  export type Hashes = Set<number>
 
   export interface Metadata extends BaseMetadata {
     bounds?: BBox

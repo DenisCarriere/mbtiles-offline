@@ -1,9 +1,8 @@
-
 import * as fs from 'fs'
 import * as MBTiles from '../'
 
-const tile: MBTiles.Tile = [0, 0, 0]
 const image = fs.readFileSync('./in/images/0/0/0.png')
+const tile: MBTiles.Tile = [0, 0, 0]
 const bounds: MBTiles.Bounds = [-110, -40, 95, 50]
 const options: MBTiles.Metadata = {
     name: 'Foo',
