@@ -6,7 +6,7 @@ const schema = require('./schema')
 const warning = require('debug')('mbtiles-offline:warning')
 
 // Globals
-const EXCLUDE = ['_table', '_index', 'db', 'tileParser', 'schema', 'uri', 'ok', 'errors']
+const EXCLUDE = ['_table', '_index', 'db', 'schema', 'uri', 'ok', 'errors']
 
 /**
  * MBTiles

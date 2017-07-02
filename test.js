@@ -23,6 +23,19 @@ const baseMetadata = {
 
 const metadata = Object.assign({}, baseMetadata, options)
 
+const metadataPlain1 = {
+  bounds: [ -179.9999999749438, -69.99999999526695, 179.9999999749438, 84.99999999782301 ],
+  center: [ 0, 7.5 ],
+  description: 'demo description',
+  format: 'png',
+  json: '{"level1":{"level2":"property"},"version":"2.0.0"}',
+  maxzoom: 4,
+  minzoom: 0,
+  name: 'plain_1',
+  type: 'baselayer',
+  version: '1.1.0'
+}
+
 const directories = {
   out: path.join(__dirname, 'test', 'out') + path.sep,
   in: path.join(__dirname, 'test', 'in') + path.sep
@@ -34,7 +47,7 @@ const fixtures = fs.readdirSync(directories.in).filter(filename => filename.matc
 test('MBTiles -- plain_1', async t => {
   const mbtiles = new MBTiles(directories.in + 'plain_1.mbtiles')
 
-  t.assert(await mbtiles.metadata())
+  t.deepEqual(await mbtiles.metadata(), metadataPlain1, 'metadata')
   t.assert(await mbtiles.tables(), 'tables')
   t.equal((await mbtiles.count()), 285, 'count')
   t.equal((await mbtiles.findAll()).length, 285, 'findAll')
