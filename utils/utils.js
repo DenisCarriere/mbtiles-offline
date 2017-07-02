@@ -5,6 +5,32 @@ const mercator = require('global-mercator')
 const dateline = require('bbox-dateline')
 
 /**
+ * Get Tile Parsers from schema
+ * http://www.maptiler.org/google-maps-coordinates-tile-bounds-projection/
+ *
+ * @param {string} schema Tile schema
+ * @return {[Function, Function]} Tile schema parsing functions [Schema to Tile, Tile to Schema]
+ */
+module.exports.getTileParsers = (schema) => {
+  if (!schema) throw new Error('schema is required')
+
+  switch (schema.toLowerCase()) {
+    case 'osm':
+    case 'arcgis':
+    case 'google':
+    case 'xyz':
+      return [mercator.googleToTile, mercator.tileToGoogle]
+    case 'quadkey':
+    case 'quadtree':
+      return [mercator.quadkeyToTile, mercator.tileToQuadkey]
+    case 'tms':
+      return [(tile) => tile, (tile) => tile]
+    default:
+      throw new Error(schema + ' unknown Tile schema')
+  }
+}
+
+/**
  * Get all files that match regex
  *
  * @param {string} path

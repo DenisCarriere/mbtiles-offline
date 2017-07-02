@@ -1,10 +1,10 @@
-const path = require('path')
-const assign = require('lodash').assign
 const fs = require('fs')
-const MBTiles = require('.')
+const path = require('path')
 const load = require('load-json-file')
+const test = require('tape')
 const write = require('write-json-file')
-const copySync = require('fs-extra').copySync
+const {copySync} = require('fs-extra')
+const MBTiles = require('./')
 
 const options = {
   name: 'Foo',
@@ -12,69 +12,75 @@ const options = {
   minzoom: 1,
   maxzoom: 3,
   format: 'png',
+  center: [-7.5, 5],
   bounds: [-110, -40, 95, 50]
 }
+
+const baseMetadata = {
+  type: 'baselayer',
+  version: '1.1.0'
+}
+
+const metadata = Object.assign({}, baseMetadata, options)
 
 const directories = {
   out: path.join(__dirname, 'test', 'out') + path.sep,
   in: path.join(__dirname, 'test', 'in') + path.sep
 }
 
-const metadata = assign(options, {
-  type: 'baselayer',
-  version: '1.1.0',
-  center: [-7.5, 5]
-})
-
 const image = fs.readFileSync(path.join(directories.in, 'images', '0', '0', '0.png'))
-
 const fixtures = fs.readdirSync(directories.in).filter(filename => filename.match(/\.mbtiles/))
 
-describe('plain_1', () => {
+test('MBTiles -- plain_1', async t => {
   const mbtiles = new MBTiles(directories.in + 'plain_1.mbtiles')
-  test('metadata', () => mbtiles.metadata().then(data => expect(data).toBeDefined()))
-  test('count', () => mbtiles.count().then(data => expect(data).toBeDefined()))
-  test('tables', () => mbtiles.tables().then(data => expect(data).toBeDefined()))
-  test('findAll', () => mbtiles.findAll().then(data => expect(data).toBeDefined()))
-  test('findOne', () => mbtiles.findOne([0, 0, 0]).then(data => expect(data).toBeTruthy()))
-  test('findOne - undefined', () => mbtiles.findOne([10, 0, 0]).then(data => expect(data).toBeUndefined()))
-  test('hashes', () => mbtiles.hashes().then(index => expect(index).toBeDefined()))
-  test('hash', () => expect(mbtiles.hash([0, 0, 0])).toBeDefined())
+
+  t.assert(await mbtiles.metadata())
+  t.assert(await mbtiles.tables(), 'tables')
+  t.equal((await mbtiles.count()), 285, 'count')
+  t.equal((await mbtiles.findAll()).length, 285, 'findAll')
+  t.equal((await mbtiles.findOne([0, 0, 0])).byteLength, 7072, 'findOne')
+  t.equal((await mbtiles.findOne([15, 9, 4])).byteLength, 1167, 'findOne - resolves correctly')
+  t.equal((await mbtiles.hashes()).size, 285, 'hashes')
+  t.equal(mbtiles.hash([0, 0, 0]), 1, 'hash')
+  t.end()
 })
 
-describe('save', () => {
+test('MBTiles -- save', async t => {
   copySync(directories.in + 'save.mbtiles', directories.out + 'save.mbtiles')
   const mbtiles = new MBTiles(directories.out + 'save.mbtiles')
-  test('index', () => mbtiles.index().then(data => expect(data).toBeDefined()))
-  test('save - [0, 0, 0]', () => mbtiles.save([0, 0, 0], image).then(data => expect(data).toBeDefined()))
-  test('save - [1, 1, 1]', () => mbtiles.save([1, 1, 1], image).then(data => expect(data).toBeDefined()))
-  test('update', () => mbtiles.update(options).then(data => expect(data).toEqual(metadata)))
-  test('delete - [1, 1, 1]', () => mbtiles.delete([1, 1, 1]).then(data => expect(data).toBeDefined()))
+
+  t.true(await mbtiles.index(), 'index')
+  t.true(await mbtiles.save([0, 0, 0], image), 'save - [0, 0, 0]')
+  t.true(await mbtiles.save([1, 1, 1], image), 'save - [1, 1, 1]')
+  t.true(await mbtiles.delete([1, 1, 1]), 'delete - [1, 1, 1]')
+  t.deepEqual(await mbtiles.update(options), metadata, 'update')
+  t.end()
 })
 
-describe('blank', () => {
+test('MBTiles -- blank', async t => {
   const mbtiles = new MBTiles(directories.in + 'blank.mbtiles')
-  test('metadata', () => mbtiles.metadata().then(data => expect(data).toBeDefined()))
-  test('count', () => mbtiles.count().then(data => expect(data).toBeDefined()))
-  test('tables', () => mbtiles.tables().then(data => expect(data).toBeDefined()))
-  test('findAll', () => mbtiles.findAll().then(data => expect(data).toBeDefined()))
-  test('findOne', () => mbtiles.findOne([0, 0, 0]).then(data => expect(data).toBeUndefined()))
-  test('findOne - undefined', () => mbtiles.findOne([10, 0, 0]).then(data => expect(data).toBeUndefined()))
-  test('hashes', () => mbtiles.hashes().then(index => expect(index).toBeDefined()))
-  test('hash', () => expect(mbtiles.hash([0, 0, 0])).toBeDefined())
+
+  t.deepEqual(await mbtiles.metadata(), baseMetadata, 'metadata')
+  t.equal(await mbtiles.count(), 0, 'count')
+  t.true(await mbtiles.tables(), 'tables')
+  t.equal((await mbtiles.findAll()).length, 0, 'findAll')
+  t.not(await mbtiles.findOne([0, 0, 0]), 'findOne')
+  t.not(await mbtiles.findOne([10, 0, 0]), 'findOne')
+  t.equal((await mbtiles.hashes()).size, 0, 'hashes')
+  t.equal(await mbtiles.hash([0, 0, 0]), 1, 'hash')
+  t.end()
 })
 
-describe('metadata', () => {
+test('MBTiles -- metadata', t => {
   for (const filename of fixtures) {
-    const name = path.parse(filename).name
+    const {name} = path.parse(filename)
     const mbtiles = new MBTiles(directories.in + filename)
-    test(name, () => {
-      mbtiles.metadata().then(metadata => {
-        if (process.env.REGEN) {
-          write.sync(directories.out + 'metadata-' + name + '.json', metadata)
-        }
-        expect(metadata).toEqual(load.sync(directories.out + 'metadata-' + name + '.json'))
-      })
+
+    mbtiles.metadata().then(metadata => {
+      const output = path.join(directories.out, `metadata-${name}.json`)
+      if (process.env.REGEN) write.sync(output, metadata)
+      t.deepEqual(metadata, load.sync(output), filename)
     })
   }
+  t.end()
 })

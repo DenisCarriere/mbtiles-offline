@@ -1,6 +1,13 @@
 
 # Changelog
 
+## 3.0.0 - 2017-07-1
+
+- Change tests to Tape/Tap instead of Jest
+- Add Schema parameters -- allows the user to enter TMS, Quadkey or XYZ as tile format and returns that format as well.
+- **BREAKING CHANGE**: Default Tile Schema is XYZ (before it was TMS)
+- **BREAKING CHANGE**: `hashes()` output => `Promise<Set(number)>`
+
 ## 2.9.0 - 2017-06-28
 
 - Update sqlite-offline to support NodeJS v8

@@ -1,11 +1,12 @@
-const assign = require('lodash').assign
-const entries = require('lodash').entries
-const omit = require('lodash').omit
+const {omit, entries, assign} = require('lodash')
 const mercator = require('global-mercator')
 const tiletype = require('@mapbox/tiletype')
 const utils = require('./utils')
 const schema = require('./schema')
 const warning = require('debug')('mbtiles-offline:warning')
+
+// Globals
+const EXCLUDE = ['_table', '_index', 'db', 'tileParser', 'schema', 'uri', 'ok', 'errors']
 
 /**
  * MBTiles
@@ -15,18 +16,23 @@ module.exports = class MBTiles {
    * MBTiles
    *
    * @param {string} uri Path to MBTiles
+   * @param {string} [schema='xyz'] Tile schema ('xyz', 'tms', 'quadkey')
    * @returns {MBTiles} MBTiles
    * @example
    * const mbtiles = new MBTiles('example.mbtiles')
    * //=mbtiles
    */
-  constructor (uri) {
+  constructor (uri, schema) {
     this.db = utils.connect(uri)
     this.uri = uri
     this.version = '1.1.0'
     this.type = 'baselayer'
     this.errors = []
     this.ok = true
+    this.schema = schema || 'xyz'
+    const [schemaToTile, tileToSchema] = utils.getTileParsers(this.schema)
+    this.schemaToTile = schemaToTile
+    this.tileToSchema = tileToSchema
   }
 
   /**
@@ -34,13 +40,13 @@ module.exports = class MBTiles {
    *
    * @param {Tile} tile Tile [x, y, z]
    * @param {Buffer} image Tile image
-   * @returns {Promise<boolean>}
+   * @returns {Promise<boolean>} true/false
    * @example
    * mbtiles.save([x, y, z], buffer)
    *   .then(status => console.log(status))
    */
   save (tile, image) {
-    const [x, y, z] = tile
+    const [x, y, z] = this.schemaToTile(tile)
     return new Promise((resolve, reject) => {
       this.tables().then(() => {
         const query = 'INSERT INTO tiles (tile_column, tile_row, zoom_level, tile_data) VALUES (?, ?, ?, ?)'
@@ -104,8 +110,7 @@ module.exports = class MBTiles {
             this.getMinZoom().then(minZoom => {
               this.getMaxZoom().then(maxZoom => {
                 this.getBounds().then(bounds => {
-                  const exclude = ['_table', '_index', 'db', 'uri', 'ok', 'errors']
-                  const json = omit(assign(this, metadata), exclude)
+                  const json = omit(assign(this, metadata), EXCLUDE)
                   const results = JSON.parse(JSON.stringify(json))
                   return resolve(results)
                 })
@@ -121,12 +126,13 @@ module.exports = class MBTiles {
    * Delete individual Tile
    *
    * @param {Tile} tile Tile [x, y, z]
-   * @returns {Promise<boolean>}
+   * @returns {Promise<boolean>} true/false
    * @example
    * mbtiles.delete([x, y, z])
    *   .then(status => console.log(status))
    */
   delete (tile) {
+    tile = this.schemaToTile(tile)
     return new Promise((resolve, reject) => {
       this.tables().then(() => {
         const query = 'DELETE FROM tiles WHERE tile_column=? AND tile_row=? AND zoom_level=?'
@@ -293,6 +299,7 @@ module.exports = class MBTiles {
    *   .then(count => console.log(count))
    */
   count (tiles) {
+    // Tile schema will be converted by findAll
     return new Promise(resolve => {
       this.findAll(tiles).then(existingTiles => {
         return resolve(existingTiles.length)
@@ -392,7 +399,7 @@ module.exports = class MBTiles {
   /**
    * Validate MBTiles according to the specifications
    *
-   * @returns Promise<boolean>
+   * @returns {Promise<boolean>} true/false
    * @example
    * mbtiles.validate()
    *  .then(status => console.log(status), error => console.log(error))
@@ -429,6 +436,7 @@ module.exports = class MBTiles {
    *   .then(tiles => console.log(tiles))
    */
   findAll (tiles = []) {
+    tiles = tiles.map(tile => this.schemaToTile(tile))
     return new Promise(resolve => {
       this.tables().then(() => {
         // Search all - Not optimized for memory leaks
@@ -441,7 +449,7 @@ module.exports = class MBTiles {
               this.ok = false
               return resolve(undefined)
             }
-            const tiles = rows.map(row => [row.tile_column, row.tile_row, row.zoom_level])
+            const tiles = rows.map(row => this.tileToSchema([row.tile_column, row.tile_row, row.zoom_level]))
             return resolve(tiles)
           })
         }
@@ -492,7 +500,7 @@ module.exports = class MBTiles {
               for (const row of rows) {
                 const tile = [row.tile_column, row.tile_row, row.zoom_level]
                 const hash = mercator.hash(tile)
-                if (index[hash]) { results.push(tile) }
+                if (index[hash]) results.push(this.tileToSchema(tile))
               }
             })
           }
@@ -514,6 +522,7 @@ module.exports = class MBTiles {
    *   .then(image => console.log(image))
    */
   findOne (tile) {
+    tile = this.schemaToTile(tile)
     return new Promise((resolve, reject) => {
       const query = 'SELECT tile_data FROM tiles WHERE tile_column=? AND tile_row=? AND zoom_level=?'
       this.db.get(query, tile, (error, row) => {
@@ -535,7 +544,7 @@ module.exports = class MBTiles {
   /**
    * Build SQL tables
    *
-   * @returns {Promise<boolean>}
+   * @returns {Promise<boolean>} true/false
    * @example
    * mbtiles.tables()
    *   .then(status => console.log(status))
@@ -569,7 +578,7 @@ module.exports = class MBTiles {
   /**
    * Build SQL index
    *
-   * @returns {Promise<boolean>}
+   * @returns {Promise<boolean>} true/false
    * @example
    * mbtiles.index()
    *   .then(status => console.log(status))
@@ -612,6 +621,7 @@ module.exports = class MBTiles {
    * //=hash
    */
   hash (tile) {
+    tile = this.schemaToTile(tile)
     return mercator.hash(tile)
   }
 
@@ -619,13 +629,13 @@ module.exports = class MBTiles {
    * Creates a hash table for all tiles
    *
    * @param {Tile[]} [tiles] Only find given tiles
-   * @return {Promise<Object>} hashes
+   * @return {Promise<Set<number>>} hashes
    */
   hashes (tiles) {
     return new Promise((resolve, reject) => {
       this.findAll(tiles).then(existingTiles => {
-        const index = {}
-        for (const tile of existingTiles) { index[mercator.hash(tile)] = true }
+        const index = new Set()
+        for (const tile of existingTiles) { index.add(mercator.hash(tile)) }
         if (Object.keys(index).length === 0) warning('<hashes> is empty')
         return resolve(index)
       })
