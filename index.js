@@ -629,7 +629,7 @@ module.exports = class MBTiles {
    * Creates a hash table for all tiles
    *
    * @param {Tile[]} [tiles] Only find given tiles
-   * @return {Promise<Object>} hashes
+   * @return {Promise<Set<number>>} hashes
    */
   hashes (tiles) {
     return new Promise((resolve, reject) => {

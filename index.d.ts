@@ -8,19 +8,25 @@ type BBox = MBTiles.BBox
 type Center = MBTiles.Center
 type Schema = 'xyz' | 'tms' | 'quadkey'
 
+interface SchemaType {
+  xyz: Tile
+  tms: Tile
+  quadkey: string
+}
+
 /**
  * MBTiles
  */
-declare class MBTiles<T extends Tile> {
-  name: string
-  description: string
+declare class MBTilesStatic<T extends Tile | string> {
+  type: string
+  version: string
+  name?: string
   minzoom?: number
   maxzoom?: number
   format?: string
   bounds?: BBox
-  type?: string
-  version?: string
   center?: Center
+  description?: string
   attribution?: string
   url?: string
 
@@ -29,7 +35,7 @@ declare class MBTiles<T extends Tile> {
   /**
    * Save buffer data to individual Tile
    */
-  save(tile: Tile, image: Buffer): Promise<boolean>
+  save(tile: T, image: Buffer): Promise<boolean>
 
   /**
    * Retrieves Metadata from MBTiles
@@ -39,12 +45,12 @@ declare class MBTiles<T extends Tile> {
   /**
    * Delete individual Tile
    */
-  delete(tile: Tile): Promise<boolean>
+  delete(tile: T): Promise<boolean>
 
   /**
    * Count the amount of Tiles
    */
-  count(tiles?: Tile[]): Promise<number>
+  count(tiles?: T[]): Promise<number>
 
 
   /**
@@ -55,12 +61,12 @@ declare class MBTiles<T extends Tile> {
   /**
    * Finds all Tile unique hashes
    */
-  findAll<T>(tiles?: T[]): Promise<T[]>
+  findAll(tiles?: T[]): Promise<T[]>
 
   /**
    * Finds one Tile and returns Buffer
    */
-  findOne<T>(tile: T): Promise<Buffer>
+  findOne(tile: T): Promise<Buffer>
 
   /**
    * Build SQL tables
@@ -75,12 +81,12 @@ declare class MBTiles<T extends Tile> {
   /**
    * Creates hash from a single Tile
    */
-  hash<T>(tile: T): number
+  hash(tile: T): number
 
   /**
    * Creates a hash table for all tiles
    */
-  hashes<T>(tiles?: T[]): Promise<MBTiles.Hashes>
+  hashes(tiles?: T[]): Promise<MBTiles.Hashes>
 
   /**
    * Retrieves Minimum Zoom level
@@ -143,4 +149,11 @@ declare namespace MBTiles {
     url?: string
   }
 }
+
+interface MBTiles<T> {
+  new (uri: string, schema: 'quadkey'): MBTilesStatic<string>;
+  new (uri: string, schema?: 'xyz' | 'tms'): MBTilesStatic<Tile>;
+}
+
+declare const MBTiles: MBTiles<Tile>;
 export = MBTiles
