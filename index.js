@@ -19,8 +19,8 @@ module.exports = class MBTiles {
    * @param {string} [schema='xyz'] Tile schema ('xyz', 'tms', 'quadkey')
    * @returns {MBTiles} MBTiles
    * @example
-   * const mbtiles = new MBTiles('example.mbtiles')
-   * //=mbtiles
+   * const db = new MBTiles('example.mbtiles')
+   * //= mbtiles
    */
   constructor (uri, schema) {
     this.db = utils.connect(uri)
@@ -42,7 +42,7 @@ module.exports = class MBTiles {
    * @param {Buffer} image Tile image
    * @returns {Promise<boolean>} true/false
    * @example
-   * mbtiles.save([x, y, z], buffer)
+   * db.save([x, y, z], buffer)
    *   .then(status => console.log(status))
    */
   save (tile, image) {
@@ -68,7 +68,7 @@ module.exports = class MBTiles {
    *
    * @returns {Promise<Metadata>} Metadata as an Object
    * @example
-   * mbtiles.metadata()
+   * db.metadata()
    *   .then(metadata => console.log(metadata))
    */
   metadata () {
@@ -128,7 +128,7 @@ module.exports = class MBTiles {
    * @param {Tile} tile Tile [x, y, z]
    * @returns {Promise<boolean>} true/false
    * @example
-   * mbtiles.delete([x, y, z])
+   * db.delete([x, y, z])
    *   .then(status => console.log(status))
    */
   delete (tile) {
@@ -154,7 +154,7 @@ module.exports = class MBTiles {
    *
    * @returns {Promise<number>}
    * @example
-   * mbtiles.getMinZoom()
+   * db.getMinZoom()
    *   .then(minZoom => console.log(minZoom))
    */
   getMinZoom () {
@@ -184,7 +184,7 @@ module.exports = class MBTiles {
    *
    * @returns {Promise<number>}
    * @example
-   * mbtiles.getMaxZoom()
+   * db.getMaxZoom()
    *   .then(maxZoom => console.log(maxZoom))
    */
   getMaxZoom () {
@@ -215,7 +215,7 @@ module.exports = class MBTiles {
    *
    * @returns {Promise<Formats>}
    * @example
-   * mbtiles.getFormat()
+   * db.getFormat()
    *   .then(format => console.log(format))
    */
   getFormat () {
@@ -247,7 +247,7 @@ module.exports = class MBTiles {
    * @param {number} zoom Zoom level
    * @returns {Promise<BBox>}
    * @example
-   * mbtiles.getBounds()
+   * db.getBounds()
    *   .then(bbox => console.log(bbox))
    */
   getBounds (zoom) {
@@ -295,7 +295,7 @@ module.exports = class MBTiles {
    * @param {Tile[]} [tiles] Only find given tiles
    * @returns {Promise<number>}
    * @example
-   * mbtiles.count()
+   * db.count()
    *   .then(count => console.log(count))
    */
   count (tiles) {
@@ -332,7 +332,7 @@ module.exports = class MBTiles {
    *   format: 'png',
    *   bounds: [-110, -40, 95, 50]
    * }
-   * mbtiles.update(options)
+   * db.update(options)
    *   .then(metadata => console.log(metadata))
    */
   update (metadata = {}) {
@@ -401,7 +401,7 @@ module.exports = class MBTiles {
    *
    * @returns {Promise<boolean>} true/false
    * @example
-   * mbtiles.validate()
+   * db.validate()
    *  .then(status => console.log(status), error => console.log(error))
    */
   validate () {
@@ -432,7 +432,7 @@ module.exports = class MBTiles {
    * @example
    * const tile1 = [33, 40, 6]
    * const tile2 = [20, 50, 7]
-   * mbtiles.findAll([tile1, tile2])
+   * db.findAll([tile1, tile2])
    *   .then(tiles => console.log(tiles))
    */
   findAll (tiles = []) {
@@ -518,7 +518,7 @@ module.exports = class MBTiles {
    * @param {Tile} tile Tile [x, y, z]
    * @return {Promise<Buffer>} Tile Data
    * @example
-   * mbtiles.findOne([x, y, z])
+   * db.findOne([x, y, z])
    *   .then(image => console.log(image))
    */
   findOne (tile) {
@@ -546,7 +546,7 @@ module.exports = class MBTiles {
    *
    * @returns {Promise<boolean>} true/false
    * @example
-   * mbtiles.tables()
+   * db.tables()
    *   .then(status => console.log(status))
    */
   tables () {
@@ -580,7 +580,7 @@ module.exports = class MBTiles {
    *
    * @returns {Promise<boolean>} true/false
    * @example
-   * mbtiles.index()
+   * db.index()
    *   .then(status => console.log(status))
    */
   index () {
@@ -617,8 +617,8 @@ module.exports = class MBTiles {
    * @param {Tile} tile
    * @return {number} hash
    * @example
-   * const hash = mbtiles.hash([5, 25, 30])
-   * //=hash
+   * const hash = db.hash([5, 25, 12])
+   * //= 16797721
    */
   hash (tile) {
     tile = this.schemaToTile(tile)
@@ -630,14 +630,17 @@ module.exports = class MBTiles {
    *
    * @param {Tile[]} [tiles] Only find given tiles
    * @return {Promise<Set<number>>} hashes
+   * @example
+   * await db.save([0, 0, 3], Buffer([0, 1]))
+   * await db.save([0, 1, 3], Buffer([2, 3]))
+   * db.hashes()
+   * //= Promise { Set { 64, 65 } }
    */
   hashes (tiles) {
     return new Promise((resolve, reject) => {
       this.findAll(tiles).then(existingTiles => {
         const index = new Set()
-        for (const tile of existingTiles) {
-          index.add(mercator.hash(this.schemaToTile(tile)))
-        }
+        for (const tile of existingTiles) index.add(this.hash(tile))
         if (Object.keys(index).length === 0) warning('<hashes> is empty')
         return resolve(index)
       })

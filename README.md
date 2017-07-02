@@ -158,8 +158,8 @@ MBTiles
 **Examples**
 
 ```javascript
-const mbtiles = new MBTiles('example.mbtiles')
-//=mbtiles
+const db = new MBTiles('example.mbtiles')
+//= mbtiles
 ```
 
 Returns **MBTiles** MBTiles
@@ -176,7 +176,7 @@ Save buffer data to individual Tile
 **Examples**
 
 ```javascript
-mbtiles.save([x, y, z], buffer)
+db.save([x, y, z], buffer)
   .then(status => console.log(status))
 ```
 
@@ -189,7 +189,7 @@ Retrieves Metadata from MBTiles
 **Examples**
 
 ```javascript
-mbtiles.metadata()
+db.metadata()
   .then(metadata => console.log(metadata))
 ```
 
@@ -206,7 +206,7 @@ Delete individual Tile
 **Examples**
 
 ```javascript
-mbtiles.delete([x, y, z])
+db.delete([x, y, z])
   .then(status => console.log(status))
 ```
 
@@ -219,11 +219,11 @@ Retrieves Minimum Zoom level
 **Examples**
 
 ```javascript
-mbtiles.getMinZoom()
+db.getMinZoom()
   .then(minZoom => console.log(minZoom))
 ```
 
-Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>**
+Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** 
 
 #### getMaxZoom
 
@@ -232,11 +232,11 @@ Retrieves Maximum Zoom level
 **Examples**
 
 ```javascript
-mbtiles.getMaxZoom()
+db.getMaxZoom()
   .then(maxZoom => console.log(maxZoom))
 ```
 
-Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>**
+Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** 
 
 #### getFormat
 
@@ -245,11 +245,11 @@ Retrieves Image Format
 **Examples**
 
 ```javascript
-mbtiles.getFormat()
+db.getFormat()
   .then(format => console.log(format))
 ```
 
-Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;Formats>**
+Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;Formats>** 
 
 #### getBounds
 
@@ -262,11 +262,11 @@ Retrieves Bounds
 **Examples**
 
 ```javascript
-mbtiles.getBounds()
+db.getBounds()
   .then(bbox => console.log(bbox))
 ```
 
-Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;BBox>**
+Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;BBox>** 
 
 #### count
 
@@ -279,11 +279,11 @@ Count the amount of Tiles
 **Examples**
 
 ```javascript
-mbtiles.count()
+db.count()
   .then(count => console.log(count))
 ```
 
-Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>**
+Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** 
 
 #### update
 
@@ -315,7 +315,7 @@ const options = {
   format: 'png',
   bounds: [-110, -40, 95, 50]
 }
-mbtiles.update(options)
+db.update(options)
   .then(metadata => console.log(metadata))
 ```
 
@@ -328,7 +328,7 @@ Validate MBTiles according to the specifications
 **Examples**
 
 ```javascript
-mbtiles.validate()
+db.validate()
  .then(status => console.log(status), error => console.log(error))
 ```
 
@@ -347,7 +347,7 @@ Finds all Tile unique hashes
 ```javascript
 const tile1 = [33, 40, 6]
 const tile2 = [20, 50, 7]
-mbtiles.findAll([tile1, tile2])
+db.findAll([tile1, tile2])
   .then(tiles => console.log(tiles))
 ```
 
@@ -364,7 +364,7 @@ Finds one Tile and returns Buffer
 **Examples**
 
 ```javascript
-mbtiles.findOne([x, y, z])
+db.findOne([x, y, z])
   .then(image => console.log(image))
 ```
 
@@ -377,7 +377,7 @@ Build SQL tables
 **Examples**
 
 ```javascript
-mbtiles.tables()
+db.tables()
   .then(status => console.log(status))
 ```
 
@@ -390,7 +390,7 @@ Build SQL index
 **Examples**
 
 ```javascript
-mbtiles.index()
+db.index()
   .then(status => console.log(status))
 ```
 
@@ -402,13 +402,13 @@ Creates hash from a single Tile
 
 **Parameters**
 
--   `tile` **Tile**
+-   `tile` **Tile** 
 
 **Examples**
 
 ```javascript
-const hash = mbtiles.hash([5, 25, 30])
-//=hash
+const hash = db.hash([5, 25, 12])
+//= 16797721
 ```
 
 Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** hash
@@ -420,5 +420,14 @@ Creates a hash table for all tiles
 **Parameters**
 
 -   `tiles` **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;Tile>?** Only find given tiles
+
+**Examples**
+
+```javascript
+await db.save([0, 0, 3], Buffer([0, 1]))
+await db.save([0, 1, 3], Buffer([2, 3]))
+db.hashes()
+//= Promise { Set { 64, 65 } }
+```
 
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Set](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set)&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>>** hashes
