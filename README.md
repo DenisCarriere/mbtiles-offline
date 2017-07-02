@@ -22,8 +22,27 @@ $ npm install --save mbtiles-offline
 ```javascript
 const MBTiles = require('mbtiles-offline')
 const db = new MBTiles('example.mbtiles')
+
 db.metadata()
-    .then(metadata => console.log(metadata))
+//= Promise{ JSON }
+
+db.save([1, 2, 3], Buffer([0, 1]))
+db.save([2, 2, 3], Buffer([3, 4]))
+
+db.findOne([1, 2, 3])
+//= Promise { <Buffer 00 01> }
+
+db.findAll()
+//= Promise{ [[1, 2, 3], [2, 2, 3]] }
+
+db.count()
+//= Promise { 2 }
+
+db.delete([1, 2, 3])
+db.delete([2, 2, 3])
+
+db.count()
+//= Promise { 0 }
 ```
 
 ## Features

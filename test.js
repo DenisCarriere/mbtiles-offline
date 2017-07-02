@@ -45,51 +45,77 @@ const image = fs.readFileSync(path.join(directories.in, 'images', '0', '0', '0.p
 const fixtures = fs.readdirSync(directories.in).filter(filename => filename.match(/\.mbtiles/))
 
 test('MBTiles -- plain_1', async t => {
-  const mbtiles = new MBTiles(directories.in + 'plain_1.mbtiles')
+  const db = new MBTiles(directories.in + 'plain_1.mbtiles')
 
-  t.deepEqual(await mbtiles.metadata(), metadataPlain1, 'metadata')
-  t.assert(await mbtiles.tables(), 'tables')
-  t.equal((await mbtiles.count()), 285, 'count')
-  t.equal((await mbtiles.findAll()).length, 285, 'findAll')
-  t.equal((await mbtiles.findOne([0, 0, 0])).byteLength, 7072, 'findOne')
-  t.equal((await mbtiles.findOne([15, 9, 4])).byteLength, 1167, 'findOne - resolves correctly')
-  t.equal((await mbtiles.hashes()).size, 285, 'hashes')
-  t.equal(mbtiles.hash([0, 0, 0]), 1, 'hash')
+  t.deepEqual(await db.metadata(), metadataPlain1, 'metadata')
+  t.assert(await db.tables(), 'tables')
+  t.equal((await db.count()), 285, 'count')
+  t.equal((await db.findAll()).length, 285, 'findAll')
+  t.equal((await db.findOne([0, 0, 0])).byteLength, 7072, 'findOne')
+  t.equal((await db.findOne([15, 9, 4])).byteLength, 1167, 'findOne - resolves correctly')
+  t.equal((await db.hashes()).size, 285, 'hashes')
+  t.equal(db.hash([0, 0, 0]), 1, 'hash')
   t.end()
 })
 
 test('MBTiles -- save', async t => {
   copySync(directories.in + 'save.mbtiles', directories.out + 'save.mbtiles')
-  const mbtiles = new MBTiles(directories.out + 'save.mbtiles')
+  const db = new MBTiles(directories.out + 'save.mbtiles')
 
-  t.true(await mbtiles.index(), 'index')
-  t.true(await mbtiles.save([0, 0, 0], image), 'save - [0, 0, 0]')
-  t.true(await mbtiles.save([1, 1, 1], image), 'save - [1, 1, 1]')
-  t.true(await mbtiles.delete([1, 1, 1]), 'delete - [1, 1, 1]')
-  t.deepEqual(await mbtiles.update(options), metadata, 'update')
+  t.true(await db.index(), 'index')
+  t.true(await db.save([0, 0, 0], image), 'save - [0, 0, 0]')
+  t.true(await db.save([1, 1, 1], image), 'save - [1, 1, 1]')
+  t.true(await db.delete([1, 1, 1]), 'delete - [1, 1, 1]')
+  t.deepEqual(await db.update(options), metadata, 'update')
+  t.end()
+})
+
+test('MBTiles -- delete quadkey', async t => {
+  const db = new MBTiles(directories.out + 'delete.mbtiles', 'quadkey')
+  await db.save('031', Buffer([0, 1]))
+  t.equal(await db.count(), 1)
+  await db.delete('031')
+  t.equal(await db.count(), 0)
+  t.end()
+})
+
+test('MBTiles -- hashes', async t => {
+  const db1 = new MBTiles(directories.out + 'hashes-quadkey.mbtiles', 'quadkey')
+  await db1.save('021', Buffer([0, 1]))
+  const db2 = new MBTiles(directories.out + 'hashes-tms.mbtiles', 'tms')
+  await db2.save([1, 5, 3], Buffer([0, 1]))
+  const db3 = new MBTiles(directories.out + 'hashes-xyz.mbtiles', 'xyz')
+  await db3.save([1, 2, 3], Buffer([0, 1]))
+
+  const hashes1 = await db1.hashes()
+  const hashes2 = await db2.hashes()
+  const hashes3 = await db3.hashes()
+
+  t.true(hashes1.has(hashes2.values().next().value))
+  t.true(hashes2.has(hashes3.values().next().value))
   t.end()
 })
 
 test('MBTiles -- blank', async t => {
-  const mbtiles = new MBTiles(directories.in + 'blank.mbtiles')
+  const db = new MBTiles(directories.in + 'blank.mbtiles')
 
-  t.deepEqual(await mbtiles.metadata(), baseMetadata, 'metadata')
-  t.equal(await mbtiles.count(), 0, 'count')
-  t.true(await mbtiles.tables(), 'tables')
-  t.equal((await mbtiles.findAll()).length, 0, 'findAll')
-  t.not(await mbtiles.findOne([0, 0, 0]), 'findOne')
-  t.not(await mbtiles.findOne([10, 0, 0]), 'findOne')
-  t.equal((await mbtiles.hashes()).size, 0, 'hashes')
-  t.equal(await mbtiles.hash([0, 0, 0]), 1, 'hash')
+  t.deepEqual(await db.metadata(), baseMetadata, 'metadata')
+  t.equal(await db.count(), 0, 'count')
+  t.true(await db.tables(), 'tables')
+  t.equal((await db.findAll()).length, 0, 'findAll')
+  t.not(await db.findOne([0, 0, 0]), 'findOne')
+  t.not(await db.findOne([10, 0, 0]), 'findOne')
+  t.equal((await db.hashes()).size, 0, 'hashes')
+  t.equal(await db.hash([0, 0, 0]), 1, 'hash')
   t.end()
 })
 
 test('MBTiles -- metadata', t => {
   for (const filename of fixtures) {
     const {name} = path.parse(filename)
-    const mbtiles = new MBTiles(directories.in + filename)
+    const db = new MBTiles(directories.in + filename)
 
-    mbtiles.metadata().then(metadata => {
+    db.metadata().then(metadata => {
       const output = path.join(directories.out, `metadata-${name}.json`)
       if (process.env.REGEN) write.sync(output, metadata)
       t.deepEqual(metadata, load.sync(output), filename)

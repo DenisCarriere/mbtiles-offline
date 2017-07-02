@@ -635,7 +635,9 @@ module.exports = class MBTiles {
     return new Promise((resolve, reject) => {
       this.findAll(tiles).then(existingTiles => {
         const index = new Set()
-        for (const tile of existingTiles) { index.add(mercator.hash(tile)) }
+        for (const tile of existingTiles) {
+          index.add(mercator.hash(this.schemaToTile(tile)))
+        }
         if (Object.keys(index).length === 0) warning('<hashes> is empty')
         return resolve(index)
       })
