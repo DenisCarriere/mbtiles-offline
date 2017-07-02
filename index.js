@@ -40,7 +40,7 @@ module.exports = class MBTiles {
    *
    * @param {Tile} tile Tile [x, y, z]
    * @param {Buffer} image Tile image
-   * @returns {Promise<boolean>}
+   * @returns {Promise<boolean>} true/false
    * @example
    * mbtiles.save([x, y, z], buffer)
    *   .then(status => console.log(status))
@@ -126,7 +126,7 @@ module.exports = class MBTiles {
    * Delete individual Tile
    *
    * @param {Tile} tile Tile [x, y, z]
-   * @returns {Promise<boolean>}
+   * @returns {Promise<boolean>} true/false
    * @example
    * mbtiles.delete([x, y, z])
    *   .then(status => console.log(status))
@@ -399,7 +399,7 @@ module.exports = class MBTiles {
   /**
    * Validate MBTiles according to the specifications
    *
-   * @returns Promise<boolean>
+   * @returns {Promise<boolean>} true/false
    * @example
    * mbtiles.validate()
    *  .then(status => console.log(status), error => console.log(error))
@@ -544,7 +544,7 @@ module.exports = class MBTiles {
   /**
    * Build SQL tables
    *
-   * @returns {Promise<boolean>}
+   * @returns {Promise<boolean>} true/false
    * @example
    * mbtiles.tables()
    *   .then(status => console.log(status))
@@ -578,7 +578,7 @@ module.exports = class MBTiles {
   /**
    * Build SQL index
    *
-   * @returns {Promise<boolean>}
+   * @returns {Promise<boolean>} true/false
    * @example
    * mbtiles.index()
    *   .then(status => console.log(status))

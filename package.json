@@ -11,10 +11,11 @@
     "schema"
   ],
   "scripts": {
-    "types": "tsc index.d.ts --lib es6",
-    "pretest": "standard",
+    "types": "tsc index.d.ts types.ts --lib es6",
+    "lint": "standard",
+    "pretest": "npm run types && npm run lint",
     "test": "tap test.js utils/utils.test.js --coverage",
-    "docs": "documentation readme index.js --shallow --section=API --markdown-toc"
+    "docs": "documentation readme index.js --shallow --section=API"
   },
   "author": "Denis Carriere <@DenisCarriere>",
   "license": "MIT",
