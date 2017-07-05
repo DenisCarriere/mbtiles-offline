@@ -1,7 +1,7 @@
 
 # Changelog
 
-## 3.0.1 - 2017-07-5
+## 3.0.3 - 2017-07-5
 
 - Update `sqlite3-offline` to support the 3 latest versions of Electron
 - Update typescript definintions to easily declare MBTiles in a container/Object/{}
