@@ -14,10 +14,7 @@ interface SchemaType {
   quadkey: string
 }
 
-/**
- * MBTiles
- */
-declare class MBTilesStatic<T extends Tile | string> {
+declare class MBTilesClass<T extends Tile | string> {
   type: string
   version: string
   name?: string
@@ -127,6 +124,9 @@ declare namespace MBTiles {
   export type MultiPolygons = GeoJSON.FeatureCollection<GeoJSON.MultiPolygon>
   export type Bounds = BBox | BBox[] | Polygon | Polygons | MultiPolygon | MultiPolygons
   export type Hashes = Set<number>
+  export type MBTilesStatic = MBTilesClass<Tile | string>
+  export type MBTilesTile = MBTilesClass<Tile>
+  export type MBTilesQuadkey = MBTilesClass<string>
 
   export interface Metadata extends BaseMetadata {
     bounds?: BBox
@@ -150,10 +150,10 @@ declare namespace MBTiles {
   }
 }
 
-interface MBTiles<T> {
-  new (uri: string, schema: 'quadkey'): MBTilesStatic<string>;
-  new (uri: string, schema?: 'xyz' | 'tms'): MBTilesStatic<Tile>;
+interface MBTiles {
+  new (uri: string, schema: 'quadkey'): MBTilesClass<string>;
+  new (uri: string, schema?: 'xyz' | 'tms'): MBTilesClass<Tile>;
 }
 
-declare const MBTiles: MBTiles<Tile>;
+declare const MBTiles: MBTiles;
 export = MBTiles
