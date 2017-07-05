@@ -1,6 +1,10 @@
 
 # Changelog
 
+## 3.0.1 - 2017-07-5
+
+- Update typescript definintions to easily declare MBTiles in a container/Object/{}
+
 ## 3.0.0 - 2017-07-1
 
 - Change tests to Tape/Tap instead of Jest
