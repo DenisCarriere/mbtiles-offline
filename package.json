@@ -31,7 +31,7 @@
     "debug": "^2.6.3",
     "global-mercator": "^2.6.0",
     "lodash": "^4.17.4",
-    "sqlite3-offline": "3.1.8-1"
+    "sqlite3-offline": "^3.1.8-2"
   },
   "devDependencies": {
     "@types/geojson": "^1.0.0",

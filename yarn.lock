@@ -3786,25 +3786,25 @@ sprintf-js@~1.0.2:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
 
-sqlite3-offline-darwin@3.1.8-1:
-  version "3.1.8-1"
-  resolved "https://registry.yarnpkg.com/sqlite3-offline-darwin/-/sqlite3-offline-darwin-3.1.8-1.tgz#19db2c6fe9decba138b54afe2e613c95bfb95e46"
+sqlite3-offline-darwin@3.1.8-2:
+  version "3.1.8-2"
+  resolved "https://registry.yarnpkg.com/sqlite3-offline-darwin/-/sqlite3-offline-darwin-3.1.8-2.tgz#022ed30411f76af6d1123083b647e20f8517b3d5"
 
-sqlite3-offline-linux@3.1.8-1:
-  version "3.1.8-1"
-  resolved "https://registry.yarnpkg.com/sqlite3-offline-linux/-/sqlite3-offline-linux-3.1.8-1.tgz#a1de4715b706ba01123e2a117222f584a1cf80e0"
+sqlite3-offline-linux@3.1.8-2:
+  version "3.1.8-2"
+  resolved "https://registry.yarnpkg.com/sqlite3-offline-linux/-/sqlite3-offline-linux-3.1.8-2.tgz#ccb8f9ec606ad3aebc1cb789428eafef344a3847"
 
-sqlite3-offline-win32@3.1.8-1:
-  version "3.1.8-1"
-  resolved "https://registry.yarnpkg.com/sqlite3-offline-win32/-/sqlite3-offline-win32-3.1.8-1.tgz#4922e22f34dd9418a4fb2ff97ed039d3707b02e5"
+sqlite3-offline-win32@3.1.8-2:
+  version "3.1.8-2"
+  resolved "https://registry.yarnpkg.com/sqlite3-offline-win32/-/sqlite3-offline-win32-3.1.8-2.tgz#fa2e2d6b9d8c5a7b92554030591fb4f13f64391e"
 
-sqlite3-offline@3.1.8-1:
-  version "3.1.8-1"
-  resolved "https://registry.yarnpkg.com/sqlite3-offline/-/sqlite3-offline-3.1.8-1.tgz#e9dbd7ea0997f666e4f236bf9c6f459027f597a0"
+sqlite3-offline@^3.1.8-2:
+  version "3.1.8-2"
+  resolved "https://registry.yarnpkg.com/sqlite3-offline/-/sqlite3-offline-3.1.8-2.tgz#156c89455c69c69b9ae0ec98f2bd2951057bd6c8"
   dependencies:
-    sqlite3-offline-darwin "3.1.8-1"
-    sqlite3-offline-linux "3.1.8-1"
-    sqlite3-offline-win32 "3.1.8-1"
+    sqlite3-offline-darwin "3.1.8-2"
+    sqlite3-offline-linux "3.1.8-2"
+    sqlite3-offline-win32 "3.1.8-2"
 
 sshpk@^1.7.0:
   version "1.13.1"
