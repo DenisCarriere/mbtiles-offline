@@ -123,3 +123,10 @@ test('MBTiles -- metadata', t => {
   }
   t.end()
 })
+
+test('MBTiles -- jpg metadata (not JPEG)', t => {
+  const db = new MBTiles(directories.out + 'format-jpg.mbtiles')
+  db.update({format: 'jpg'})
+    .then(metadata => t.equal(metadata.format, 'jpg'))
+  t.end()
+})

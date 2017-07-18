@@ -1,6 +1,10 @@
 
 # Changelog
 
+## 3.1.0 - 2017-07-18
+
+- Dropped automatic conversion of JPG to JPEG (MBTiles spec uses `jpg`)
+
 ## 3.0.3 - 2017-07-5
 
 - Update `sqlite3-offline` to support the 3 latest versions of Electron

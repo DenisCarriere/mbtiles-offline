@@ -6,6 +6,8 @@ type UpdateMetadata = MBTiles.UpdateMetadata
 type Bounds = MBTiles.Bounds
 type BBox = MBTiles.BBox
 type Center = MBTiles.Center
+type Formats = 'jpg' | 'png' | 'pbf' | 'webp'
+type Types = 'overlay' | 'baselayer'
 type Schema = 'xyz' | 'tms' | 'quadkey'
 
 interface SchemaType {

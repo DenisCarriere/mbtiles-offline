@@ -9,12 +9,13 @@ interface Container {
 const image = fs.readFileSync('./in/images/0/0/0.png')
 const bounds: Bounds = [-110, -40, 95, 50]
 const options = {
+    bounds,
+    format: 'jpg',
+    type: 'overlay',
     name: 'Foo',
     description: 'Bar',
     minzoom: 1,
     maxzoom: 3,
-    format: 'png',
-    bounds: bounds
 }
 
 // Default (TMS/XYZ Schema)
