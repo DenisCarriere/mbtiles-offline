@@ -176,8 +176,11 @@ Save buffer data to individual Tile
 **Examples**
 
 ```javascript
-db.save([x, y, z], buffer)
-  .then(status => console.log(status))
+db.save([x, y, z], buffer).then(status => {
+  //= status
+}).catch(error => {
+  //= error
+})
 ```
 
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** true/false
@@ -189,11 +192,33 @@ Retrieves Metadata from MBTiles
 **Examples**
 
 ```javascript
-db.metadata()
-  .then(metadata => console.log(metadata))
+db.metadata().then(metadata => {
+  //= metadata
+}).catch(error => {
+  //= error
+})
 ```
 
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;Metadata>** Metadata as an Object
+
+#### metadataSync
+
+Sync: Retrieves Metadata from MBTiles
+
+**Parameters**
+
+-   `callback` **[Function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function)** a method that takes (error: {Error}, metadata: {Object})
+
+**Examples**
+
+```javascript
+db.metadata((error, metadata) => {
+  //= error
+  //= metadata
+})
+```
+
+Returns **void** 
 
 #### delete
 
@@ -206,8 +231,11 @@ Delete individual Tile
 **Examples**
 
 ```javascript
-db.delete([x, y, z])
-  .then(status => console.log(status))
+db.delete([x, y, z]).then(status => {
+  //= status
+}).catch(error => {
+  //= error
+})
 ```
 
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** true/false
@@ -219,8 +247,11 @@ Retrieves Minimum Zoom level
 **Examples**
 
 ```javascript
-db.getMinZoom()
-  .then(minZoom => console.log(minZoom))
+db.getMinZoom().then(minZoom => {
+  //= minZoom
+}).catch(error => {
+  //= error
+})
 ```
 
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** 
@@ -232,8 +263,11 @@ Retrieves Maximum Zoom level
 **Examples**
 
 ```javascript
-db.getMaxZoom()
-  .then(maxZoom => console.log(maxZoom))
+db.getMaxZoom().then(maxZoom => {
+  //= maxZoom
+}).catch(error => {
+  //= error
+})
 ```
 
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** 
@@ -245,8 +279,11 @@ Retrieves Image Format
 **Examples**
 
 ```javascript
-db.getFormat()
-  .then(format => console.log(format))
+db.getFormat().then(format => {
+  //= format
+}).catch(error => {
+  //= error
+})
 ```
 
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;Formats>** 
@@ -262,8 +299,11 @@ Retrieves Bounds
 **Examples**
 
 ```javascript
-db.getBounds()
-  .then(bbox => console.log(bbox))
+db.getBounds().then(bbox => {
+  //= bbox
+}).catch(error => {
+  //= error
+})
 ```
 
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;BBox>** 
@@ -279,8 +319,11 @@ Count the amount of Tiles
 **Examples**
 
 ```javascript
-db.count()
-  .then(count => console.log(count))
+db.count().then(count => {
+  //= count
+}).catch(error => {
+  //= error
+})
 ```
 
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** 
@@ -315,8 +358,11 @@ const options = {
   format: 'png',
   bounds: [-110, -40, 95, 50]
 }
-db.update(options)
-  .then(metadata => console.log(metadata))
+db.update(options).then(metadata => {
+  //= metadata
+}).catch(error => {
+  //= error
+})
 ```
 
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;Metadata>** Metadata
@@ -328,8 +374,11 @@ Validate MBTiles according to the specifications
 **Examples**
 
 ```javascript
-db.validate()
- .then(status => console.log(status), error => console.log(error))
+db.validate().then(status => {
+  //= status
+}).catch(error => {
+  //= error
+})
 ```
 
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** true/false
@@ -347,11 +396,34 @@ Finds all Tile unique hashes
 ```javascript
 const tile1 = [33, 40, 6]
 const tile2 = [20, 50, 7]
-db.findAll([tile1, tile2])
-  .then(tiles => console.log(tiles))
+db.findAll([tile1, tile2]).then(tiles => {
+  //= tiles
+}).catch(error => {
+  //= error
+})
 ```
 
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;Tile>>** An array of Tiles [x, y, z]
+
+#### findOneSync
+
+Sync: Finds one Tile and returns Buffer
+
+**Parameters**
+
+-   `tile` **Tile** Tile [x, y, z]
+-   `callback` **[Function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function)** a method that takes (image: {Buffer})
+
+**Examples**
+
+```javascript
+db.findOneSync([x, y, z], (error, image) => {
+  //= error
+  //= image
+})
+```
+
+Returns **void** 
 
 #### findOne
 
@@ -364,8 +436,11 @@ Finds one Tile and returns Buffer
 **Examples**
 
 ```javascript
-db.findOne([x, y, z])
-  .then(image => console.log(image))
+db.findOne([x, y, z]).then(image => {
+  //= image
+}).catch(error => {
+  //= error
+})
 ```
 
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Buffer](https://nodejs.org/api/buffer.html)>** Tile Data
@@ -377,8 +452,11 @@ Build SQL tables
 **Examples**
 
 ```javascript
-db.tables()
-  .then(status => console.log(status))
+db.tables().then(status => {
+  //= status
+}).catch(error => {
+  //= error
+})
 ```
 
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** true/false
@@ -390,8 +468,11 @@ Build SQL index
 **Examples**
 
 ```javascript
-db.index()
-  .then(status => console.log(status))
+db.index().then(status => {
+  //= status
+}).catch(error => {
+  //= error
+})
 ```
 
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** true/false

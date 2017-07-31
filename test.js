@@ -119,7 +119,7 @@ test('MBTiles -- metadata', t => {
       const output = path.join(directories.out, `metadata-${name}.json`)
       if (process.env.REGEN) write.sync(output, metadata)
       t.deepEqual(metadata, load.sync(output), filename)
-    })
+    }).catch(error => console.error(error))
   }
   t.end()
 })
@@ -128,5 +128,23 @@ test('MBTiles -- jpg metadata (not JPEG)', t => {
   const db = new MBTiles(directories.out + 'format-jpg.mbtiles')
   db.update({format: 'jpg'})
     .then(metadata => t.equal(metadata.format, 'jpg'))
+  t.end()
+})
+
+test('MBTiles -- findOneSync', t => {
+  const db = new MBTiles(directories.in + 'plain_1.mbtiles')
+  db.findOneSync([1, 1, 1], (error, image) => {
+    if (error) t.fail(error)
+    t.equal(image.byteLength, 2450)
+  })
+  t.end()
+})
+
+test('MBTiles -- metadataSync', t => {
+  const db = new MBTiles(directories.in + 'plain_1.mbtiles')
+  db.metadataSync((error, metadata) => {
+    if (error) t.fail(error)
+    t.deepEqual(metadata, metadataPlain1)
+  })
   t.end()
 })

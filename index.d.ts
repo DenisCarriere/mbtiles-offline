@@ -52,6 +52,11 @@ declare class MBTilesClass<T extends Tile | string> {
   metadata(): Promise<Metadata>
 
   /**
+   * Sync: Retrieves Metadata from MBTiles
+   */
+  metadataSync(callback: (error: Error, metadata: Metadata) => void): void
+
+  /**
    * Delete individual Tile
    */
   delete(tile: T): Promise<boolean>
@@ -76,6 +81,11 @@ declare class MBTilesClass<T extends Tile | string> {
    * Finds one Tile and returns Buffer
    */
   findOne(tile: T): Promise<Buffer>
+
+  /**
+   * Sync: Finds one Tile and returns Buffer
+   */
+  findOneSync(tile: T, callback: (error: Error, tile: Buffer) => void): void
 
   /**
    * Build SQL tables

@@ -1,9 +1,12 @@
 
 # Changelog
 
-## 3.1.1 - 2017-07-30
+## 3.2.0 - 2017-07-30
 
+- Added new methods `findOneSync` & `metadataSync` using callbacks
+- Improve `Promise.reject` handling
 - Update Typescript definition - added `mbtiles.db` & `mbtiles.uri`
+- Updated documentation
 
 ## 3.1.0 - 2017-07-18
 

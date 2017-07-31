@@ -1,6 +1,6 @@
-const {omit, entries, assign} = require('lodash')
 const mercator = require('global-mercator')
 const tiletype = require('@mapbox/tiletype')
+const {omit, entries, assign} = require('lodash')
 const utils = require('./utils')
 const schema = require('./schema')
 const warning = require('debug')('mbtiles-offline:warning')
@@ -42,8 +42,11 @@ module.exports = class MBTiles {
    * @param {Buffer} image Tile image
    * @returns {Promise<boolean>} true/false
    * @example
-   * db.save([x, y, z], buffer)
-   *   .then(status => console.log(status))
+   * db.save([x, y, z], buffer).then(status => {
+   *   //= status
+   * }).catch(error => {
+   *   //= error
+   * })
    */
   save (tile, image) {
     const [x, y, z] = this.schemaToTile(tile)
@@ -68,52 +71,73 @@ module.exports = class MBTiles {
    *
    * @returns {Promise<Metadata>} Metadata as an Object
    * @example
-   * db.metadata()
-   *   .then(metadata => console.log(metadata))
+   * db.metadata().then(metadata => {
+   *   //= metadata
+   * }).catch(error => {
+   *   //= error
+   * })
    */
   metadata () {
     return new Promise((resolve, reject) => {
-      this.db.serialize(() => {
-        this.db.run(schema.TABLE.metadata, error => {
-          if (error) {
-            warning(error)
-            this.errors.push(error)
-            this.ok = false
-            return resolve({})
-          }
-        })
-        this.db.all('SELECT * FROM metadata', (error, rows) => {
-          if (error) {
-            warning(error)
-            this.errors.push(error)
-            this.ok = false
-            return resolve(undefined)
-          }
+      this.metadataSync((error, metadata) => {
+        if (error) return reject(error)
+        return resolve(metadata)
+      })
+    })
+  }
 
-          const metadata = utils.parseMetadata(rows)
-          this.minzoom = metadata.minzoom
-          this.maxzoom = metadata.maxzoom
-          this.attribution = metadata.attribution || this.attribution
-          this.description = metadata.description || this.description
-          this.name = metadata.name || this.name
-          this.type = metadata.type || this.type
-          this.version = metadata.version || this.version
-          this.url = metadata.url || this.url
-          const bounds = metadata.bounds || this.bounds
-          if (bounds) {
-            const bbox = utils.parseBounds(bounds)
-            this.bounds = bbox
-            this.center = mercator.bboxToCenter(bbox)
-          }
+  /**
+   * Sync: Retrieves Metadata from MBTiles
+   *
+   * @param {Function} callback a method that takes (error: {Error}, metadata: {Object})
+   * @returns {void}
+   * @example
+   * db.metadata((error, metadata) => {
+   *   //= error
+   *   //= metadata
+   * })
+   */
+  metadataSync (callback) {
+    this.db.serialize(() => {
+      this.db.run(schema.TABLE.metadata, error => {
+        if (error) {
+          warning(error)
+          this.errors.push(error)
+          this.ok = false
+          return callback(error, {})
+        }
+      })
+      this.db.all('SELECT * FROM metadata', (error, rows) => {
+        if (error) {
+          warning(error)
+          this.errors.push(error)
+          this.ok = false
+          return callback(error, {})
+        }
 
-          this.getFormat().then(format => {
-            this.getMinZoom().then(minZoom => {
-              this.getMaxZoom().then(maxZoom => {
-                this.getBounds().then(bounds => {
-                  const json = omit(assign(this, metadata), EXCLUDE)
-                  const results = JSON.parse(JSON.stringify(json))
-                  return resolve(results)
-                })
+        const metadata = utils.parseMetadata(rows)
+        this.minzoom = metadata.minzoom
+        this.maxzoom = metadata.maxzoom
+        this.attribution = metadata.attribution || this.attribution
+        this.description = metadata.description || this.description
+        this.name = metadata.name || this.name
+        this.type = metadata.type || this.type
+        this.version = metadata.version || this.version
+        this.url = metadata.url || this.url
+        const bounds = metadata.bounds || this.bounds
+        if (bounds) {
+          const bbox = utils.parseBounds(bounds)
+          this.bounds = bbox
+          this.center = mercator.bboxToCenter(bbox)
+        }
+
+        this.getFormat().then(format => {
+          this.getMinZoom().then(minZoom => {
+            this.getMaxZoom().then(maxZoom => {
+              this.getBounds().then(bounds => {
+                const json = omit(assign(this, metadata), EXCLUDE)
+                const results = JSON.parse(JSON.stringify(json))
+                return callback(error, results)
               })
             })
           })
@@ -128,8 +152,11 @@ module.exports = class MBTiles {
    * @param {Tile} tile Tile [x, y, z]
    * @returns {Promise<boolean>} true/false
    * @example
-   * db.delete([x, y, z])
-   *   .then(status => console.log(status))
+   * db.delete([x, y, z]).then(status => {
+   *   //= status
+   * }).catch(error => {
+   *   //= error
+   * })
    */
   delete (tile) {
     tile = this.schemaToTile(tile)
@@ -154,8 +181,11 @@ module.exports = class MBTiles {
    *
    * @returns {Promise<number>}
    * @example
-   * db.getMinZoom()
-   *   .then(minZoom => console.log(minZoom))
+   * db.getMinZoom().then(minZoom => {
+   *   //= minZoom
+   * }).catch(error => {
+   *   //= error
+   * })
    */
   getMinZoom () {
     return new Promise((resolve, reject) => {
@@ -184,8 +214,11 @@ module.exports = class MBTiles {
    *
    * @returns {Promise<number>}
    * @example
-   * db.getMaxZoom()
-   *   .then(maxZoom => console.log(maxZoom))
+   * db.getMaxZoom().then(maxZoom => {
+   *   //= maxZoom
+   * }).catch(error => {
+   *   //= error
+   * })
    */
   getMaxZoom () {
     return new Promise((resolve, reject) => {
@@ -215,8 +248,11 @@ module.exports = class MBTiles {
    *
    * @returns {Promise<Formats>}
    * @example
-   * db.getFormat()
-   *   .then(format => console.log(format))
+   * db.getFormat().then(format => {
+   *   //= format
+   * }).catch(error => {
+   *   //= error
+   * })
    */
   getFormat () {
     return new Promise((resolve, reject) => {
@@ -246,8 +282,11 @@ module.exports = class MBTiles {
    * @param {number} zoom Zoom level
    * @returns {Promise<BBox>}
    * @example
-   * db.getBounds()
-   *   .then(bbox => console.log(bbox))
+   * db.getBounds().then(bbox => {
+   *   //= bbox
+   * }).catch(error => {
+   *   //= error
+   * })
    */
   getBounds (zoom) {
     return new Promise((resolve, reject) => {
@@ -294,8 +333,11 @@ module.exports = class MBTiles {
    * @param {Tile[]} [tiles] Only find given tiles
    * @returns {Promise<number>}
    * @example
-   * db.count()
-   *   .then(count => console.log(count))
+   * db.count().then(count => {
+   *   //= count
+   * }).catch(error => {
+   *   //= error
+   * })
    */
   count (tiles) {
     // Tile schema will be converted by findAll
@@ -331,8 +373,11 @@ module.exports = class MBTiles {
    *   format: 'png',
    *   bounds: [-110, -40, 95, 50]
    * }
-   * db.update(options)
-   *   .then(metadata => console.log(metadata))
+   * db.update(options).then(metadata => {
+   *   //= metadata
+   * }).catch(error => {
+   *   //= error
+   * })
    */
   update (metadata = {}) {
     return new Promise((resolve, reject) => {
@@ -396,11 +441,14 @@ module.exports = class MBTiles {
    *
    * @returns {Promise<boolean>} true/false
    * @example
-   * db.validate()
-   *  .then(status => console.log(status), error => console.log(error))
+   * db.validate().then(status => {
+   *   //= status
+   * }).catch(error => {
+   *   //= error
+   * })
    */
   validate () {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       this.metadata().then(metadata => {
         if (this.errors.length) throw new Error(this.errors)
 
@@ -427,8 +475,11 @@ module.exports = class MBTiles {
    * @example
    * const tile1 = [33, 40, 6]
    * const tile2 = [20, 50, 7]
-   * db.findAll([tile1, tile2])
-   *   .then(tiles => console.log(tiles))
+   * db.findAll([tile1, tile2]).then(tiles => {
+   *   //= tiles
+   * }).catch(error => {
+   *   //= error
+   * })
    */
   findAll (tiles = []) {
     tiles = tiles.map(tile => this.schemaToTile(tile))
@@ -508,30 +559,52 @@ module.exports = class MBTiles {
   }
 
   /**
+   * Sync: Finds one Tile and returns Buffer
+   *
+   * @param {Tile} tile Tile [x, y, z]
+   * @param {Function} callback a method that takes (image: {Buffer})
+   * @return {void}
+   * @example
+   * db.findOneSync([x, y, z], (error, image) => {
+   *   //= error
+   *   //= image
+   * })
+   */
+  findOneSync (tile, callback) {
+    tile = this.schemaToTile(tile)
+    const query = 'SELECT tile_data FROM tiles WHERE tile_column=? AND tile_row=? AND zoom_level=?'
+    this.db.get(query, tile, (error, row) => {
+      if (error) {
+        warning(error)
+        this.errors.push(error)
+        this.ok = false
+        callback(error, null)
+      } else if (row) {
+        callback(error, row.tile_data)
+      } else {
+        warning('<findOne> not found')
+        callback(error, null)
+      }
+    })
+  }
+
+  /**
    * Finds one Tile and returns Buffer
    *
    * @param {Tile} tile Tile [x, y, z]
    * @return {Promise<Buffer>} Tile Data
    * @example
-   * db.findOne([x, y, z])
-   *   .then(image => console.log(image))
+   * db.findOne([x, y, z]).then(image => {
+   *   //= image
+   * }).catch(error => {
+   *   //= error
+   * })
    */
   findOne (tile) {
-    tile = this.schemaToTile(tile)
     return new Promise((resolve, reject) => {
-      const query = 'SELECT tile_data FROM tiles WHERE tile_column=? AND tile_row=? AND zoom_level=?'
-      this.db.get(query, tile, (error, row) => {
-        if (error) {
-          warning(error)
-          this.errors.push(error)
-          this.ok = false
-          return resolve(undefined)
-        } else if (row) {
-          return resolve(row.tile_data)
-        } else {
-          warning('<findOne> not found')
-          return resolve(undefined)
-        }
+      this.findOneSync(tile, (error, image) => {
+        if (error) return reject(error)
+        return resolve(image)
       })
     })
   }
@@ -541,11 +614,14 @@ module.exports = class MBTiles {
    *
    * @returns {Promise<boolean>} true/false
    * @example
-   * db.tables()
-   *   .then(status => console.log(status))
+   * db.tables().then(status => {
+   *   //= status
+   * }).catch(error => {
+   *   //= error
+   * })
    */
   tables () {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       if (this._table) { return resolve(true) }
       this.db.serialize(() => {
         this.db.run(schema.TABLE.metadata, error => {
@@ -553,7 +629,7 @@ module.exports = class MBTiles {
             warning(error)
             this.errors.push(error)
             this.ok = false
-            return resolve(false)
+            return reject(error)
           }
         })
         this.db.run(schema.TABLE.tiles, error => {
@@ -561,7 +637,7 @@ module.exports = class MBTiles {
             warning(error)
             this.errors.push(error)
             this.ok = false
-            return resolve(false)
+            return reject(error)
           }
           this._table = true
           return resolve(true)
@@ -575,11 +651,14 @@ module.exports = class MBTiles {
    *
    * @returns {Promise<boolean>} true/false
    * @example
-   * db.index()
-   *   .then(status => console.log(status))
+   * db.index().then(status => {
+   *   //= status
+   * }).catch(error => {
+   *   //= error
+   * })
    */
   index () {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       if (this._index) { return resolve(true) }
       this.tables().then(() => {
         this.db.serialize(() => {
@@ -588,7 +667,7 @@ module.exports = class MBTiles {
               warning(error)
               this.errors.push(error)
               this.ok = false
-              return resolve(false)
+              return reject(error)
             }
           })
           this.db.run(schema.INDEX.metadata, error => {
@@ -596,7 +675,7 @@ module.exports = class MBTiles {
               warning(error)
               this.errors.push(error)
               this.ok = false
-              return resolve(false)
+              return reject(false)
             }
             this._index = true
             return resolve(true)

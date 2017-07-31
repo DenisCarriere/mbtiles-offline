@@ -40,6 +40,10 @@ async function main() {
     hashes.size
     const container: Container = {}
     container['foo'].findOne(tile)
+
+    // Sync functions
+    db.metadataSync((error, metadata) => {})
+    db.findOneSync(tile, (error, image) => {})
 }
 
 // Quadkey Schema
