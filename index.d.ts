@@ -1,5 +1,7 @@
 /// <reference types="geojson" />
 
+import {Database} from 'sqlite3-offline'
+
 type Tile = MBTiles.Tile
 type Metadata = MBTiles.Metadata
 type UpdateMetadata = MBTiles.UpdateMetadata
@@ -17,6 +19,7 @@ interface SchemaType {
 }
 
 declare class MBTilesClass<T extends Tile | string> {
+  // Metadata properties
   type: string
   version: string
   name?: string
@@ -28,6 +31,13 @@ declare class MBTilesClass<T extends Tile | string> {
   description?: string
   attribution?: string
   url?: string
+
+  // Extra properties
+  db?: Database
+  uri?: string
+  errors?: any[]
+  ok?: boolean
+  schema?: string
 
   constructor(uri: string, schema?: Schema)
 

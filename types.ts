@@ -22,6 +22,10 @@ const options = {
 async function main() {
     const tile: Tile = [0, 0, 0]
     const db = new MBTiles('./in/plain_1.mbtiles', 'tms')
+    // Class properties
+    db.db
+    db.uri
+    // Class methods
     await db.metadata()
     await db.count()
     await db.tables()

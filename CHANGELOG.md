@@ -1,6 +1,10 @@
 
 # Changelog
 
+## 3.1.1 - 2017-07-30
+
+- Update Typescript definition - added `mbtiles.db` & `mbtiles.uri`
+
 ## 3.1.0 - 2017-07-18
 
 - Dropped automatic conversion of JPG to JPEG (MBTiles spec uses `jpg`)
