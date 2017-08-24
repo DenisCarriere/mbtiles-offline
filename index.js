@@ -1,6 +1,9 @@
 const mercator = require('global-mercator')
 const tiletype = require('@mapbox/tiletype')
-const {omit, entries, assign} = require('lodash')
+const lodash = require('lodash')
+const omit = lodash.omit
+const entries = lodash.entries
+const assign = lodash.assign
 const utils = require('./utils')
 const schema = require('./schema')
 const warning = require('debug')('mbtiles-offline:warning')
@@ -30,9 +33,9 @@ module.exports = class MBTiles {
     this.errors = []
     this.ok = true
     this.schema = schema || 'xyz'
-    const [schemaToTile, tileToSchema] = utils.getTileParsers(this.schema)
-    this.schemaToTile = schemaToTile
-    this.tileToSchema = tileToSchema
+    const parser = utils.getTileParser(this.schema)
+    this.schemaToTile = parser.schemaToTile
+    this.tileToSchema = parser.tileToSchema
   }
 
   /**
@@ -49,7 +52,10 @@ module.exports = class MBTiles {
    * })
    */
   save (tile, image) {
-    const [x, y, z] = this.schemaToTile(tile)
+    tile = this.schemaToTile(tile)
+    const x = tile[0]
+    const y = tile[1]
+    const z = tile[2]
     return new Promise((resolve, reject) => {
       this.tables().then(() => {
         const query = 'INSERT INTO tiles (tile_column, tile_row, zoom_level, tile_data) VALUES (?, ?, ?, ?)'
@@ -198,10 +204,10 @@ module.exports = class MBTiles {
             this.ok = false
             return resolve(undefined)
           }
-          if (row === undefined || row === null) { return resolve(undefined) }
+          if (row === undefined || row === null) return resolve(undefined)
 
           const minzoom = row['MIN(zoom_level)']
-          if (minzoom === null || minzoom === undefined) { return resolve(undefined) }
+          if (minzoom === undefined || minzoom === null) return resolve(undefined)
           this.minzoom = minzoom
           return resolve(minzoom)
         })
@@ -222,8 +228,8 @@ module.exports = class MBTiles {
    */
   getMaxZoom () {
     return new Promise((resolve, reject) => {
-      if (this.db === undefined) { return resolve(undefined) }
-      if (this.maxzoom !== undefined) { return resolve(this.maxzoom) }
+      if (this.db === undefined) return resolve(undefined)
+      if (this.maxzoom !== undefined) return resolve(this.maxzoom)
       this.tables().then(() => {
         this.db.get('SELECT MAX(zoom_level) FROM tiles', (error, row) => {
           if (error) {
@@ -232,10 +238,10 @@ module.exports = class MBTiles {
             this.ok = false
             return resolve(undefined)
           }
-          if (row === undefined || row === null) { return resolve(undefined) }
+          if (row === undefined || row === null) return resolve(undefined)
 
           const maxzoom = row['MAX(zoom_level)']
-          if (maxzoom === null || maxzoom === undefined) { return resolve(undefined) }
+          if (maxzoom === null || maxzoom === undefined) return resolve(undefined)
           this.maxzoom = maxzoom
           return resolve(maxzoom)
         })
@@ -256,7 +262,7 @@ module.exports = class MBTiles {
    */
   getFormat () {
     return new Promise((resolve, reject) => {
-      if (this.format !== undefined) { return resolve(this.format) }
+      if (this.format !== undefined) return resolve(this.format)
       this.tables().then(() => {
         this.db.get('SELECT tile_data FROM tiles LIMIT 1', (error, row) => {
           if (error) {
@@ -265,10 +271,10 @@ module.exports = class MBTiles {
             this.ok = false
             return resolve(undefined)
           }
-          if (row === undefined || row === null) { return resolve(undefined) }
+          if (row === undefined || row === null) return resolve(undefined)
 
           let format = tiletype.type(row['tile_data'])
-          if (format === undefined || format === null) { return resolve(undefined) }
+          if (format === undefined || format === null) return resolve(undefined)
           this.format = format
           return resolve(format)
         })
@@ -290,14 +296,14 @@ module.exports = class MBTiles {
    */
   getBounds (zoom) {
     return new Promise((resolve, reject) => {
-      if (this.bounds !== undefined) { return resolve(this.bounds) }
+      if (this.bounds !== undefined) return resolve(this.bounds)
       this.tables().then(() => {
         this.getMaxZoom().then(maxzoom => {
           this.getMinZoom().then(minzoom => {
             // Validate zoom input based on Min & Max zoom levels
             let zoomLevel = (zoom === undefined) ? maxzoom : zoom
-            if (zoom > maxzoom) { zoomLevel = maxzoom }
-            if (zoom < minzoom) { zoomLevel = minzoom }
+            if (zoom > maxzoom) zoomLevel = maxzoom
+            if (zoom < minzoom) zoomLevel = minzoom
 
             const query = 'SELECT MIN(tile_column), MIN(tile_row), MAX(tile_column), MAX(tile_row) FROM tiles WHERE zoom_level=?'
             this.db.get(query, zoomLevel, (error, row) => {
@@ -307,8 +313,8 @@ module.exports = class MBTiles {
                 this.ok = false
                 return resolve(undefined)
               }
-              if (row === undefined || row === null) { return resolve(undefined) }
-              if (zoomLevel === undefined || zoomLevel === null) { return resolve(undefined) }
+              if (row === undefined || row === null) return resolve(undefined)
+              if (zoomLevel === undefined || zoomLevel === null) return resolve(undefined)
 
               // Retrieve BBox from southwest & northeast tiles
               const southwest = mercator.tileToBBox([row['MIN(tile_column)'], row['MIN(tile_row)'], zoomLevel])
@@ -399,7 +405,7 @@ module.exports = class MBTiles {
               return resolve(undefined)
             }
           })
-          if (metadata.bounds) { metadata.bounds = utils.parseBounds(metadata.bounds) }
+          if (metadata.bounds) metadata.bounds = utils.parseBounds(metadata.bounds)
           const results = assign(currentMetadata, metadata)
 
           // Load Metadata to database
@@ -503,7 +509,9 @@ module.exports = class MBTiles {
         // Searh by defined set of tiles
         const levels = {}
         for (const tile of tiles) {
-          const [x, y, z] = tile
+          const x = tile[0]
+          const y = tile[1]
+          const z = tile[2]
           if (levels[z] === undefined) {
             levels[z] = {
               west: x,

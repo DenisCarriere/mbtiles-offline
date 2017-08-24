@@ -8,25 +8,25 @@ test('Utils -- getFiles', t => {
 })
 
 // http://www.maptiler.org/google-maps-coordinates-tile-bounds-projection/
-test('Utils -- Tile Parsers -- Quadkey', t => {
-  const [schemaToTile, tileToSchema] = utils.getTileParsers('quadkey')
-  t.deepEqual(schemaToTile('00'), [0, 3, 2])
-  t.deepEqual(tileToSchema([0, 3, 2]), '00')
+test('Utils -- Tile Parser -- Quadkey', t => {
+  const parser = utils.getTileParser('quadkey')
+  t.deepEqual(parser.schemaToTile('00'), [0, 3, 2])
+  t.deepEqual(parser.tileToSchema([0, 3, 2]), '00')
   t.end()
 })
 
-test('Utils -- Tile Parsers -- XYZ', t => {
-  const [schemaToTile, tileToSchema] = utils.getTileParsers('xyz')
-  t.deepEqual(schemaToTile([0, 3, 2]), [0, 0, 2])
-  t.deepEqual(tileToSchema([0, 0, 2]), [0, 3, 2])
-  t.deepEqual(tileToSchema([15, 9, 4]), [15, 6, 4])
+test('Utils -- Tile Parser -- XYZ', t => {
+  const parser = utils.getTileParser('xyz')
+  t.deepEqual(parser.schemaToTile([0, 3, 2]), [0, 0, 2])
+  t.deepEqual(parser.tileToSchema([0, 0, 2]), [0, 3, 2])
+  t.deepEqual(parser.tileToSchema([15, 9, 4]), [15, 6, 4])
   t.end()
 })
 
-test('Utils -- Tile Parsers -- TMS', t => {
-  const [schemaToTile, tileToSchema] = utils.getTileParsers('tms')
-  t.deepEqual(schemaToTile([0, 3, 2]), [0, 3, 2])
-  t.deepEqual(tileToSchema([0, 3, 2]), [0, 3, 2])
+test('Utils -- Tile Parser -- TMS', t => {
+  const parser = utils.getTileParser('tms')
+  t.deepEqual(parser.schemaToTile([0, 3, 2]), [0, 3, 2])
+  t.deepEqual(parser.tileToSchema([0, 3, 2]), [0, 3, 2])
   t.end()
 })
 
@@ -48,7 +48,7 @@ test('Utils -- parseMetadata', t => {
 })
 
 test('Utils -- throws', t => {
-  t.throws(() => utils.getTileParsers(''), /schema is required/)
-  t.throws(() => utils.getTileParsers('foo'), 'invalid tile parser')
+  t.throws(() => utils.getTileParser(''), /schema is required/)
+  t.throws(() => utils.getTileParser('foo'), 'invalid tile parser')
   t.end()
 })

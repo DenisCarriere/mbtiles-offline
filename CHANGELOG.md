@@ -1,6 +1,10 @@
 
 # Changelog
 
+## 3.3.0 - 2017-08-24
+
+- Start converting library to ES5+ (NodeJS 4 compatible)
+
 ## 3.2.0 - 2017-07-30
 
 - Added new methods `findOneSync` & `metadataSync` using callbacks

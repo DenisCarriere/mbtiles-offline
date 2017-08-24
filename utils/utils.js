@@ -5,13 +5,13 @@ const mercator = require('global-mercator')
 const dateline = require('bbox-dateline')
 
 /**
- * Get Tile Parsers from schema
+ * Get Tile Parser from schema
  * http://www.maptiler.org/google-maps-coordinates-tile-bounds-projection/
  *
  * @param {string} schema Tile schema
  * @return {[Function, Function]} Tile schema parsing functions [Schema to Tile, Tile to Schema]
  */
-module.exports.getTileParsers = (schema) => {
+module.exports.getTileParser = (schema) => {
   if (!schema) throw new Error('schema is required')
 
   switch (schema.toLowerCase()) {
@@ -19,12 +19,12 @@ module.exports.getTileParsers = (schema) => {
     case 'arcgis':
     case 'google':
     case 'xyz':
-      return [mercator.googleToTile, mercator.tileToGoogle]
+      return {schemaToTile: mercator.googleToTile, tileToSchema: mercator.tileToGoogle}
     case 'quadkey':
     case 'quadtree':
-      return [mercator.quadkeyToTile, mercator.tileToQuadkey]
+      return {schemaToTile: mercator.quadkeyToTile, tileToSchema: mercator.tileToQuadkey}
     case 'tms':
-      return [(tile) => tile, (tile) => tile]
+      return {schemaToTile: (tile) => tile, tileToSchema: (tile) => tile}
     default:
       throw new Error(schema + ' unknown Tile schema')
   }

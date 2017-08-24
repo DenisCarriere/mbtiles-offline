@@ -3,7 +3,7 @@ const path = require('path')
 const load = require('load-json-file')
 const test = require('tape')
 const write = require('write-json-file')
-const {copySync} = require('fs-extra')
+const copySync = require('fs-extra').copySync
 const MBTiles = require('./')
 
 const options = {
@@ -112,7 +112,7 @@ test('MBTiles -- blank', async t => {
 
 test('MBTiles -- metadata', t => {
   for (const filename of fixtures) {
-    const {name} = path.parse(filename)
+    const name = path.parse(filename).name
     const db = new MBTiles(directories.in + filename)
 
     db.metadata().then(metadata => {
