@@ -9,7 +9,7 @@
 
 [![Standard - JavaScript Style Guide](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
 
-> This library is intented to be used in an offline environment with no dependencies which require the use of downloading a package from the internet.
+> Easy to use MBTiles binding for NodeJS 4+ using Callbacks and/or Promises.
 
 ## Install
 
@@ -218,7 +218,7 @@ db.metadata((error, metadata) => {
 })
 ```
 
-Returns **void** 
+Returns **void**
 
 #### delete
 
@@ -254,7 +254,7 @@ db.getMinZoom().then(minZoom => {
 })
 ```
 
-Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** 
+Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>**
 
 #### getMaxZoom
 
@@ -270,7 +270,7 @@ db.getMaxZoom().then(maxZoom => {
 })
 ```
 
-Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** 
+Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>**
 
 #### getFormat
 
@@ -286,7 +286,7 @@ db.getFormat().then(format => {
 })
 ```
 
-Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;Formats>** 
+Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;Formats>**
 
 #### getBounds
 
@@ -306,7 +306,7 @@ db.getBounds().then(bbox => {
 })
 ```
 
-Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;BBox>** 
+Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;BBox>**
 
 #### count
 
@@ -326,7 +326,7 @@ db.count().then(count => {
 })
 ```
 
-Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** 
+Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>**
 
 #### update
 
@@ -423,7 +423,7 @@ db.findOneSync([x, y, z], (error, image) => {
 })
 ```
 
-Returns **void** 
+Returns **void**
 
 #### findOne
 
@@ -483,7 +483,7 @@ Creates hash from a single Tile
 
 **Parameters**
 
--   `tile` **Tile** 
+-   `tile` **Tile**
 
 **Examples**
 

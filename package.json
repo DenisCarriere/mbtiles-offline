@@ -1,7 +1,7 @@
 {
   "name": "mbtiles-offline",
   "version": "4.0.0",
-  "description": "MBTiles SQLite3 binding (for offline environments)",
+  "description": "MBTiles binding for NodeJS 4+",
   "main": "index.js",
   "types": "index.d.js",
   "files": [
