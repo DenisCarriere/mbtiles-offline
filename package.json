@@ -1,7 +1,7 @@
 {
   "name": "mbtiles-offline",
   "version": "4.0.0",
-  "description": "MBTiles binding for NodeJS 4+",
+  "description": "MBTiles binding for NodeJS 4+ using Callbacks and/or Promises.",
   "main": "index.js",
   "types": "index.d.js",
   "files": [

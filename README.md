@@ -9,7 +9,7 @@
 
 [![Standard - JavaScript Style Guide](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
 
-> Easy to use MBTiles binding for NodeJS 4+ using Callbacks and/or Promises.
+> MBTiles binding for NodeJS 4+ using Callbacks and/or Promises.
 
 ## Install
 
