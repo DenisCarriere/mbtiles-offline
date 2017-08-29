@@ -39,8 +39,9 @@ module.exports.getTileParser = (schema) => {
  * getFiles('/home/myfiles')
  * //=['map', 'test']
  */
-module.exports.getFiles = (path, regex = /\.mbtiles$/) => {
-  let mbtiles = fs.readdirSync(path).filter(value => value.match(regex))
+module.exports.getFiles = (path, regex) => {
+  regex = regex || /\.mbtiles$/
+  var mbtiles = fs.readdirSync(path).filter(value => value.match(regex))
   mbtiles = mbtiles.map(data => data.replace(regex, ''))
   mbtiles = mbtiles.filter(name => !name.match(/^_.*/))
   return mbtiles
@@ -64,11 +65,11 @@ module.exports.connect = (uri) => {
 module.exports.parseMetadata = (data) => {
   const metadata = {}
   if (data) {
-    for (const item of data) {
+    data.forEach(item => {
       const name = item.name.toLowerCase()
       const value = item.value
 
-      if (value === null || value === undefined || value === '') { continue }
+      if (value === null || value === undefined || value === '') return
 
       switch (name) {
         case 'minzoom':
@@ -122,7 +123,7 @@ module.exports.parseMetadata = (data) => {
         default:
           metadata[name] = value
       }
-    }
+    })
   }
   return metadata
 }

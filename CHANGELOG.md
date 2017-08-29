@@ -1,9 +1,11 @@
 
 # Changelog
 
-## 3.3.0 - 2017-08-24
+## 4.0.0 - 2017-08-28
 
-- Start converting library to ES5+ (NodeJS 4 compatible)
+- Convert entire library to ES5+ (NodeJS 4 compatible)
+- Upgrade `sqlite3-offline` to NodeJS 4 compatible
+- Drop classes in favor of ES5 syntax
 
 ## 3.2.0 - 2017-07-30
 
