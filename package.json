@@ -30,8 +30,9 @@
     "bbox-dateline": "^1.1.1",
     "debug": "^2.6.3",
     "global-mercator": "^2.6.0",
-    "lodash": "^4.17.4",
-    "sqlite3-offline": "3.1.8-2"
+    "lodash.omit": "^4.5.0",
+    "sqlite3-offline": "3.1.8-2",
+    "universalify": "^0.1.1"
   },
   "devDependencies": {
     "@types/geojson": "^1.0.0",

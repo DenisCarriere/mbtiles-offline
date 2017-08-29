@@ -1,5 +1,5 @@
 const test = require('tape')
-const universalify = require('./universalify')
+const universalify = require('universalify')
 
 function fnPromise (message) {
   return new Promise((resolve, reject) => {

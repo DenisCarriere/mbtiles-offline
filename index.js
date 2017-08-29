@@ -1,15 +1,12 @@
 const mercator = require('global-mercator')
 const tiletype = require('@mapbox/tiletype')
-const lodash = require('lodash')
-const omit = lodash.omit
-const entries = lodash.entries
-const assign = lodash.assign
+const omit = require('lodash.omit')
 const utils = require('./utils')
 const schema = require('./schema')
 const warning = require('debug')('mbtiles-offline:warning')
 
 // Globals
-const EXCLUDE = ['_table', '_index', 'db', 'schema', 'uri', 'ok', 'errors']
+const EXCLUDE = ['_table', '_index', 'db', 'schema', 'uri', 'ok', 'errors', 'schemaToTile', 'tileToSchema']
 
 /**
  * MBTiles
@@ -141,7 +138,7 @@ module.exports = class MBTiles {
           this.getMinZoom().then(minZoom => {
             this.getMaxZoom().then(maxZoom => {
               this.getBounds().then(bounds => {
-                const json = omit(assign(this, metadata), EXCLUDE)
+                const json = omit(Object.assign(this, metadata), EXCLUDE)
                 const results = JSON.parse(JSON.stringify(json))
                 return callback(error, results)
               })
@@ -273,7 +270,7 @@ module.exports = class MBTiles {
           }
           if (row === undefined || row === null) return resolve(undefined)
 
-          let format = tiletype.type(row['tile_data'])
+          var format = tiletype.type(row['tile_data'])
           if (format === undefined || format === null) return resolve(undefined)
           this.format = format
           return resolve(format)
@@ -301,7 +298,7 @@ module.exports = class MBTiles {
         this.getMaxZoom().then(maxzoom => {
           this.getMinZoom().then(minzoom => {
             // Validate zoom input based on Min & Max zoom levels
-            let zoomLevel = (zoom === undefined) ? maxzoom : zoom
+            var zoomLevel = (zoom === undefined) ? maxzoom : zoom
             if (zoom > maxzoom) zoomLevel = maxzoom
             if (zoom < minzoom) zoomLevel = minzoom
 
@@ -406,13 +403,15 @@ module.exports = class MBTiles {
             }
           })
           if (metadata.bounds) metadata.bounds = utils.parseBounds(metadata.bounds)
-          const results = assign(currentMetadata, metadata)
+          const results = Object.assign(currentMetadata, metadata)
 
           // Load Metadata to database
           const stmt = this.db.prepare('INSERT INTO metadata VALUES (?, ?)')
-          for (const [name, value] of entries(results)) {
+          for (const name of Object.keys(results)) {
+            const value = results[name]
+
             // String or Number
-            let query
+            var query
             if (typeof value !== 'object') query = [name, String(value)]
             // Array
             else if (value.length) query = [name, value.join(',')]
@@ -541,7 +540,14 @@ module.exports = class MBTiles {
             AND tile_column<=?
             AND tile_row>=?
             AND tile_row<=?`)
-          for (const [zoom, { west, south, east, north, index }] of entries(levels)) {
+          for (const zoom of Object.keys(levels)) {
+            const level = levels[zoom]
+            const west = level.west
+            const south = level.south
+            const east = level.east
+            const north = level.north
+            const index = level.index
+
             stmt.all([zoom, west, east, south, north], (error, rows) => {
               if (error) {
                 warning(error)
