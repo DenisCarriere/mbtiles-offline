@@ -1,5 +1,3 @@
-/// <reference types="geojson" />
-
 import {Database} from 'sqlite3-offline'
 
 type Tile = MBTiles.Tile

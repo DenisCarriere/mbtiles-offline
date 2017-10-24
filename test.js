@@ -79,7 +79,7 @@ test('MBTiles -- save', t => {
 test('MBTiles -- delete quadkey', t => {
   const db = new MBTiles(directories.out + 'delete.mbtiles', 'quadkey')
   Promise.all([
-    db.save('031', Buffer([0, 1])),
+    db.save('031', Buffer.from([0, 1])),
     db.count().then(count => t.equal(count, 1, 'save count')),
     db.delete('031'),
     db.count().then(count => t.equal(count, 0, 'delete count'))
@@ -94,9 +94,9 @@ test('MBTiles -- hashes', t => {
   const db3 = new MBTiles(directories.out + 'hashes-xyz.mbtiles', 'xyz')
 
   Promise.all([
-    db1.save('021', Buffer([0, 1])),
-    db2.save([1, 5, 3], Buffer([0, 1])),
-    db3.save([1, 2, 3], Buffer([0, 1]))
+    db1.save('021', Buffer.from([0, 1])),
+    db2.save([1, 5, 3], Buffer.from([0, 1])),
+    db3.save([1, 2, 3], Buffer.from([0, 1]))
   ]).then(() => {
     db1.hashes().then(hashes1 => {
       db2.hashes().then(hashes2 => {

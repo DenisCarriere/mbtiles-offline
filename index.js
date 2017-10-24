@@ -636,7 +636,7 @@ MBTiles.prototype.findOne = function (tile) {
  */
 MBTiles.prototype.tables = function () {
   return new Promise((resolve, reject) => {
-    if (this._table) { return resolve(true) }
+    if (this._table) return resolve(true)
     this.db.serialize(() => {
       this.db.run(schema.TABLE.metadata, error => {
         if (error) {
@@ -689,7 +689,7 @@ MBTiles.prototype.index = function () {
             warning(error)
             this.errors.push(error)
             this.ok = false
-            return reject(false)
+            return reject(new Error('index'))
           }
           this._index = true
           return resolve(true)

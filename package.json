@@ -15,6 +15,7 @@
     "lint": "standard",
     "pretest": "npm run types && npm run lint",
     "test": "tap test.js utils/utils.test.js --coverage",
+    "posttest": "tsc types.ts --lib es6 && node types.js",
     "docs": "documentation readme index.js --shallow --section=API"
   },
   "author": "Denis Carriere <@DenisCarriere>",
@@ -25,26 +26,26 @@
     "offline"
   ],
   "dependencies": {
-    "@mapbox/tiletype": "^0.3.1",
-    "@turf/bbox": "^3.10.3",
-    "bbox-dateline": "^1.1.1",
-    "debug": "^2.6.3",
-    "global-mercator": "^2.6.0",
-    "lodash.omit": "^4.5.0",
-    "sqlite3-offline": "3.1.8-4",
-    "universalify": "^0.1.1"
+    "@mapbox/tiletype": "*",
+    "@turf/bbox": "*",
+    "bbox-dateline": "*",
+    "debug": "*",
+    "global-mercator": "*",
+    "lodash.omit": "*",
+    "sqlite3-offline": "*",
+    "universalify": "*"
   },
   "devDependencies": {
-    "@types/geojson": "^1.0.0",
-    "@types/node": "^7.0.5",
-    "coveralls": "^2.11.15",
-    "documentation": "^4.0.0-beta.18",
-    "fs-extra": "^2.0.0",
-    "load-json-file": "^2.0.0",
-    "standard": "^8.6.0",
-    "tap": "^10.7.0",
-    "tape": "^4.7.0",
-    "typescript": "^2.1.5",
-    "write-json-file": "^2.0.0"
+    "@types/geojson": "*",
+    "@types/node": "*",
+    "coveralls": "*",
+    "documentation": "*",
+    "fs-extra": "*",
+    "load-json-file": "*",
+    "standard": "*",
+    "tap": "*",
+    "tape": "*",
+    "typescript": "*",
+    "write-json-file": "*"
   }
 }

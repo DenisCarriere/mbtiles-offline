@@ -1,4 +1,5 @@
 import * as fs from 'fs'
+import * as path from 'path'
 import * as MBTiles from './'
 import {Tile, Bounds, MBTilesStatic} from './'
 
@@ -6,7 +7,7 @@ interface Container {
     [name: string]: MBTilesStatic
 }
 
-const image = fs.readFileSync('./in/images/0/0/0.png')
+const image = fs.readFileSync(path.join(__dirname, 'test', 'in', 'images', '0', '0', '0.png'))
 const bounds: Bounds = [-110, -40, 95, 50]
 const options = {
     bounds,
@@ -21,7 +22,7 @@ const options = {
 // Default (TMS/XYZ Schema)
 async function main() {
     const tile: Tile = [0, 0, 0]
-    const db = new MBTiles('./in/plain_1.mbtiles', 'tms')
+    const db = new MBTiles(path.join(__dirname, 'test', 'in', 'plain_1.mbtiles'), 'tms')
     // Class properties
     db.db
     db.uri
